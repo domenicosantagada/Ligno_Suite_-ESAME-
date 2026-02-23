@@ -1,1 +1,208 @@
-<p>preventivi works!</p>
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Gestione Preventivi</h2>
+    <div>
+      @if (isPreview()) {
+        <button (click)="togglePreview()" class="btn btn-outline-secondary me-2">
+          <i class="bi bi-pencil"></i> Torna alla Modifica
+        </button>
+        <button (click)="downloadPDF()" class="btn btn-primary">
+          <i class="bi bi-download"></i> Scarica PDF
+        </button>
+      } @else {
+        <button (click)="togglePreview()" class="btn btn-primary">
+          <i class="bi bi-eye"></i> Vedi Anteprima
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (!isPreview()) {
+    <div class="card p-4 shadow-sm mb-4 border-0 bg-white">
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-secondary">Numero Preventivo</label>
+          <input (ngModelChange)="preventiviService.updateInvoice({invoiceNumber: $event})" [ngModel]="invoice().invoiceNumber" class="form-control"
+                 placeholder="Es. INV-001"
+                 type="text">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-secondary">Data</label>
+          <input (ngModelChange)="preventiviService.updateInvoice({date: $event})" [ngModel]="invoice().date"
+                 class="form-control"
+                 type="date">
+        </div>
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded">
+            <h5 class="mb-3">Da (La tua Falegnameria)</h5>
+            <input (ngModelChange)="preventiviService.updateInvoice({fromName: $event})" [ngModel]="invoice().fromName" class="form-control mb-2"
+                   placeholder="Nome Falegnameria / Azienda" type="text">
+            <input (ngModelChange)="preventiviService.updateInvoice({fromEmail: $event})" [ngModel]="invoice().fromEmail" class="form-control"
+                   placeholder="Indirizzo Email"
+                   type="email">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded">
+            <h5 class="mb-3">A (Cliente)</h5>
+            <input (ngModelChange)="preventiviService.updateInvoice({toName: $event})" [ngModel]="invoice().toName" class="form-control mb-2"
+                   placeholder="Nome / Azienda Cliente" type="text">
+            <input (ngModelChange)="preventiviService.updateInvoice({toEmail: $event})" [ngModel]="invoice().toEmail" class="form-control"
+                   placeholder="Indirizzo Email" type="email">
+          </div>
+        </div>
+      </div>
+
+      <h5 class="mb-3 border-bottom pb-2">Voci del Preventivo</h5>
+      <div class="table-responsive mb-3">
+        <table class="table table-borderless align-middle">
+          <thead class="table-light">
+          <tr>
+            <th>Descrizione Lavoro / Articolo</th>
+            <th style="width: 120px;">Quantità</th>
+            <th style="width: 150px;">Prezzo Unit. (€)</th>
+            <th class="text-end" style="width: 150px;">Totale Rigo</th>
+            <th class="text-center" style="width: 80px;">Azioni</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (item of invoice().items; track item.id; let i = $index) {
+              <tr class="border-bottom">
+                <td>
+                  <input (ngModelChange)="preventiviService.updateItem(i, 'description', $event)" [ngModel]="item.description" class="form-control"
+                         placeholder="Es. Realizzazione tavolo in rovere"
+                         type="text">
+                </td>
+                <td>
+                  <input (ngModelChange)="preventiviService.updateItem(i, 'quantity', $event)" [ngModel]="item.quantity" class="form-control"
+                         min="1"
+                         type="number">
+                </td>
+                <td>
+                  <input (ngModelChange)="preventiviService.updateItem(i, 'rate', $event)" [ngModel]="item.rate" class="form-control" min="0"
+                         step="0.01" type="number">
+                </td>
+                <td class="text-end fw-bold text-secondary">
+                  € {{ item.amount | number:'1.2-2' }}
+                </td>
+                <td class="text-center">
+                  <button (click)="preventiviService.removeItem(i)" [disabled]="invoice().items.length === 1"
+                          class="btn btn-outline-danger btn-sm" title="Rimuovi riga">
+                    ✕
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <button (click)="preventiviService.addItem()" class="btn btn-secondary btn-sm mb-4">
+        + Aggiungi Voce
+      </button>
+
+      <div class="row justify-content-end">
+        <div class="col-md-5 col-lg-4">
+          <div class="p-3 bg-light rounded">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Imponibile (Subtotale):</span>
+              <span class="fw-bold">€ {{ invoice().subtotal | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted">Aliquota IVA (%):</span>
+              <input (ngModelChange)="preventiviService.updateInvoice({taxRate: $event})" [ngModel]="invoice().taxRate" class="form-control form-control-sm w-25 text-end" max="100"
+                     min="0" type="number">
+            </div>
+
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+              <span class="text-muted">Importo IVA:</span>
+              <span>€ {{ invoice().taxAmount | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between fw-bold fs-4 text-primary">
+              <span>TOTALE:</span>
+              <span>€ {{ invoice().total | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  } @else {
+    <div class="card p-5 shadow-sm border-0 bg-white mx-auto" id="invoice-preview-container" style="max-width: 900px;">
+
+      <div class="row mb-5 border-bottom pb-4">
+        <div class="col-sm-6">
+          <h1 class="display-6 fw-bold text-primary mb-1">PREVENTIVO</h1>
+          <p class="text-muted mb-0 fs-5">#{{ invoice().invoiceNumber || 'Bozza' }}</p>
+        </div>
+        <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+          <p class="text-muted mb-0 fw-bold">Data Emissione</p>
+          <p class="fs-5">{{ invoice().date | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+
+      <div class="row mb-5">
+        <div class="col-sm-6">
+          <h6 class="fw-bold text-uppercase text-muted mb-3">Dati Prestatore:</h6>
+          <p class="fs-5 fw-bold mb-1">{{ invoice().fromName || '[Il tuo Nome/Azienda]' }}</p>
+          <p class="text-muted">{{ invoice().fromEmail || '[La tua Email]' }}</p>
+        </div>
+        <div class="col-sm-6 text-sm-end mt-4 mt-sm-0">
+          <h6 class="fw-bold text-uppercase text-muted mb-3">Preventivo Intestato A:</h6>
+          <p class="fs-5 fw-bold mb-1">{{ invoice().toName || '[Nome Cliente]' }}</p>
+          <p class="text-muted">{{ invoice().toEmail || '[Email Cliente]' }}</p>
+        </div>
+      </div>
+
+      <table class="table mb-5">
+        <thead class="table-light border-top border-bottom">
+        <tr>
+          <th class="py-3">Descrizione</th>
+          <th class="py-3 text-center">Q.tà</th>
+          <th class="py-3 text-end">Prezzo Unit.</th>
+          <th class="py-3 text-end">Importo</th>
+        </tr>
+        </thead>
+        <tbody class="border-bottom-0">
+          @for (item of invoice().items; track item.id) {
+            <tr>
+              <td class="py-3">{{ item.description || '-' }}</td>
+              <td class="py-3 text-center">{{ item.quantity }}</td>
+              <td class="py-3 text-end">€ {{ item.rate | number:'1.2-2' }}</td>
+              <td class="py-3 text-end fw-bold">€ {{ item.amount | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="row justify-content-end">
+        <div class="col-md-6 col-lg-5">
+          <table class="table table-borderless mb-0">
+            <tbody>
+            <tr>
+              <td class="text-muted text-end pb-1">Imponibile:</td>
+              <td class="text-end pb-1" style="width: 130px;">€ {{ invoice().subtotal | number:'1.2-2' }}</td>
+            </tr>
+            <tr class="border-bottom">
+              <td class="text-muted text-end pb-3">IVA ({{ invoice().taxRate }}%):</td>
+              <td class="text-end pb-3">€ {{ invoice().taxAmount | number:'1.2-2' }}</td>
+            </tr>
+            <tr>
+              <td class="text-end fw-bold fs-4 text-primary pt-3">TOTALE:</td>
+              <td class="text-end fw-bold fs-4 text-primary pt-3">€ {{ invoice().total | number:'1.2-2' }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
