@@ -1,30 +1,30 @@
 <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
-  <div class="container-fluid">
+  <div class="container-fluid position-relative">
 
-    <a [routerLink]="['/']" class="navbar-brand">
+    <!-- Logo a sinistra -->
+    <a [routerLink]="['/']" class="navbar-brand position-absolute start-0">
       <img alt="Logo" class="d-inline-block align-text-top" height="70" src="image/logo.svg">
     </a>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mb-2 mb-lg-0 mx-auto">
+    <!-- Link centrati -->
+    <div class="collapse navbar-collapse justify-content-center">
+      <ul class="navbar-nav mb-2 mb-lg-0">
         <li class="nav-item">
           <a [routerLink]="['/preventivi']" class="nav-link custom-link">Preventivi</a>
         </li>
-
         <li class="nav-item">
           <a [routerLink]="['/taglio-pannelli']" class="nav-link custom-link">Taglio Pannelli</a>
         </li>
-
         <li class="nav-item">
           <a [routerLink]="['/prezzario']" class="nav-link custom-link">Prezzario</a>
         </li>
       </ul>
-
-      <form class="d-flex">
-        <button class="btn btn-outline-dark btn-sm px-4 rounded-pill" type="submit">Esci</button>
-      </form>
     </div>
 
+    <!-- Pulsante a destra -->
+    <form class="d-flex position-absolute end-0">
+      <button class="btn btn-outline-dark btn-sm px-4 rounded-pill" type="submit">Esci</button>
+    </form>
 
   </div>
 </nav>

@@ -1,41 +1,41 @@
 /* Navbar pulita e minimale */
 .custom-navbar {
-  background-color: #ffffff; /* bianco pulito */
-  border-bottom: 1px solid #e5e5e5; /* linea sottile, elegante */
+  background-color: #ffffff;
+  border-bottom: 2px solid #e5e5e5;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  box-shadow: none; /* niente ombre */
+  /*margin su tutti i 4 lati di 50px per distanziare la navbar dal resto del contenuto*/
+  margin: 20px 30px 80px 30px;
+  padding-bottom: 30px;
+
 }
 
-/* Logo ridimensionato e proporzionato */
+/* Logo dimensioni */
 .custom-navbar .navbar-brand img {
-  height: 60px; /* altezza fissa */
-  width: auto; /* mantiene proporzioni */
-  cursor: pointer;
+  height: 70px;
+  width: auto;
 }
 
 /* Link stile minimale */
 .custom-link {
-  color: #333333; /* colore base scuro ma non nero intenso */
+  color: #333333;
   font-weight: 400;
-  font-size: 0.95rem;
+  font-size: 18px;
   margin: 0 12px;
   position: relative;
   transition: color 0.2s ease;
 }
 
-/* Hover delicato */
 .custom-link:hover {
-  color: #000000; /* cambia colore leggermente */
+  color: #000000;
 }
 
-/* Linea sottile animata sotto il link */
 .custom-link::after {
   content: '';
   position: absolute;
   width: 0;
   height: 2px;
   left: 0;
-  bottom: -4px; /* sotto il testo */
+  bottom: -4px;
   background: #000000;
   transition: width 0.3s ease;
 }
