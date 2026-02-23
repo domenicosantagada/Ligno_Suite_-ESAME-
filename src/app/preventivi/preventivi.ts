@@ -1,9 +1,9 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core'; // Aggiungi OnInit
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router'; // Aggiungi ActivatedRoute
 import {PreventiviService} from './preventivi.service';
 
-// Ignoriamo l'errore TypeScript nel caso manchino i tipi della libreria
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 
@@ -14,10 +14,24 @@ import html2pdf from 'html2pdf.js';
   templateUrl: './preventivi.html',
   styleUrl: './preventivi.css',
 })
-export class Preventivi {
+export class Preventivi implements OnInit { // Implementa OnInit
   preventiviService = inject(PreventiviService);
+  route = inject(ActivatedRoute); // Inietta la rotta per leggere l'URL
+
   invoice = this.preventiviService.invoice;
   isPreview = signal(false);
+
+  // Appena la pagina si carica...
+  ngOnInit() {
+    // Controlla se c'è "?preview=true" nell'URL
+    this.route.queryParams.subscribe(params => {
+      if (params['preview'] === 'true') {
+        this.isPreview.set(true); // Se sì, accende direttamente l'anteprima!
+      } else {
+        this.isPreview.set(false); // Altrimenti mostra il form per la modifica
+      }
+    });
+  }
 
   togglePreview() {
     this.isPreview.update(v => !v);

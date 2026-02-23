@@ -40,15 +40,18 @@
               <td class="py-3 fw-semibold text-dark">{{ prev.toName || 'Cliente anonimo' }}</td>
               <td class="py-3 text-muted small">{{ prev.date | date:'dd MMM yyyy' }}</td>
               <td class="py-3 text-end fw-bold text-dark">€ {{ prev.total | number:'1.2-2' }}</td>
-              <td class="pe-4 py-3 text-center">
 
+
+              <td class="pe-4 py-3 text-center">
                 <div class="d-flex justify-content-center gap-3">
                   <button (click)="visualizzaPreventivo(prev)" class="action-icon" title="Visualizza">
                     <i class="bi bi-eye"></i>
                   </button>
+
                   <button (click)="modificaPreventivo(prev)" class="action-icon" title="Modifica">
                     <i class="bi bi-pencil-square"></i>
                   </button>
+
                   <button (click)="eliminaPreventivo(prev.invoiceNumber)" class="action-icon text-danger-hover"
                           title="Elimina">
                     <i class="bi bi-trash3"></i>

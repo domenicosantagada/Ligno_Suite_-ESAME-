@@ -2,7 +2,7 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {InvoiceData} from '../preventivi/preventivi.model';
-import {Router} from '@angular/router'; // <-- Aggiunto Router
+import {Router} from '@angular/router'; // Importa il Router
 import {PreventiviService} from '../preventivi/preventivi.service';
 
 @Component({
@@ -14,7 +14,7 @@ import {PreventiviService} from '../preventivi/preventivi.service';
 })
 export class ListaPreventivi implements OnInit {
   preventiviService = inject(PreventiviService);
-  router = inject(Router); // <-- Inietta il Router per navigare via codice
+  router = inject(Router); // Inietta il router
 
   preventivi = signal<InvoiceData[]>([]);
   searchTerm = signal('');
@@ -38,22 +38,27 @@ export class ListaPreventivi implements OnInit {
     });
   }
 
+  // --- NUOVI METODI PER VISUALIZZA E MODIFICA ---
+
+  visualizzaPreventivo(prev: InvoiceData) {
+    // Carica i dati nel service
+    this.preventiviService.invoice.set(prev);
+    // Naviga alla pagina preventivi ma con ?preview=true
+    this.router.navigate(['/preventivi'], {queryParams: {preview: 'true'}});
+  }
+
+  modificaPreventivo(prev: InvoiceData) {
+    // Carica i dati nel service
+    this.preventiviService.invoice.set(prev);
+    // Naviga normalmente alla pagina preventivi (modalità modifica)
+    this.router.navigate(['/preventivi']);
+  }
+
   // --- NUOVI METODI ---
 
   creaNuovo() {
     this.preventiviService.resetInvoice(); // Svuota i dati vecchi
     this.router.navigate(['/preventivi']); // Vai alla pagina di creazione
-  }
-
-  visualizzaPreventivo(prev: InvoiceData) {
-    this.preventiviService.invoice.set(prev); // Carica i dati nel service
-    // Naviga alla pagina ma aggiunge ?preview=true nell'URL
-    this.router.navigate(['/preventivi'], {queryParams: {preview: 'true'}});
-  }
-
-  modificaPreventivo(prev: InvoiceData) {
-    this.preventiviService.invoice.set(prev); // Carica i dati nel service
-    this.router.navigate(['/preventivi']); // Naviga in modalità form (modifica)
   }
 
   // --- FINE NUOVI METODI ---
