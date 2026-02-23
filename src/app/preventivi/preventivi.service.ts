@@ -10,10 +10,11 @@ import {HttpClient} from '@angular/common/http';
 export class PreventiviService {
 
 
+  // 1. Aggiungi questa riga per ricordare il numero originale del documento aperto
+  originalInvoiceNumber: string | null = null;
+
   private http = inject(HttpClient); // Inietta il client HTTP
   private apiUrl = 'http://localhost:8080/api/preventivi'; // L'URL di Spring Boot
-
-
   // Dati iniziali di default
   private initialData: InvoiceData = {
     invoiceNumber: '',
@@ -92,15 +93,25 @@ export class PreventiviService {
     this.updateInvoice({items: newItems});
   }
 
-  // Aggiungi questo NUOVO metodo per salvare su DB
+  // 4. MODIFICA il metodo di salvataggio
   salvaPreventivoNelDb() {
-    const preventivoDaSalvare = this.invoice();
+    // Cloniamo i dati prima di inviarli
+    const preventivoDaSalvare = JSON.parse(JSON.stringify(this.invoice()));
 
-    // Effettua la chiamata POST a Spring Boot
+    // LA MAGIA: Se il numero preventivo è stato cambiato dall'utente,
+    // significa che sta facendo un "Salva con nome" (nuovo preventivo).
+    // Rigeneriamo gli ID delle righe per non far arrabbiare il database!
+    if (this.originalInvoiceNumber && this.originalInvoiceNumber !== preventivoDaSalvare.invoiceNumber) {
+      preventivoDaSalvare.items.forEach((item: any, index: number) => {
+        item.id = Date.now().toString() + '-' + index;
+      });
+    }
+
     this.http.post<InvoiceData>(this.apiUrl, preventivoDaSalvare).subscribe({
       next: (response) => {
         alert('Preventivo salvato con successo nel database!');
-        console.log('Salvato:', response);
+        // Ora il nuovo numero diventa l'originale
+        this.originalInvoiceNumber = preventivoDaSalvare.invoiceNumber;
       },
       error: (err) => {
         alert('Errore durante il salvataggio');
@@ -121,6 +132,7 @@ export class PreventiviService {
 
   // Aggiungi questo metodo per svuotare il form quando si crea un nuovo preventivo
   resetInvoice() {
+    this.originalInvoiceNumber = null;
     this.invoice.set({
       invoiceNumber: '',
       date: new Date().toISOString().split('T')[0],
@@ -134,6 +146,13 @@ export class PreventiviService {
       taxAmount: 0,
       total: 0
     });
+  }
+
+  // 3. AGGIUNGI QUESTO NUOVO METODO per caricare i dati dalla lista in modo sicuro
+  caricaPreventivoPerModifica(prev: InvoiceData) {
+    this.originalInvoiceNumber = prev.invoiceNumber;
+    // Crea una copia slegata dai dati della lista per evitare problemi
+    this.invoice.set(JSON.parse(JSON.stringify(prev)));
   }
 
   // Logica traslata fedelmente da utils/calculations.ts

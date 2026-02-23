@@ -41,16 +41,14 @@ export class ListaPreventivi implements OnInit {
   // --- NUOVI METODI PER VISUALIZZA E MODIFICA ---
 
   visualizzaPreventivo(prev: InvoiceData) {
-    // Carica i dati nel service
-    this.preventiviService.invoice.set(prev);
-    // Naviga alla pagina preventivi ma con ?preview=true
+    // Usa il nuovo metodo del service
+    this.preventiviService.caricaPreventivoPerModifica(prev);
     this.router.navigate(['/preventivi'], {queryParams: {preview: 'true'}});
   }
 
   modificaPreventivo(prev: InvoiceData) {
-    // Carica i dati nel service
-    this.preventiviService.invoice.set(prev);
-    // Naviga normalmente alla pagina preventivi (modalità modifica)
+    // Usa il nuovo metodo del service
+    this.preventiviService.caricaPreventivoPerModifica(prev);
     this.router.navigate(['/preventivi']);
   }
 
