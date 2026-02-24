@@ -1,9 +1,12 @@
-import {Component, computed, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {RubricaService} from './rubrica.service';
 
+// Interfaccia aggiornata
 export interface Cliente {
-  id: string;
+  id?: number | string; // Ora può essere numero (da DB) o indefinito (nuovo)
+  utenteId?: number;    // ID del proprietario
   nome: string;
   email: string;
   telefono: string;
@@ -17,30 +20,20 @@ export interface Cliente {
   templateUrl: './rubrica.html',
   styleUrl: './rubrica.css',
 })
-export class Rubrica {
+export class Rubrica implements OnInit { // Implementiamo OnInit
 
-  clienti = signal<Cliente[]>([
-    {
-      id: '1',
-      nome: 'Mario Rossi Carpenteria',
-      email: 'info@mariorossi.it',
-      telefono: '02 1234567',
-      partitaIva: 'IT12345678901'
-    },
-    {
-      id: '2',
-      nome: 'Studio Architettura Verdi',
-      email: 'progetti@studioverdi.com',
-      telefono: '333 9876543',
-      partitaIva: 'IT09876543210'
-    }
-  ]);
+  rubricaService = inject(RubricaService);
 
+  // Lista inizialmente VUOTA
+  clienti = signal<Cliente[]>([]);
   searchTerm = signal('');
 
-  // --- NUOVE VARIABILI PER IL FORM ---
-  mostraForm = signal(false); // Controlla se mostrare la tabella o il form
-  clienteCorrente = signal<Cliente>({id: '', nome: '', email: '', telefono: '', partitaIva: ''});
+  mostraForm = signal(false);
+
+  // Cliente vuoto di base per il reset
+  clienteVuoto: Cliente = {nome: '', email: '', telefono: '', partitaIva: ''};
+  clienteCorrente = signal<Cliente>({...this.clienteVuoto});
+
   filteredClienti = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.clienti().filter(c =>
@@ -49,28 +42,34 @@ export class Rubrica {
     );
   });
 
-  // AGGIUNGI QUESTO METODO:
-  aggiornaCampoForm(campo: keyof Cliente, valore: string) {
-    this.clienteCorrente.update(c => ({...c, [campo]: valore}));
+  // All'avvio della pagina, carica i clienti dal DB!
+  ngOnInit() {
+    this.caricaClienti();
   }
 
-  // --- NUOVA LOGICA DEI PULSANTI ---
+  caricaClienti() {
+    this.rubricaService.getClientiDalDb().subscribe({
+      next: (dati) => this.clienti.set(dati),
+      error: (err) => console.error('Errore caricamento clienti:', err)
+    });
+  }
 
   creaNuovo() {
-    // Svuota il form e lo mostra
-    this.clienteCorrente.set({id: '', nome: '', email: '', telefono: '', partitaIva: ''});
+    this.clienteCorrente.set({...this.clienteVuoto}); // Svuota il form
     this.mostraForm.set(true);
   }
 
   modificaCliente(cliente: Cliente) {
-    // Copia i dati del cliente nel form e lo mostra
-    this.clienteCorrente.set({...cliente});
+    this.clienteCorrente.set({...cliente}); // Copia i dati
     this.mostraForm.set(true);
   }
 
   annulla() {
-    // Chiude il form senza salvare
     this.mostraForm.set(false);
+  }
+
+  aggiornaCampoForm(campo: keyof Cliente, valore: string) {
+    this.clienteCorrente.update(c => ({...c, [campo]: valore}));
   }
 
   salvaCliente() {
@@ -81,22 +80,29 @@ export class Rubrica {
       return;
     }
 
-    if (dati.id === '') {
-      // È un NUOVO cliente (generiamo un ID finto provvisorio)
-      dati.id = Date.now().toString();
-      this.clienti.update(list => [...list, dati]);
-    } else {
-      // È una MODIFICA di un cliente esistente
-      this.clienti.update(list => list.map(c => c.id === dati.id ? dati : c));
-    }
-
-    // Chiudi il form al termine
-    this.mostraForm.set(false);
+    // Chiamata al backend
+    this.rubricaService.salvaClienteNelDb(dati).subscribe({
+      next: () => {
+        this.caricaClienti(); // Ricarica la tabella con i dati aggiornati
+        this.mostraForm.set(false); // Chiudi il form
+      },
+      error: (err) => {
+        alert('Errore durante il salvataggio del cliente.');
+        console.error(err);
+      }
+    });
   }
 
-  eliminaCliente(id: string) {
-    if (confirm('Sei sicuro di voler eliminare questo cliente dalla rubrica?')) {
-      this.clienti.update(list => list.filter(c => c.id !== id));
+  eliminaCliente(id?: number | string) {
+    if (!id) return;
+
+    if (confirm('Sei sicuro di voler eliminare questo cliente?')) {
+      this.rubricaService.eliminaClienteDalDb(id).subscribe({
+        next: () => {
+          this.caricaClienti(); // Ricarica la tabella aggiornata
+        },
+        error: (err) => console.error('Errore durante l\'eliminazione:', err)
+      });
     }
   }
 }

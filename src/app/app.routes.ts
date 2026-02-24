@@ -12,10 +12,10 @@ import {Impostazioni} from './impostazioni/impostazioni'; // 1. Importa il compo
 export const routes: Routes = [
 
   // Per accedere direttamente alla lista dei preventivi
-  {path: "", redirectTo: "/lista-preventivi", pathMatch: "full"},
+  //{path: "", redirectTo: "/lista-preventivi", pathMatch: "full"},
 
   // Ripristina il redirect iniziale
-  //{path: "", redirectTo: "/login", pathMatch: "full"}, // 2. Modifica il redirect iniziale su /login
+  {path: "", redirectTo: "/login", pathMatch: "full"}, // 2. Modifica il redirect iniziale su /login
 
 
   {path: "login", component: Login}, // 3. Aggiungi la rotta di login
