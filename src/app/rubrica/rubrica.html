@@ -1,0 +1,69 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <h2 class="mb-0">Rubrica Clienti</h2>
+    <button (click)="creaNuovo()" class="btn btn-dark btn-sm px-4 rounded-pill">
+      Nuovo Cliente
+    </button>
+  </div>
+
+  <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden">
+
+    <div class="px-4 pt-4 mb-3">
+      <div class="input-group input-group-sm" style="max-width: 300px;">
+        <span class="input-group-text bg-white border-end-0 text-muted">
+          <i class="bi bi-search"></i>
+        </span>
+        <input (ngModelChange)="searchTerm.set($event)"
+               [ngModel]="searchTerm()"
+               class="form-control border-start-0 ps-0 shadow-none"
+               placeholder="Cerca cliente..."
+               type="text">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="bg-light">
+        <tr>
+          <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Ragione Sociale
+          </th>
+          <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Email</th>
+          <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Telefono</th>
+          <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">P.IVA / C.F.</th>
+          <th class="pe-4 py-3 text-uppercase small fw-bold text-muted text-center" style="letter-spacing: 1px;">
+            Azioni
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (cliente of filteredClienti(); track cliente.id) {
+            <tr class="hover-row">
+              <td class="ps-4 py-3 fw-semibold text-dark">{{ cliente.nome }}</td>
+              <td class="py-3 text-muted small">{{ cliente.email || '---' }}</td>
+              <td class="py-3 text-muted small">{{ cliente.telefono || '---' }}</td>
+              <td class="py-3 font-monospace text-secondary small">{{ cliente.partitaIva || '---' }}</td>
+
+              <td class="pe-4 py-3 text-center">
+                <div class="d-flex justify-content-center gap-3">
+                  <button (click)="modificaCliente(cliente)" class="action-icon" title="Modifica">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+
+                  <button (click)="eliminaCliente(cliente.id)" class="action-icon text-danger-hover" title="Elimina">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="text-center py-5 text-muted" colspan="5">
+                Nessun cliente trovato.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

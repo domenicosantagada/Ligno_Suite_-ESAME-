@@ -22,6 +22,35 @@
           <li class="nav-item">
             <a [routerLink]="['/prezzario']" class="nav-link custom-link">Prezzario</a>
           </li>
+
+          <li class="nav-item dropdown">
+
+            <a (click)="toggleMenuGestione($event)" [class.show]="menuGestioneAperto()"
+               class="nav-link custom-link dropdown-toggle d-flex align-items-center" style="cursor: pointer;">
+              Gestione <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem; margin-top: 2px;"></i>
+            </a>
+
+            <ul [class.show]="menuGestioneAperto()" class="dropdown-menu custom-dropdown-menu">
+
+              <li>
+                <a (click)="menuGestioneAperto.set(false)" [routerLink]="['/rubrica']"
+                   class="dropdown-item custom-dropdown-item"
+                   routerLink="/rubrica">Rubrica</a>
+              </li>
+              <li>
+                <a (click)="menuGestioneAperto.set(false)" [routerLink]="['/impostazioni']"
+                   class="dropdown-item custom-dropdown-item"
+                   routerLink="/impostazioni">Impostazioni</a>
+              </li>
+              <li>
+                <a (click)="menuGestioneAperto.set(false)" [routerLink]="['/']"
+                   class="dropdown-item custom-dropdown-item"
+                   routerLink="/altro">Altro</a>
+              </li>
+            </ul>
+
+          </li>
+
         </ul>
       </div>
 

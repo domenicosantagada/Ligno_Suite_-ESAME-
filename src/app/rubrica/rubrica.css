@@ -1,0 +1,33 @@
+/* Rende la riga leggermente evidenziata al passaggio */
+.hover-row:hover {
+  background-color: #fcfcfc;
+}
+
+/* Pulsanti icona minimali */
+.action-icon {
+  background: none;
+  border: none;
+  padding: 5px;
+  color: #adb5bd; /* Grigio chiaro di base */
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.action-icon:hover {
+  color: #212529; /* Nero al passaggio */
+  transform: translateY(-1px);
+}
+
+.text-danger-hover:hover {
+  color: #dc3545 !important;
+}
+
+/* Rimuove i bordi della tabella per un look più moderno */
+.table td, .table th {
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}

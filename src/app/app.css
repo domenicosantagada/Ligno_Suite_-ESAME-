@@ -43,3 +43,40 @@
 .custom-link:hover::after {
   width: 100%;
 }
+
+/* --- FIX PER FAR FUNZIONARE LA LINEA ANIMATA SUL DROPDOWN --- */
+.custom-link.dropdown-toggle::after {
+  display: block; /* Annulla l'inline-block di Bootstrap */
+  border: none; /* Rimuove il triangolino di default di Bootstrap */
+  margin: 0;
+  vertical-align: baseline;
+}
+
+/* --- STILE DELLA FINESTRELLA A TENDINA --- */
+.custom-dropdown-menu {
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Ombra morbida */
+  border-radius: 8px; /* Angoli leggermente arrotondati */
+  padding: 10px 0;
+  margin-top: 15px !important; /* Lo stacca dalla navbar */
+  background-color: #ffffff;
+}
+
+/* --- STILE DEI LINK INTERNI AL MENU --- */
+.custom-dropdown-item {
+  color: #333333; /* Stesso colore dei link principali */
+  font-weight: 400;
+  font-size: 16px;
+  padding: 8px 24px;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+/* Effetto al passaggio del mouse sui link del menu */
+.custom-dropdown-item:hover,
+.custom-dropdown-item:focus {
+  background-color: #ffffff;
+  color: #000000;
+  /* Invece della linea sotto, facciamo scorrere leggermente il testo a destra! */
+  transform: translateX(6px);
+}
