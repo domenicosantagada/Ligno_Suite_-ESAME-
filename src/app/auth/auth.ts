@@ -15,4 +15,20 @@ export class Auth {
   register(dati: any) {
     return this.http.post(`${this.apiUrl}/register`, dati);
   }
+
+  setUtenteLoggato(utente: any) {
+    // Salva l'utente nella memoria del browser
+    localStorage.setItem('utente', JSON.stringify(utente));
+  }
+
+  getUtenteLoggato() {
+    // Recupera l'utente. Se non c'è, restituisce null
+    const utenteString = localStorage.getItem('utente');
+    return utenteString ? JSON.parse(utenteString) : null;
+  }
+
+  logout() {
+    // Cancella l'utente dalla memoria
+    localStorage.removeItem('utente');
+  }
 }

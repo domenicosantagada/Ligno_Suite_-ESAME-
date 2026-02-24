@@ -24,9 +24,10 @@ export class Login {
   onSubmit() {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
-        // AGGIUNGI ": any" QUI SOTTO
         next: (utente: any) => {
-          console.log('Benvenuto', utente.nome);
+          // SALVA L'UTENTE NELLA SESSIONE!
+          this.authService.setUtenteLoggato(utente);
+
           this.router.navigate(['/home']);
         },
         error: () => {

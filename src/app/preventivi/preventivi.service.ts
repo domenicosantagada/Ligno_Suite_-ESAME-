@@ -2,6 +2,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {InvoiceData, InvoiceItem} from './preventivi.model';
 import {HttpClient} from '@angular/common/http';
+import {Auth} from '../auth/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ export class PreventiviService {
   originalInvoiceNumber: string | null = null;
 
   private http = inject(HttpClient); // Inietta il client HTTP
+  private authService = inject(Auth); // <-- Inietta Auth
   private apiUrl = 'http://localhost:8080/api/preventivi'; // L'URL di Spring Boot
   // Dati iniziali di default
   private initialData: InvoiceData = {
@@ -108,6 +110,12 @@ export class PreventiviService {
 
     const preventivoDaSalvare = JSON.parse(JSON.stringify(data));
 
+    // AGGIUNGI L'ID DELL'UTENTE LOGGATO AL PREVENTIVO
+    const utenteLoggato = this.authService.getUtenteLoggato();
+    if (utenteLoggato) {
+      preventivoDaSalvare.utenteId = utenteLoggato.id;
+    }
+
     // 2. CAPIAMO L'INTENZIONE DELL'UTENTE
     // È un aggiornamento SOLO se l'utente aveva aperto un preventivo esistente
     // e NON ha cambiato il suo numero.
@@ -157,7 +165,11 @@ export class PreventiviService {
 
   // Aggiungi questo NUOVO metodo per leggere dal DB
   getTuttiIPreventivi() {
-    return this.http.get<InvoiceData[]>(this.apiUrl);
+    const utenteLoggato = this.authService.getUtenteLoggato();
+    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
+
+    // Aggiunge ?utenteId=X all'URL
+    return this.http.get<InvoiceData[]>(`${this.apiUrl}?utenteId=${utenteId}`);
   }
 
   // Metodo per ELIMINARE dal DB
