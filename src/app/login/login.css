@@ -1,0 +1,22 @@
+.login-wrapper {
+  /* Prende tutta l'altezza dello schermo e centra la card */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa; /* Sfondo grigio molto chiaro, coerente con le tue tabelle */
+  /* Margin negativo necessario per contrastare l'eventuale padding del body */
+  margin: -1.5rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Stile per dare un effetto focus ai campi di testo */
+.form-control:focus {
+  background-color: #ffffff !important;
+  border: 1px solid #212529 !important;
+  box-shadow: none;
+}

@@ -1,0 +1,45 @@
+<div class="login-wrapper">
+  <div class="card shadow-sm border-0 rounded-4 login-card">
+    <div class="card-body p-5">
+
+      <div class="text-center mb-4">
+        <img alt="Logo" class="mb-3" src="image/logo.png" width="100">
+        <h4 class="fw-bold text-dark">Accedi</h4>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" [formGroup]="loginForm">
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">Email</label>
+          <input class="form-control form-control-lg bg-light border-0" formControlName="email" placeholder="Inserisci la tua email"
+                 type="email">
+
+          @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
+            <small class="text-danger mt-1 d-block">L'email è obbligatoria</small>
+          }
+          @if (loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched) {
+            <small class="text-danger mt-1 d-block">Formato email non valido</small>
+          }
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-muted small fw-bold">Password</label>
+          <input class="form-control form-control-lg bg-light border-0" formControlName="password" placeholder="Inserisci la password"
+                 type="password">
+
+          @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
+            <small class="text-danger mt-1 d-block">La password è obbligatoria</small>
+          }
+          @if (loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched) {
+            <small class="text-danger mt-1 d-block">Minimo 6 caratteri</small>
+          }
+        </div>
+
+        <button [disabled]="loginForm.invalid" class="btn btn-dark btn-lg w-100 rounded-pill" type="submit">
+          Login
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>
