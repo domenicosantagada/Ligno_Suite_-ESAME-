@@ -11,10 +11,15 @@ export interface InvoiceItem {
 export interface InvoiceData {
   invoiceNumber: string;
   date: string;
+
   fromName: string;
   fromEmail: string;
+  fromPiva?: string;
+
   toName: string;
   toEmail: string;
+  toPiva?: string;
+
   items: InvoiceItem[];
   taxRate: number | string;
   subtotal: number;

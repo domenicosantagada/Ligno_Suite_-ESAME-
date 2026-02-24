@@ -1,0 +1,29 @@
+/* Stili per la tendina di autocompletamento dei clienti */
+.custom-autocomplete-dropdown {
+  top: 100%;
+  left: 0;
+  z-index: 1050;
+  max-height: 250px; /* Se hai molti clienti, la tendina diventa scorrevole */
+  overflow-y: auto;
+  margin-top: 4px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  padding: 8px 0;
+}
+
+.custom-autocomplete-dropdown .dropdown-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #fcfcfc;
+  background-color: transparent;
+}
+
+.custom-autocomplete-dropdown .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.custom-autocomplete-dropdown .dropdown-item:hover,
+.custom-autocomplete-dropdown .dropdown-item:focus {
+  background-color: #ffffff;
+  transform: translateX(4px); /* Stesso effetto che hai nella navbar */
+}

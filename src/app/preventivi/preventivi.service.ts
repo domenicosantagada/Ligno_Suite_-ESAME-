@@ -18,13 +18,16 @@ export class PreventiviService {
   private authService = inject(Auth); // <-- Inietta Auth
   private apiUrl = 'http://localhost:8080/api/preventivi'; // L'URL di Spring Boot
   // Dati iniziali di default
+
   private initialData: InvoiceData = {
     invoiceNumber: '',
     date: new Date().toISOString().split('T')[0], // Data di oggi in formato YYYY-MM-DD
     fromName: '',
     fromEmail: '',
+    fromPiva: '',
     toName: '',
     toEmail: '',
+    toPiva: '',
     items: [{id: Date.now().toString(), description: '', quantity: 1, rate: 0, amount: 0}],
     taxRate: 22, // Possiamo impostare l'IVA italiana di default al 22%
     subtotal: 0,
@@ -185,8 +188,10 @@ export class PreventiviService {
       date: new Date().toISOString().split('T')[0],
       fromName: '',
       fromEmail: '',
+      fromPiva: '',
       toName: '',
       toEmail: '',
+      toPiva: '',
       items: [{id: Date.now().toString(), description: '', quantity: 1, rate: 0, amount: 0}],
       taxRate: 22,
       subtotal: 0,

@@ -43,6 +43,8 @@
       </div>
 
       <div class="row g-4 mb-4">
+
+
         <div class="col-md-6">
           <div class="p-3 bg-light rounded">
             <h5 class="mb-3">Emittente
@@ -50,23 +52,61 @@
             <input (ngModelChange)="preventiviService.updateInvoice({fromName: $event})" [ngModel]="invoice().fromName"
                    class="form-control mb-2"
                    placeholder="Nome Falegnameria / Azienda" type="text">
+
             <input (ngModelChange)="preventiviService.updateInvoice({fromEmail: $event})"
-                   [ngModel]="invoice().fromEmail" class="form-control"
+                   [ngModel]="invoice().fromEmail" class="form-control mb-2"
                    placeholder="Indirizzo Email"
                    type="email">
+
+            <input (ngModelChange)="preventiviService.updateInvoice({fromPiva: $event})"
+                   [ngModel]="invoice().fromPiva" class="form-control"
+                   placeholder="P.IVA / C.F." type="text">
+
+
           </div>
         </div>
+
         <div class="col-md-6">
           <div class="p-3 bg-light rounded">
             <h5 class="mb-3">Cliente</h5>
-            <input (ngModelChange)="preventiviService.updateInvoice({toName: $event})" [ngModel]="invoice().toName"
-                   class="form-control mb-2"
-                   placeholder="Nome / Azienda Cliente" type="text">
+
+            <div class="position-relative mb-2">
+              <input (blur)="nascondiDropdownRitardato()"
+                     (focus)="mostraDropdownClienti.set(true)"
+                     (ngModelChange)="onNomeClienteChange($event)"
+                     [ngModel]="invoice().toName"
+                     autocomplete="off"
+                     class="form-control"
+                     placeholder="Nome / Azienda Cliente"
+                     type="text"> @if (mostraDropdownClienti() && clientiFiltrati().length > 0) {
+              <ul class="dropdown-menu show w-100 position-absolute custom-autocomplete-dropdown shadow-sm">
+                @for (cliente of clientiFiltrati(); track cliente.id) {
+                  <li>
+                    <button (click)="selezionaClienteDaDropdown(cliente)" class="dropdown-item py-2" type="button">
+                      <div
+                        class="fw-bold text-dark">{{ cliente.nome }}
+                      </div>
+                      @if (cliente.email) {
+                        <div class="small text-muted">{{ cliente.email }}</div>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+            </div>
+
             <input (ngModelChange)="preventiviService.updateInvoice({toEmail: $event})" [ngModel]="invoice().toEmail"
-                   class="form-control"
+                   class="form-control mb-2"
                    placeholder="Indirizzo Email" type="email">
+
+            <input (ngModelChange)="preventiviService.updateInvoice({toPiva: $event})" [ngModel]="invoice().toPiva"
+                   class="form-control"
+                   placeholder="P.IVA / C.F." type="text">
           </div>
         </div>
+
+
       </div>
 
       <h5 class="mb-3 border-bottom pb-2">Voci del Preventivo</h5>
@@ -174,18 +214,21 @@
       </div>
 
       <!-- SEPARATORE -->
-      <hr class="mb-4">
+      <hr class="4">
 
-      <div class="row mb-5">
+      <div class="row mb-4">
         <div class="col-sm-6">
-          <h6 class="fw-bold text-uppercase text-muted mb-3">Dati Prestatore:</h6>
+          <h6 class="fw-bold text-uppercase text-muted mb-3">Emittente</h6>
           <p class="fs-5 fw-bold mb-1">{{ invoice().fromName || '[Il tuo Nome/Azienda]' }}</p>
-          <p class="text-muted">{{ invoice().fromEmail || '[La tua Email]' }}</p>
+          <p class="text-muted mb-0">{{ invoice().fromEmail || '[La tua Email]' }}</p>
+          <p class="text-muted mb-0">{{ invoice().fromPiva ? 'P.IVA ' + invoice().fromPiva : '[La tua P.Iva]' }}</p>
         </div>
+
         <div class="col-sm-6 text-sm-end mt-4 mt-sm-0">
-          <h6 class="fw-bold text-uppercase text-muted mb-3">Preventivo Intestato A:</h6>
+          <h6 class="fw-bold text-uppercase text-muted mb-3">Cliente</h6>
           <p class="fs-5 fw-bold mb-1">{{ invoice().toName || '[Nome Cliente]' }}</p>
-          <p class="text-muted">{{ invoice().toEmail || '[Email Cliente]' }}</p>
+          <p class="text-muted mb-0">{{ invoice().toEmail || '[Email Cliente]' }}</p>
+          <p class="text-muted mb-0">{{ invoice().toPiva ? 'P.IVA ' + invoice().toPiva : '[P.Iva Cliente]' }}</p>
         </div>
       </div>
 
@@ -212,21 +255,23 @@
         </tbody>
       </table>
 
+
       <div class="row justify-content-end">
         <div class="col-md-6 col-lg-5">
           <table class="table table-borderless mb-0">
             <tbody>
             <tr>
-              <td class="text-muted text-end pb-1">Imponibile:</td>
-              <td class="text-end pb-1" style="width: 130px;">€ {{ invoice().subtotal | number:'1.2-2' }}</td>
+              <td class="text-muted text-end pb-1 text-nowrap">Imponibile:</td>
+              <td class="text-end pb-1 text-nowrap">€ {{ invoice().subtotal | number:'1.2-2' }}</td>
             </tr>
             <tr class="border-bottom">
-              <td class="text-muted text-end pb-3">IVA ({{ invoice().taxRate }}%):</td>
-              <td class="text-end pb-3">€ {{ invoice().taxAmount | number:'1.2-2' }}</td>
+              <td class="text-muted text-end pb-3 text-nowrap">IVA ({{ invoice().taxRate }}%):</td>
+              <td class="text-end pb-3 text-nowrap">€ {{ invoice().taxAmount | number:'1.2-2' }}</td>
             </tr>
             <tr>
-              <td class="text-end fw-bold fs-4 text-primary pt-3">TOTALE:</td>
-              <td class="text-end fw-bold fs-4 text-primary pt-3">€ {{ invoice().total | number:'1.2-2' }}</td>
+              <td class="text-end fw-bold fs-4 text-primary pt-3 text-nowrap">TOTALE:</td>
+              <td class="text-end fw-bold fs-4 text-primary pt-3 text-nowrap">€ {{ invoice().total | number:'1.2-2' }}
+              </td>
             </tr>
             </tbody>
           </table>
