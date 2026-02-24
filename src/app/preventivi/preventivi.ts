@@ -6,6 +6,7 @@ import {PreventiviService} from './preventivi.service';
 // Importiamo i servizi della rubrica
 import {RubricaService} from '../rubrica/rubrica.service';
 import {Cliente} from '../rubrica/rubrica';
+import Swal from 'sweetalert2';
 
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
@@ -80,31 +81,49 @@ export class Preventivi implements OnInit {
     this.isPreview.update(v => !v);
   }
 
-  // Metodo richiamato in automatico dal Guard quando cerchi di cambiare pagina
-  puoAbbandonarePagina(): boolean {
+  async puoAbbandonarePagina(): Promise<boolean> {
     const inv = this.invoice();
 
-    // Controlliamo se c'è almeno un dato inserito (per non disturbare l'utente se la pagina è già vuota)
     const haDati = inv.invoiceNumber !== '' ||
       inv.toName !== '' ||
       inv.fromName !== '' ||
       (inv.items.length > 0 && inv.items[0].description !== '');
 
-    // Se il documento è completamente vuoto, lo lasciamo uscire subito svuotando per sicurezza
     if (!haDati) {
       this.preventiviService.resetInvoice();
       return true;
     }
 
-    // Se c'è qualcosa di scritto, mostriamo il messaggio di avviso
-    const conferma = confirm('Sei sicuro di voler lasciare la pagina? I dati non salvati andranno persi.');
+    // 3. Creiamo il nostro popup minimale e in stile Bootstrap
+    const result = await Swal.fire({
+      title: 'Vuoi uscire dalla pagina?',
+      text: 'I dati che non hai salvato andranno persi.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sì, esci',
+      cancelButtonText: 'Rimani',
+      reverseButtons: true, // Mette "Annulla" a sinistra e "Sì" a destra
+      // DISATTIVA IL FOCUS SU ENTRAMBI I BOTTONI
+      focusConfirm: false,
+      focusCancel: false,
 
-    if (conferma) {
-      // Se sceglie "Sì", puliamo tutto. Così al prossimo accesso il documento è di nuovo vuoto!
+      // AGGIUNGI QUESTO BLOCCO: Rimuove forzatamente il focus appena si apre!
+      didOpen: () => {
+        (document.activeElement as HTMLElement)?.blur();
+      },
+
+      customClass: {
+        popup: 'rounded-4 shadow-sm border-0', // Stesso stile delle tue card!
+        confirmButton: 'btn btn-dark px-4 rounded-pill ms-2', // Stesso bottone scuro
+        cancelButton: 'btn btn-outline-secondary px-4 rounded-pill' // Stesso bottone grigio
+      },
+      buttonsStyling: false // se è false si ottengono gli stili predefiniti di Swal
+    });
+
+    if (result.isConfirmed) {
       this.preventiviService.resetInvoice();
-      return true; // Permette la navigazione
+      return true;
     } else {
-      // Se sceglie "No", blocchiamo il cambio pagina e lo lasciamo lì dov'è
       return false;
     }
   }
