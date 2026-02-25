@@ -16,6 +16,10 @@ export class Auth {
     return this.http.post(`${this.apiUrl}/register`, dati);
   }
 
+  updateProfilo(id: number, dati: any) {
+    return this.http.put(`${this.apiUrl}/update/${id}`, dati);
+  }
+
   setUtenteLoggato(utente: any) {
     // Salva l'utente nella memoria del browser
     localStorage.setItem('utente', JSON.stringify(utente));

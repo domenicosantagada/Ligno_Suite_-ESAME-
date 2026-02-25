@@ -1,1 +1,134 @@
-<p>impostazioni works!</p>
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Impostazioni Azienda</h2>
+    <div>
+      <button (click)="annullaModifiche()" class="btn btn-outline-secondary btn-sm px-4 rounded-pill me-2">
+        <i class="bi bi-arrow-counterclockwise"></i> Annulla
+      </button>
+      <button (click)="salvaImpostazioni()" class="btn btn-success btn-sm px-4 rounded-pill">
+        <i class="bi bi-floppy"></i> Salva
+      </button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <div class="col-lg-8">
+
+      <div class="card p-4 shadow-sm border-0 bg-white mb-4">
+        <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-building me-2"></i>Dati Aziendali</h5>
+
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label class="form-label text-muted small mb-1">Nome Azienda / Ragione Sociale</label>
+            <input (ngModelChange)="updateProfilo({nomeAzienda: $event})" [ngModel]="profilo().nomeAzienda"
+                   class="form-control" placeholder="Es. Falegnameria Rossi" type="text">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Partita IVA</label>
+            <input (ngModelChange)="updateProfilo({partitaIva: $event})" [ngModel]="profilo().partitaIva"
+                   class="form-control" type="text">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Codice Fiscale</label>
+            <input (ngModelChange)="updateProfilo({codiceFiscale: $event})" [ngModel]="profilo().codiceFiscale"
+                   class="form-control" type="text">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Email Aziendale</label>
+            <input (ngModelChange)="updateProfilo({email: $event})" [ngModel]="profilo().email" class="form-control"
+                   type="email">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Telefono / Cellulare</label>
+            <input (ngModelChange)="updateProfilo({telefono: $event})" [ngModel]="profilo().telefono"
+                   class="form-control" type="text">
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 shadow-sm border-0 bg-white mb-4">
+        <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-geo-alt me-2"></i>Sede Legale / Indirizzo</h5>
+
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label class="form-label text-muted small mb-1">Indirizzo (Via/Piazza e numero)</label>
+            <input (ngModelChange)="updateProfilo({indirizzo: $event})" [ngModel]="profilo().indirizzo"
+                   class="form-control" type="text">
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label text-muted small mb-1">Città</label>
+            <input (ngModelChange)="updateProfilo({citta: $event})" [ngModel]="profilo().citta" class="form-control"
+                   type="text">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label text-muted small mb-1">CAP</label>
+            <input (ngModelChange)="updateProfilo({cap: $event})" [ngModel]="profilo().cap" class="form-control"
+                   type="text">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small mb-1">Provincia (Sigla)</label>
+            <input (ngModelChange)="updateProfilo({provincia: $event})" [ngModel]="profilo().provincia"
+                   class="form-control" maxlength="2" placeholder="Es. RM" type="text">
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 shadow-sm border-0 bg-white">
+        <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-person me-2"></i>Dati Titolare (Opzionale)</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Nome</label>
+            <input (ngModelChange)="updateProfilo({nomeTitolare: $event})" [ngModel]="profilo().nomeTitolare"
+                   class="form-control" type="text">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Cognome</label>
+            <input (ngModelChange)="updateProfilo({cognomeTitolare: $event})" [ngModel]="profilo().cognomeTitolare"
+                   class="form-control" type="text">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+      <div class="card p-4 shadow-sm border-0 bg-white text-center h-100">
+        <h5 class="mb-4 text-primary border-bottom pb-2 text-start"><i class="bi bi-image me-2"></i>Logo per Preventivi
+        </h5>
+
+        <p class="text-muted small mb-4">Carica il logo della tua falegnameria. Verrà inserito automaticamente
+          nell'intestazione dei PDF.</p>
+
+        <div [class.has-image]="profilo().logoBase64" class="logo-upload-box mb-3 position-relative">
+
+          @if (profilo().logoBase64) {
+            <img [src]="profilo().logoBase64" alt="Logo Azienda" class="img-fluid logo-preview">
+            <button (click)="rimuoviLogo()"
+                    class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle" title="Rimuovi Logo">
+              <i class="bi bi-trash"></i>
+            </button>
+          } @else {
+            <div class="upload-placeholder p-5">
+              <i class="bi bi-cloud-arrow-up display-4 text-secondary mb-2"></i>
+              <div class="fw-bold">Clicca per caricare</div>
+              <div class="small text-muted">JPG o PNG (Max 2MB)</div>
+            </div>
+          }
+
+          <input (change)="onLogoSelected($event)" [disabled]="!!profilo().logoBase64" accept="image/png, image/jpeg"
+                 class="file-input"
+                 type="file">
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
