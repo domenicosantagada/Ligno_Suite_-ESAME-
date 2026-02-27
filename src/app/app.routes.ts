@@ -7,7 +7,8 @@ import {ListaPreventivi} from './lista-preventivi/lista-preventivi';
 import {Login} from './login/login';
 import {Register} from './register/register';
 import {Rubrica} from './rubrica/rubrica';
-import {Impostazioni} from './impostazioni/impostazioni'; // 1. Importa il componente Login
+import {Impostazioni} from './impostazioni/impostazioni';
+import {authGuard} from './auth/auth.guard'; // 1. Importa il componente Login
 
 export const routes: Routes = [
 
@@ -18,20 +19,24 @@ export const routes: Routes = [
   {path: "", redirectTo: "/login", pathMatch: "full"}, // 2. Modifica il redirect iniziale su /login
 
 
+  // Rotte PUBBLICHE (accessibili a tutti)
   {path: "login", component: Login}, // 3. Aggiungi la rotta di login
   {path: "register", component: Register}, // Aggiungi la rotta
-  {path: "home", component: Home},
-  {path: "lista-preventivi", component: ListaPreventivi},
+
+  // Rotte PRIVATE (protette da authGuard)
+  {path: "home", component: Home, canActivate: [authGuard]},
+  {path: "lista-preventivi", component: ListaPreventivi, canActivate: [authGuard]},
 
   {
     path: "preventivi",
     component: Preventivi,
+    canActivate: [authGuard],
     canDeactivate: [(component: Preventivi) => component.puoAbbandonarePagina()]
   },
 
 
-  {path: "taglio-pannelli", component: TaglioPannelli},
-  {path: "prezzario", component: Prezzario},
-  {path: "rubrica", component: Rubrica},
-  {path: "impostazioni", component: Impostazioni}
+  {path: "taglio-pannelli", component: TaglioPannelli, canActivate: [authGuard]},
+  {path: "prezzario", component: Prezzario, canActivate: [authGuard]},
+  {path: "rubrica", component: Rubrica, canActivate: [authGuard]},
+  {path: "impostazioni", component: Impostazioni, canActivate: [authGuard]},
 ];
