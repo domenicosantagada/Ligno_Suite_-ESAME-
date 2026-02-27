@@ -141,42 +141,6 @@ export class Impostazioni implements OnInit {
     this.updateProfilo({logoBase64: null});
   }
 
-  alvaImpostazioni() {
-    const utenteLoggato = this.authService.getUtenteLoggato();
-    if (!utenteLoggato) return;
-
-    // Uniamo i dati vecchi di sicurezza (es. password) con i nuovi dati del profilo
-    const datiDaInviare = {
-      ...utenteLoggato,
-      ...this.profilo() // Inserisce tutti i campi dell'interfaccia (indirizzo, logo, p.iva, ecc.)
-    };
-
-    // Chiamata al database tramite il Service
-    this.authService.updateProfilo(utenteLoggato.id, datiDaInviare).subscribe({
-      next: (utenteAggiornatoDalDb) => {
-        // 1. Aggiorniamo i dati salvati nel browser
-        this.authService.setUtenteLoggato(utenteAggiornatoDalDb);
-
-        // 2. Aggiorniamo la copia di backup per il tasto "Annulla"
-        this.datiOriginali = JSON.parse(JSON.stringify(this.profilo()));
-
-        // 3. Mostriamo il messaggio di successo
-        Swal.fire({
-          title: 'Salvato!',
-          text: 'Le impostazioni sono state aggiornate con successo.',
-          icon: 'success',
-          confirmButtonText: 'Ok',
-          customClass: {confirmButton: 'btn btn-success px-4 rounded-pill'},
-          buttonsStyling: false
-        });
-      },
-      error: (err) => {
-        console.error("Errore durante il salvataggio:", err);
-        Swal.fire('Errore', 'Impossibile salvare le impostazioni.', 'error');
-      }
-    });
-  }
-
   annullaModifiche() {
     if (this.datiOriginali) {
       this.profilo.set(JSON.parse(JSON.stringify(this.datiOriginali)));
