@@ -6,9 +6,13 @@
       <button (click)="annullaModifiche()" class="btn btn-outline-secondary btn-sm px-4 rounded-pill me-2">
         <i class="bi bi-arrow-counterclockwise"></i> Annulla
       </button>
-      <button (click)="salvaImpostazioni()" class="btn btn-success btn-sm px-4 rounded-pill">
+
+      <button (click)="salvaImpostazioni()"
+              [disabled]="!profilo().nomeAzienda || !profilo().email || erroreEmail"
+              class="btn btn-success btn-sm px-4 rounded-pill">
         <i class="bi bi-floppy"></i> Salva
       </button>
+
     </div>
   </div>
 
@@ -20,10 +24,17 @@
         <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-building me-2"></i>Dati Aziendali</h5>
 
         <div class="row g-3">
+
           <div class="col-md-12">
-            <label class="form-label text-muted small mb-1">Nome Azienda / Ragione Sociale</label>
-            <input (ngModelChange)="updateProfilo({nomeAzienda: $event})" [ngModel]="profilo().nomeAzienda"
+            <label class="form-label text-muted small mb-1">Nome Azienda / Ragione Sociale *</label>
+            <input (ngModelChange)="updateProfilo({nomeAzienda: $event})"
+                   [class.is-invalid]="!profilo().nomeAzienda"
+                   [ngModel]="profilo().nomeAzienda"
                    class="form-control" placeholder="Es. Falegnameria Rossi" type="text">
+
+            @if (!profilo().nomeAzienda) {
+              <div class="invalid-feedback">Il nome dell'azienda è obbligatorio.</div>
+            }
           </div>
 
           <div class="col-md-6">
@@ -38,10 +49,19 @@
           </div>
 
           <div class="col-md-6">
-            <label class="form-label text-muted small mb-1">Email Aziendale</label>
-            <input (ngModelChange)="updateProfilo({email: $event})" [ngModel]="profilo().email" class="form-control"
-                   type="email">
+            <label class="form-label text-muted small mb-1">Email Aziendale *</label>
+            <input (ngModelChange)="updateProfilo({email: $event}); erroreEmail = ''"
+                   [class.is-invalid]="!profilo().email || erroreEmail"
+                   [ngModel]="profilo().email"
+                   class="form-control" type="email">
+
+            @if (!profilo().email) {
+              <div class="invalid-feedback">L'email aziendale è obbligatoria.</div>
+            } @else if (erroreEmail) {
+              <div class="invalid-feedback">{{ erroreEmail }}</div>
+            }
           </div>
+
           <div class="col-md-6">
             <label class="form-label text-muted small mb-1">Telefono / Cellulare</label>
             <input (ngModelChange)="updateProfilo({telefono: $event})" [ngModel]="profilo().telefono"
@@ -79,7 +99,7 @@
       </div>
 
       <div class="card p-4 shadow-sm border-0 bg-white">
-        <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-person me-2"></i>Dati Titolare (Opzionale)</h5>
+        <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-person me-2"></i>Dati Titolare</h5>
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label text-muted small mb-1">Nome</label>

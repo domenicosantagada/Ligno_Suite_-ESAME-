@@ -1,8 +1,10 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnInit, signal} from '@angular/core';
+// changeDetectorRef: serve per aggiornare i dati del form dopo aver salvato in modo diretto
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Auth} from '../auth/auth';
 import Swal from 'sweetalert2';
+
 
 export interface ProfiloAzienda {
   nomeAzienda: string;
@@ -26,8 +28,15 @@ export interface ProfiloAzienda {
   templateUrl: './impostazioni.html',
   styleUrl: './impostazioni.css'
 })
+
+
 export class Impostazioni implements OnInit {
+
   authService = inject(Auth);
+  cdr = inject(ChangeDetectorRef);
+
+  // Variabile per gestire l'errore di unicità dell'email
+  erroreEmail = '';
 
   // Dati iniziali vuoti
   profilo = signal<ProfiloAzienda>({
@@ -108,7 +117,15 @@ export class Impostazioni implements OnInit {
       },
       error: (err) => {
         console.error("Errore durante il salvataggio:", err);
-        Swal.fire('Errore', 'Impossibile salvare le impostazioni.', 'error');
+
+        // --- NUOVO CONTROLLO ERRORE ---
+        if (err.status === 409) {
+          // Invece del popup, mostriamo l'errore rosso sotto il campo!
+          this.erroreEmail = 'Questa email è già in uso da un altro utente.';
+          this.cdr.detectChanges();
+        } else {
+          Swal.fire('Errore', 'Impossibile salvare le impostazioni.', 'error');
+        }
       }
     });
   }
