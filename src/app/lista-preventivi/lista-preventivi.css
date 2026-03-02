@@ -1,33 +1,63 @@
-/* Rende la riga leggermente evidenziata al passaggio */
+/* * Pseudo-classe :hover
+ * Si attiva solo quando l'utente passa il cursore del mouse sopra un elemento
+ * che ha la classe "hover-row" (in questo caso, le righe <tr> della tabella).
+ */
 .hover-row:hover {
+  /* Cambia il colore di sfondo della riga quando ci si passa sopra con il mouse. */
   background-color: #fcfcfc;
 }
 
-/* Pulsanti icona minimali */
+
+/* ==========================================================================
+   STILI PER I PULSANTI CON ICONA (Es. Modifica, Elimina, Visualizza)
+   ========================================================================== */
+
+/* Classe base per le icone cliccabili. */
 .action-icon {
-  background: none;
-  border: none;
-  padding: 5px;
-  color: #adb5bd; /* Grigio chiaro di base */
+  background: none; /* Rimuove lo sfondo grigio di default dei bottoni */
+  border: none; /* Rimuove il bordino rialzato di default */
+  padding: 5px; /* Aumenta l'area cliccabile senza ingrandire l'icona stessa (ottimo per il mobile) */
+  color: #adb5bd; /* Colore di partenza: un grigio chiaro neutro */
+
+  /* "transition" crea un'animazione fluida. Invece di cambiare colore di scatto,
+     ci metterà 0.2 secondi (0.2s) in modo morbido (ease). */
   transition: all 0.2s ease;
-  font-size: 1.1rem;
-  line-height: 1;
+
+  font-size: 1.1rem; /* Ingrandisce leggermente l'icona rispetto al testo normale */
+  line-height: 1; /* Evita che l'icona sballi le altezze della riga */
 }
 
+/* Cosa succede quando si passa il mouse sull'icona generica */
 .action-icon:hover {
-  color: #212529; /* Nero al passaggio */
+  color: #212529; /* L'icona si scurisce (quasi nero) per far capire che è cliccabile */
+
+  /* trasla leggermente lungo l'asse y */
   transform: translateY(-1px);
 }
 
+/* Variante specifica per le azioni pericolose (es. il cestino per eliminare). */
 .text-danger-hover:hover {
+  /* !important serve a "forzare" questa regola. Assicura che questo rosso (#dc3545)
+     vinca sempre sul nero definito sopra in ".action-icon:hover", se l'elemento
+     ha entrambe le classi. */
   color: #dc3545 !important;
 }
 
-/* Rimuove i bordi della tabella per un look più moderno */
+
+/* ==============================================
+   STILI PER LE TABELLE (Es. Lista Preventivi)
+   ============================================== */
+
 .table td, .table th {
   border-bottom: 1px solid #f1f1f1;
 }
 
+/* * :last-child è un selettore strutturale.
+ * Trova l'ULTIMA riga (tr) della tabella e applica la regola alle sue celle (td).
+ */
 .table tr:last-child td {
+  /* Togliamo il bordo all'ultima riga della tabella.
+     Serve a evitare il "doppio bordo" sgradevole se la tabella
+     si trova dentro una card che ha già il suo bordo inferiore o arrotondato. */
   border-bottom: none;
 }
