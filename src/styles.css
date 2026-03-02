@@ -1,6 +1,10 @@
+/*
+  Stili personalizzati per SweetAlert2: sistema per le notifiche e messaggi popup
+ */
+
 /* Modifica la grandezza del titolo del popup */
 .swal2-title {
-  font-size: 22px !important;
+  font-size: 22px !important; /* important sta per "importante" e serve a forzare l'applicazione di questo stile, anche se ci sono altri stili che potrebbero sovrascriverlo. */
 }
 
 /* Modifica la grandezza del testo descrittivo del popup */
@@ -8,7 +12,7 @@
   font-size: 16px !important;
 }
 
-/* Se vuoi ingrandire/rimpicciolire anche il testo dei bottoni */
+/* Serve per ingrandire/rimpicciolire il testo dei bottoni */
 .swal2-actions .btn {
   font-size: 15px !important;
 }

@@ -10,20 +10,30 @@ import {Rubrica} from './rubrica/rubrica';
 import {Impostazioni} from './impostazioni/impostazioni';
 import {authGuard} from './auth/auth.guard'; // 1. Importa il componente Login
 
+/**
+ * array delle ROTTE. Angular legge questo array dall'alto verso il basso.
+ * Appena trova una rotta che "matcha" (corrisponde) all'URL, si ferma e carica quel componente.
+ */
 export const routes: Routes = [
 
-  // Per accedere direttamente alla lista dei preventivi
-  //{path: "", redirectTo: "/lista-preventivi", pathMatch: "full"},
+  /* * ROTTA DI DEFAULT (Root)
+   * Se l'utente digita solo "localhost:4200/", Angular lo reindirizza (redirectTo) a "/login".
+   * pathMatch: "full" significa che l'URL deve essere ESATTAMENTE vuoto per far scattare questo redirect.
+   */
+  {path: "", redirectTo: "/login", pathMatch: "full"},
 
-  // Ripristina il redirect iniziale
-  {path: "", redirectTo: "/login", pathMatch: "full"}, // 2. Modifica il redirect iniziale su /login
 
+  // --- ROTTE PUBBLICHE (accessibili senza essere loggati) ---
+  {path: "login", component: Login},
+  {path: "register", component: Register},
 
-  // Rotte PUBBLICHE (accessibili a tutti)
-  {path: "login", component: Login}, // 3. Aggiungi la rotta di login
-  {path: "register", component: Register}, // Aggiungi la rotta
-
-  // Rotte PRIVATE (protette da authGuard)
+  // --- ROTTE PRIVATE (Dashboard dell'utente) ---
+  /*
+   * canActivate: [authGuard] è un "Garante" (Guard) di sicurezza.
+   * Prima di caricare il componente "Home", Angular esegue il codice dentro authGuard.
+   * Se authGuard restituisce 'true' (l'utente ha fatto il login), lo fa passare.
+   * Se restituisce 'false' (non è loggato), blocca la navigazione e di solito lo rimanda al Login.
+   */
   {path: "home", component: Home, canActivate: [authGuard]},
   {path: "lista-preventivi", component: ListaPreventivi, canActivate: [authGuard]},
 
@@ -31,9 +41,15 @@ export const routes: Routes = [
     path: "preventivi",
     component: Preventivi,
     canActivate: [authGuard],
+    /*
+     * canDeactivate è un Guard in uscita.
+     * Serve a bloccare l'utente se sta cercando di uscire dalla pagina.
+     * Molto utile se l'utente sta compilando un preventivo e preme "Indietro" per sbaglio:
+     * chiama il metodo 'puoAbbandonarePagina()' del componente Preventivi per mostrare
+     * un popup "Vuoi davvero uscire? I dati non salvati andranno persi!".
+     */
     canDeactivate: [(component: Preventivi) => component.puoAbbandonarePagina()]
   },
-
 
   {path: "taglio-pannelli", component: TaglioPannelli, canActivate: [authGuard]},
   {path: "prezzario", component: Prezzario, canActivate: [authGuard]},

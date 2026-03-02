@@ -1,49 +1,66 @@
+<!-- Se siamo in una pagina diversa da login e register mostriamo la navbar -->
 @if (router.url !== '/login' && router.url !== '/register') {
   <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
     <div class="container-fluid position-relative">
+
+      <!-- ELEMENTI NAVBAR-->
 
       <!-- Logo a sinistra -->
       <a [routerLink]="['/home']" class="navbar-brand position-absolute start-0">
         <img alt="Logo" class="d-inline-block align-text-top" height="70" src="image/LignoSuiteLogo.svg">
       </a>
 
-      <!-- Link centrati -->
+      <!-- Link centrali -->
       <div class="collapse navbar-collapse justify-content-center">
         <ul class="navbar-nav mb-2 mb-lg-0">
+
+          <!-- Sezione Preventivi -->
           <li class="nav-item">
             <a [routerLink]="['/lista-preventivi']" class="nav-link custom-link">Preventivi</a>
           </li>
+
+          <!-- Sezione Nuovo Documento -->
           <li class="nav-item">
             <a [routerLink]="['/preventivi']" class="nav-link custom-link">Nuovo Documento</a>
           </li>
+
+          <!-- Sezione Taglio Pannelli -->
           <li class="nav-item">
             <a [routerLink]="['/taglio-pannelli']" class="nav-link custom-link">Taglio Pannelli</a>
           </li>
+
+          <!-- Sezione Prezzario -->
           <li class="nav-item">
             <a [routerLink]="['/prezzario']" class="nav-link custom-link">Prezzario</a>
           </li>
 
+          <!-- Sezione Gestione -->
           <li class="nav-item dropdown">
-
+            <!-- Il link che apre il dropdown -->
             <a (click)="toggleMenuGestione($event)" [class.show]="menuGestioneAperto()"
                class="nav-link custom-link dropdown-toggle d-flex align-items-center" style="cursor: pointer;">
               Gestione <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem; margin-top: 2px;"></i>
             </a>
 
+            <!-- Il dropdown -->
             <ul [class.show]="menuGestioneAperto()" class="dropdown-menu custom-dropdown-menu">
 
+              <!-- Elementi del dropdown -->
               <li>
                 <a (click)="menuGestioneAperto.set(false)" [routerLink]="['/rubrica']"
                    class="dropdown-item custom-dropdown-item">Rubrica</a>
               </li>
+
               <li>
                 <a (click)="menuGestioneAperto.set(false)" [routerLink]="['/impostazioni']"
                    class="dropdown-item custom-dropdown-item">Impostazioni</a>
               </li>
+
               <li>
                 <a (click)="menuGestioneAperto.set(false)" [routerLink]="['/home']"
                    class="dropdown-item custom-dropdown-item">Altro</a>
               </li>
+
             </ul>
 
           </li>
@@ -51,6 +68,7 @@
         </ul>
       </div>
 
+      <!-- Bottone di logout -->
       <div class="d-flex position-absolute end-0">
         <button (click)="logout()" class="btn btn-outline-danger btn-sm px-4 rounded-pill" type="button">
           <i class="bi bi-box-arrow-in-right"></i> Esci
@@ -61,6 +79,7 @@
   </nav>
 }
 
+<!-- Se ci troviamo sulla pagina login o register non mostriamo la navbar -->
 <div [class.container]="router.url !== '/login' && router.url !== '/register'"
      [class.mt-4]="router.url !== '/login' && router.url !== '/register'">
   <router-outlet></router-outlet>

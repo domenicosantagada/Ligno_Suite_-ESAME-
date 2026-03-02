@@ -1,21 +1,30 @@
-/* Navbar pulita e minimale */
+/* ==========================================================================
+   COMPONENTE NAVBAR
+   Gestione degli stili globali per la barra di navigazione principale
+   ========================================================================== */
+
+/* --- Contenitore Principale --- */
 .custom-navbar {
   background-color: #ffffff;
   border-bottom: 2px solid #e5e5e5;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  /*margin su tutti i 4 lati di 50px per distanziare la navbar dal resto del contenuto*/
+
+  /* Posizionamento e spaziatura rispetto al corpo della pagina */
   margin: 20px 30px 80px 30px;
   padding-bottom: 30px;
-
 }
 
-/* Logo dimensioni */
+/* --- Dimensionamento Logo --- */
 .custom-navbar .navbar-brand img {
   height: 50px;
   width: auto;
 }
 
-/* Link stile minimale */
+/* ==========================================================================
+   VOCI DI NAVIGAZIONE (LINK)
+   ========================================================================== */
+
+/* --- Stile Base dei Link --- */
 .custom-link {
   color: #333333;
   font-weight: 400;
@@ -25,10 +34,12 @@
   transition: color 0.2s ease;
 }
 
+/* Feedback visivo sul testo al passaggio del mouse */
 .custom-link:hover {
   color: #000000;
 }
 
+/* --- Animazione Underline (Pseudo-elemento ::after) --- */
 .custom-link::after {
   content: '';
   position: absolute;
@@ -40,43 +51,52 @@
   transition: width 0.3s ease;
 }
 
+/* Espansione della linea inferiore all'hover */
 .custom-link:hover::after {
   width: 100%;
 }
 
-/* --- FIX PER FAR FUNZIONARE LA LINEA ANIMATA SUL DROPDOWN --- */
+/* --- Override Bootstrap per Dropdown Toggle --- */
+/* Disabilita il caret (triangolino) nativo di Bootstrap per non interferire
+   con l'animazione custom (underline) definita sopra. */
 .custom-link.dropdown-toggle::after {
-  display: block; /* Annulla l'inline-block di Bootstrap */
-  border: none; /* Rimuove il triangolino di default di Bootstrap */
+  display: block;
+  border: none;
   margin: 0;
   vertical-align: baseline;
 }
 
-/* --- STILE DELLA FINESTRELLA A TENDINA --- */
+/* ==========================================================================
+   MENU DROPDOWN (GESTIONE)
+   ========================================================================== */
+
+/* --- Contenitore della Tendina --- */
 .custom-dropdown-menu {
   border: 1px solid #e5e5e5;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Ombra morbida */
-  border-radius: 8px; /* Angoli leggermente arrotondati */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
   padding: 10px 0;
-  margin-top: 15px !important; /* Lo stacca dalla navbar */
   background-color: #ffffff;
+
+  /* Distanzia il menu dalla navbar sovrascrivendo le regole di default */
+  margin-top: 15px !important;
 }
 
-/* --- STILE DEI LINK INTERNI AL MENU --- */
+/* --- Singole Voci del Menu --- */
 .custom-dropdown-item {
-  color: #333333; /* Stesso colore dei link principali */
+  color: #333333;
   font-weight: 400;
   font-size: 16px;
   padding: 8px 24px;
-  transition: all 0.2s ease;
   background-color: transparent;
+  transition: all 0.2s ease;
 }
 
-/* Effetto al passaggio del mouse sui link del menu */
+/* --- Effetto Hover sulle Voci del Menu --- */
+/* Sostituisce l'underline con una leggera traslazione sull'asse X (Destra) */
 .custom-dropdown-item:hover,
 .custom-dropdown-item:focus {
   background-color: #ffffff;
   color: #000000;
-  /* Invece della linea sotto, facciamo scorrere leggermente il testo a destra! */
   transform: translateX(6px);
 }
