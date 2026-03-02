@@ -203,8 +203,8 @@ export class Preventivi implements OnInit {
       const opt: any = {
         margin: [0, 0, 0, 0],
         filename: fileName,
-        image: {type: 'jpeg', quality: 0.98}, // Qualità fotografica, se aumento troppo, il file diventa pesante. Max -> 1.0 min -> 0.1
-        html2canvas: {scale: 2, useCORS: true}, // Scala a 2 migliora la nitidezza del testo
+        image: {type: 'jpeg', quality: 0.1}, // Qualità fotografica, se aumento troppo, il file diventa pesante. Max -> 1.0 min -> 0.1
+        html2canvas: {scale: 16, useCORS: true}, // Scala a 2 migliora la nitidezza del testo (valore da 1 a 3), useCORS serve per caricare immagini da altre origini (es. logo azienda in base64)
         jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}, // Foglio standard A4
         pagebreak: {mode: ['css', 'legacy']} // Gestisce il salto pagina se il preventivo è troppo lungo
       };
