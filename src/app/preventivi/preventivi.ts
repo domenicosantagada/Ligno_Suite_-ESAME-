@@ -210,10 +210,10 @@ export class Preventivi implements OnInit {
       const fileName = `PREV_${numero}_${nomePulito}.pdf`;
       // Opzioni di configurazione per la libreria html2pdf
       const opt: any = {
-        margin: [0, 0, 0, 0],
+        margin: [8, 8], // Margine in mm (top/bottom, left/right)
         filename: fileName,
         image: {type: 'jpeg', quality: 1}, // Qualità fotografica, se aumento troppo, il file diventa pesante. Max -> 1.0 min -> 0.1
-        html2canvas: {scale: 10, useCORS: true}, // Scala a 2 migliora la nitidezza del testo (valore da 1 a 3), useCORS serve per caricare immagini da altre origini (es. logo azienda in base64)
+        html2canvas: {scale: 14, useCORS: true}, // Scala per la renderizzazione (più alto = migliore qualità ma più lento), useCORS per caricare immagini da altre origini
         jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}, // Foglio standard A4
         pagebreak: {mode: ['css', 'legacy']} // Gestisce il salto pagina se il preventivo è troppo lungo
       };
