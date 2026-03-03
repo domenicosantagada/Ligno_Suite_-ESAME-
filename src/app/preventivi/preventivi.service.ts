@@ -180,7 +180,13 @@ export class PreventiviService {
   }
 
   eliminaPreventivoDalDb(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    // 1. Recupera i dati dell'utente loggato dal servizio Auth
+    const utenteLoggato = this.authService.getUtenteLoggato();
+    // recuperiamo l'ID dell'utente loggato se esiste altrimenti 0
+    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
+
+    // 2. Aggiunge l'utenteId come parametro URL nella richiesta DELETE
+    return this.http.delete(`${this.apiUrl}/${id}?utenteId=${utenteId}`);
   }
 
   resetInvoice() {

@@ -63,7 +63,11 @@ export class RubricaService {
    * ELIMINA UN CLIENTE (DELETE - Metodo HTTP DELETE)
    */
   eliminaClienteDalDb(id: number | string) {
-    // Aggiungiamo l'ID in fondo all'URL (es. /api/clienti/5) per dire al server esattamente chi eliminare
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    // 1. Recupera l'utente loggato per sapere il suo ID
+    const utenteLoggato = this.authService.getUtenteLoggato();
+    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
+
+    // 2. Aggiungi l'utenteId come parametro nella query string dell'URL per superare il controllo di sicurezza del backend
+    return this.http.delete(`${this.apiUrl}/${id}?utenteId=${utenteId}`);
   }
 }
