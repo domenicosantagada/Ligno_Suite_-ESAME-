@@ -2,6 +2,7 @@ import {inject, Injectable, signal} from '@angular/core';
 import {InvoiceData, InvoiceItem} from './preventivi.model';
 import {HttpClient} from '@angular/common/http';
 import {Auth} from '../auth/auth';
+import {Observable} from 'rxjs';
 
 /**
  * SERVIZIO PREVENTIVI
@@ -206,6 +207,11 @@ export class PreventiviService {
   caricaPreventivoPerModifica(prev: InvoiceData) {
     this.originalInvoiceNumber = prev.invoiceNumber;
     this.invoice.set(JSON.parse(JSON.stringify(prev)));
+  }
+
+  /* metodo per utilizzare l'API del linguaggio AI per generare una descrizione voce preventivo accurata*/
+  miglioraDescrizioneConIA(testoBreve: string): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/ai/genera-descrizione', {testo: testoBreve});
   }
 
   /**

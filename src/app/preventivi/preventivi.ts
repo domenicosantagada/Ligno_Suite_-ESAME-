@@ -20,6 +20,7 @@ import html2pdf from 'html2pdf.js';
 })
 export class Preventivi implements OnInit {
 
+  rigaInGenerazioneIA: number = -1;
   /* ==========================================================================
      DEPENDENCY INJECTION
      ========================================================================== */
@@ -210,7 +211,7 @@ export class Preventivi implements OnInit {
       const fileName = `PREV_${numero}_${nomePulito}.pdf`;
       // Opzioni di configurazione per la libreria html2pdf
       const opt: any = {
-        margin: [8, 8], // Margine in mm (top/bottom, left/right)
+        margin: [2, 2], // Margine in mm (top/bottom, left/right), prima dell'ai era 8,8
         filename: fileName,
         image: {type: 'jpeg', quality: 1}, // Qualità fotografica, se aumento troppo, il file diventa pesante. Max -> 1.0 min -> 0.1
         html2canvas: {scale: 14, useCORS: true}, // Scala per la renderizzazione (più alto = migliore qualità ma più lento), useCORS per caricare immagini da altre origini
@@ -223,5 +224,38 @@ export class Preventivi implements OnInit {
     } else {
       console.error("Elemento per l'anteprima del PDF non trovato!");
     }
+  }
+
+  generaDescrizioneIA(index: number) {
+    const itemCorrente = this.invoice().items[index];
+    const testoAttuale = itemCorrente.description;
+
+    if (!testoAttuale || testoAttuale.trim() === '') {
+      Swal.fire('Attenzione', 'Scrivi prima una breve descrizione da far migliorare all\'IA!', 'warning');
+      return;
+    }
+
+    this.rigaInGenerazioneIA = index; // Imposta lo spinner per questa riga specifica
+
+    this.preventiviService.miglioraDescrizioneConIA(testoAttuale).subscribe({
+      next: (res) => {
+        // Usiamo il metodo corretto del service per aggiornare la descrizione di quella specifica riga
+        this.preventiviService.updateItem(index, 'description', res.descrizioneMigliorata);
+        this.rigaInGenerazioneIA = -1; // Spegne lo spinner
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'bottom-end',
+          showConfirmButton: false,
+          timer: 3000
+        });
+        Toast.fire({icon: 'success', title: 'Descrizione migliorata con IA! ✨'});
+      },
+      error: (err) => {
+        console.error(err);
+        this.rigaInGenerazioneIA = -1;
+        Swal.fire('Errore', 'Impossibile contattare l\'IA in questo momento.', 'error');
+      }
+    });
   }
 }
