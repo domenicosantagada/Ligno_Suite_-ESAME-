@@ -165,10 +165,15 @@ export class PreventiviService {
       });
     }
 
-    if (isUpdate) {
+    if (isUpdate && preventivoDaSalvare.id !== undefined) {
       // ---> MODALITÀ MODIFICA (PUT)
       this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}`, preventivoDaSalvare).subscribe({
-        next: () => alert('Preventivo aggiornato con successo!'),
+        next: () => {
+          alert('Preventivo aggiornato con successo!');
+
+          // torna la nuvoletta verde!
+          this.hasUnsavedChanges.set(false);
+        },
         error: (err) => {
           alert('Errore durante l\'aggiornamento: ' + (err.error?.message || 'Errore generico'));
           console.error(err);
@@ -177,9 +182,13 @@ export class PreventiviService {
     } else {
       // ---> MODALITÀ CREAZIONE O "SALVA CON NOME" (POST)
       this.http.post<InvoiceData>(this.apiUrl, preventivoDaSalvare).subscribe({
-        next: () => {
+        next: (rispostaDb: any) => {
           alert('Nuovo preventivo salvato con successo!');
           this.originalInvoiceNumber = preventivoDaSalvare.invoiceNumber; // Il nuovo numero diventa l'originale
+          this.invoice.update(current => ({...current, id: rispostaDb.id}));
+
+          // torna la nuvoletta verde!
+          this.hasUnsavedChanges.set(false);
         },
         error: (err) => {
           if (err.status === 409) {
