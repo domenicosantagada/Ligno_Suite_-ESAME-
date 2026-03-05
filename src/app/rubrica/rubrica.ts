@@ -123,7 +123,7 @@ export class Rubrica implements OnInit {
 
     // Validazione base obbligatoria
     if (!dati.nome || dati.nome.trim() === '') {
-      alert('Inserisci almeno la Ragione Sociale / Nome.');
+      Swal.fire('Attenzione', 'Inserisci almeno la Ragione Sociale / Nome.', 'warning');
       return;
     }
 
