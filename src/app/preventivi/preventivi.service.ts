@@ -244,6 +244,24 @@ export class PreventiviService {
   }
 
   /**
+   * Sincronizza silenziosamente i dati dell'emittente con quelli attuali del LocalStorage.
+   * Essendo "silenzioso" (non aggiorna hasUnsavedChanges), non fa scattare
+   * la nuvoletta rossa appena apri la pagina.
+   */
+  allineaDatiEmittenteSilenzioso() {
+    const utente = this.authService.getUtenteLoggato();
+
+    if (utente) {
+      this.invoice.update(current => ({
+        ...current,
+        fromName: utente.nomeAzienda || utente.nome || '',
+        fromEmail: utente.email || '',
+        fromPiva: utente.partitaIva || ''
+      }));
+    }
+  }
+
+  /**
    * Genera un preventivo vuoto ma precompilato con i dati dell'utente loggato
    */
   private creaDatiIniziali(): InvoiceData {

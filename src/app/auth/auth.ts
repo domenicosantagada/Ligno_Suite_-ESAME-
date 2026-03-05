@@ -74,5 +74,10 @@ export class Auth {
    */
   logout() {
     localStorage.removeItem('utente');
+
+    // Ricarica l'applicazione e rimanda al login.
+    // Fondamentale per svuotare la memoria locale del browser
+    // ed evitare che i dati di un utente si mescolino con il successivo!
+    window.location.href = '/login';
   }
 }

@@ -75,6 +75,10 @@ export class Preventivi implements OnInit {
         // Se è un nuovo preventivo (non ha numero), chiediamo al server di assegnare
         // automaticamente il prossimo numero progressivo disponibile.
         if (this.invoice().invoiceNumber === null) {
+          // 1. Allineiamo sempre i dati emittente con l'utente attualmente loggato
+          this.preventiviService.allineaDatiEmittenteSilenzioso();
+
+          // 2. Chiediamo al backend il prossimo numero progressivo
           this.preventiviService.ottieniProssimoNumero();
         }
       }
