@@ -2,7 +2,7 @@ import {inject, Injectable, signal} from '@angular/core';
 import {InvoiceData, InvoiceItem} from './preventivi.model';
 import {HttpClient} from '@angular/common/http';
 import {Auth} from '../auth/auth';
-import {debounceTime, Subject} from 'rxjs';
+import {debounceTime, Observable, Subject} from 'rxjs';
 import Swal from 'sweetalert2';
 
 /**
@@ -259,6 +259,11 @@ export class PreventiviService {
         fromPiva: utente.partitaIva || ''
       }));
     }
+  }
+
+  /* metodo per utilizzare l'API del linguaggio AI per generare una descrizione voce preventivo accurata*/
+  miglioraDescrizioneConIA(testoBreve: string): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/ai/genera-descrizione', {testo: testoBreve});
   }
 
   /**
