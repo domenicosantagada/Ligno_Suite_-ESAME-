@@ -1,0 +1,39 @@
+/* ==========================================================================
+   STILI PER LA TABELLA
+   ========================================================================== */
+
+/* Sostituisce i bordi scuri standard di Bootstrap con un grigio chiarissimo ed elegante */
+.table td, .table th {
+  border-bottom: 1px solid #f1f1f1;
+}
+
+/* Rimuove completamente il bordo inferiore dall'ultima riga per farla fondere con la card */
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* ==========================================================================
+   STILI PER I PULSANTI CON ICONA (Es. Modifica, Elimina)
+   ========================================================================== */
+
+.action-icon {
+  background: none; /* Rimuove lo sfondo grigio del bottone nativo HTML */
+  border: none; /* Rimuove il bordo standard */
+  padding: 5px; /* Crea un'area cliccabile più grande senza ingrandire l'icona stessa */
+  color: #adb5bd; /* Colore neutro (grigio) quando il pulsante è a riposo */
+  transition: all 0.2s ease; /* Aggiunge una transizione fluida per il cambio di colore e posizione al passaggio del mouse */
+  font-size: 1.1rem; /* Leggermente più grande del testo standard */
+  line-height: 1; /* Previene problemi di allineamento verticale nella cella */
+}
+
+.action-icon:hover {
+  color: #212529; /* Scurisce l'icona quando passa il mouse */
+  /* Effetto "sollevamento": sposta l'icona di 1 pixel verso l'alto */
+  transform: translateY(-1px);
+}
+
+/* Classe specifica per le azioni distruttive (es. Elimina) */
+.text-danger-hover:hover {
+  color: #dc3545 !important;
+}

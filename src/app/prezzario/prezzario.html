@@ -1,1 +1,159 @@
-<p>prezzario works!</p>
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <h2 class="mb-0">Prezzario Materiali</h2>
+
+    @if (!mostraForm) {
+      <button (click)="apriFormNuovo()" class="btn btn-dark btn-sm px-4 rounded-pill">
+        Nuovo Articolo
+      </button>
+    } @else {
+      <button (click)="chiudiForm()" class="btn btn-outline-secondary btn-sm px-4 rounded-pill">
+        Chiudi Form
+      </button>
+    }
+  </div>
+
+  @if (mostraForm) {
+    <div class="card p-4 shadow-sm border-0 bg-white rounded-4 mb-5 mx-auto">
+
+      <h5 class="mb-4 border-bottom pb-3 text-dark fw-bold">
+        {{ isEditing ? 'Modifica Articolo' : 'Aggiungi Nuovo Articolo' }}
+      </h5>
+
+      <div class="row g-4 mb-2">
+        <div class="col-md-4">
+          <label class="form-label text-muted small fw-bold">Nome Materiale *</label>
+          <input [(ngModel)]="articoloForm.nome"
+                 class="form-control bg-light border-0 text-capitalize"
+                 placeholder="es. Legno Massello Rovere"
+                 type="text">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">Fornitore</label>
+          <input [(ngModel)]="articoloForm.fornitore"
+                 class="form-control bg-light border-0 text-capitalize"
+                 placeholder="es. Brico Legno SRL"
+                 type="text">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold">Prezzo Acquisto *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-0 text-muted">€</span>
+            <input [(ngModel)]="articoloForm.prezzoAcquisto"
+                   class="form-control bg-light border-0 ps-0"
+                   min="0"
+                   step="0.01"
+                   type="number">
+          </div>
+        </div>
+
+        <div class="col-md-1">
+          <label class="form-label text-muted small fw-bold">U.M.</label>
+          <select [(ngModel)]="articoloForm.unitaMisura" class="form-select bg-light border-0">
+            <option value="pz">pz</option>
+            <option value="mq">mq</option>
+            <option value="ml">ml</option>
+            <option value="mc">mc</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold">Data Acquisto</label>
+          <input [(ngModel)]="articoloForm.dataAcquisto"
+                 class="form-control bg-light border-0"
+                 type="date">
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end mt-4">
+        <button (click)="chiudiForm()" class="btn btn-outline-secondary btn-sm px-4 rounded-pill me-2">
+          Annulla
+        </button>
+        <button (click)="salvaArticolo()" class="btn btn-success btn-sm px-4 rounded-pill">
+          <i class="bi bi-floppy"></i> Salva
+        </button>
+      </div>
+
+    </div>
+  }
+
+  <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden">
+
+    <div class="px-4 pt-4 mb-3">
+      <div class="input-group input-group-sm" style="max-width: 300px;">
+        <span class="input-group-text bg-white border-end-0 text-muted">
+          <i class="bi bi-search"></i>
+        </span>
+        <input (ngModelChange)="searchTerm.set($event)"
+               [ngModel]="searchTerm()"
+               class="form-control border-start-0 ps-0 shadow-none"
+               placeholder="Cerca materiale o fornitore..."
+               type="text">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="bg-light">
+        <tr>
+          <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Materiale</th>
+          <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Fornitore</th>
+          <th class="py-3 text-uppercase small fw-bold text-muted text-center" style="letter-spacing: 1px;">Data
+            Acquisto
+          </th>
+          <th class="py-3 text-uppercase small fw-bold text-muted text-end" style="letter-spacing: 1px;">Prezzo</th>
+          <th class="pe-4 py-3 text-uppercase small fw-bold text-muted text-center" style="letter-spacing: 1px;">
+            Azioni
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (articolo of articoliFiltrati(); track articolo.id) {
+            <tr class="hover-row">
+              <td class="ps-4 py-3 fw-semibold text-dark">{{ articolo.nome }}</td>
+              <td class="py-3 text-muted small">{{ articolo.fornitore || '---' }}</td>
+
+              <td class="py-3 text-center text-muted small">
+                {{ articolo.dataAcquisto | date:'dd MMM yyyy' }}
+              </td>
+
+              <td class="py-3 text-end fw-bold text-dark">
+                € {{ articolo.prezzoAcquisto | number:'1.2-2' }} <span
+                class="text-muted small fw-normal">/ {{ articolo.unitaMisura }}</span>
+              </td>
+
+              <td class="pe-4 py-3 text-center">
+                <div class="d-flex justify-content-center gap-3">
+
+                  <button (click)="apriFormModifica(articolo)"
+                          class="action-icon"
+                          title="Modifica">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+
+                  <button (click)="eliminaArticolo(articolo)"
+                          class="action-icon text-danger-hover"
+                          title="Elimina">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="text-center py-5 text-muted" colspan="5">
+                Nessun articolo trovato nel prezzario.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
