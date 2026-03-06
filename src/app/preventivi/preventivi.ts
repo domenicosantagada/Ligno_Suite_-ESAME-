@@ -20,7 +20,12 @@ import Swal from 'sweetalert2';
 })
 export class Preventivi implements OnInit {
 
+  // variabile per tenere traccia della riga in fase di generazione IA, -1 se non in fase di generazione
   rigaInGenerazioneIA: number = -1;
+
+  // Indice della riga che si sta trascinando
+  draggedIndex: number | null = null;
+
   /* ==========================================================================
      DEPENDENCY INJECTION
      ========================================================================== */
@@ -254,5 +259,30 @@ export class Preventivi implements OnInit {
         Swal.fire('Errore', 'Impossibile contattare l\'IA in questo momento.', 'error');
       }
     });
+  }
+
+  /* ==========================================================================
+     DRAG & DROP VOCI PREVENTIVO
+     ========================================================================== */
+
+  onDragStart(event: DragEvent, index: number) {
+    this.draggedIndex = index;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+    }
+  }
+
+  onDragOver(event: DragEvent) {
+    // Necessario per permettere il rilascio (drop)
+    event.preventDefault();
+  }
+
+  onDrop(event: DragEvent, dropIndex: number) {
+    event.preventDefault();
+    if (this.draggedIndex !== null && this.draggedIndex !== dropIndex) {
+      // Chiama il servizio per scambiare gli elementi
+      this.preventiviService.riordinaItem(this.draggedIndex, dropIndex);
+    }
+    this.draggedIndex = null;
   }
 }

@@ -153,11 +153,12 @@
         <table class="table table-borderless align-middle">
           <thead class="table-light">
           <tr>
+            <th style="width: 10px;"></th>
             <th>Descrizione Lavoro</th>
             <th style="width: 100px;">Quantità</th>
             <th style="width: 100px;">U.M.</th>
-            <th style="width: 150px;">Prezzo Unit. (€)</th>
-            <th class="text-end" style="width: 150px;">Importo</th>
+            <th style="width: 140px;">Prezzo Unit. (€)</th>
+            <th class="text-end" style="width: 120px;">Importo</th>
             <th class="text-center" style="width: 80px;">Azioni</th>
           </tr>
           </thead>
@@ -167,13 +168,25 @@
           <!-- con il for, per ogni item viene creato una riga della tabella con campi di input per la descrizione, quantità, unità di misura e prezzo unitario. -->
           <!-- Ogni campo di input ha un evento ngModelChange che chiama il metodo updateItem del servizio preventiviService per aggiornare lo stato del preventivo con i nuovi valori inseriti dall'utente. -->
             @for (item of invoice().items; track item.id; let i = $index) {
-              <tr class="border-bottom">
-                <td>
 
+              <!-- rendiamo trascinabili le righe della tabella -->
+              <tr (dragover)="onDragOver($event)"
+                  (dragstart)="onDragStart($event, i)"
+                  (drop)="onDrop($event, i)"
+                  class="border-bottom"
+                  draggable="true">
+
+                <!-- icona dei trascinabili -->
+                <td class="text-center text-muted px-1" style="cursor: grab;"
+                    title="Trascina per riordinare">
+                  <i class="bi bi-grip-vertical fs-5"></i>
+                </td>
+
+                <td>
                   <!-- La descrizione del lavoro o prodotto è un campo di textarea che consente all'utente di inserire una descrizione dettagliata della voce del preventivo. -->
                   <!-- ngModelChange viene usato per aggiornare lo stato del preventivo ogni volta che l'utente modifica la descrizione della voce. -->
 
-                  <div class="d-flex align-items-center gap-2">
+                  <div class="d-flex align-items-center ">
                     <textarea
                       (ngModelChange)="preventiviService.updateItem(i, 'description', $event)"
                       [ngModel]="item.description"
@@ -187,7 +200,7 @@
                       (click)="generaDescrizioneIA(i)"
                       [disabled]="rigaInGenerazioneIA === i"
 
-                      class="btn btn-outline-primary"
+                      class="btn btn-outline-primary ms-3"
                       title="Migliora descrizione con l'IA"
                       type="button">
 

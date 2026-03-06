@@ -272,6 +272,22 @@ export class PreventiviService {
   }
 
   /**
+   * Riordina le voci tramite Drag & Drop
+   */
+  riordinaItem(daIndice: number, aIndice: number) {
+    const newItems = [...this.invoice().items];
+
+    // Rimuove l'elemento dalla sua posizione originale
+    const [itemSpostato] = newItems.splice(daIndice, 1);
+
+    // Lo inserisce nella nuova posizione
+    newItems.splice(aIndice, 0, itemSpostato);
+
+    // Aggiorna il preventivo
+    this.updateInvoice({items: newItems});
+  }
+
+  /**
    * Genera un preventivo vuoto ma precompilato con i dati dell'utente loggato
    */
   private creaDatiIniziali(): InvoiceData {
