@@ -60,23 +60,34 @@
           <!-- ps-4 padding sinistro -->
           <!-- py-3 padding verticale -->
           <!-- text-uppercase testo maiuscolo -->
-          <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">ID</th>
 
-          <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Cliente</th>
 
-          <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Data</th>
+          <th class="ps-4 py-3 text-uppercase small fw-bold text-center"
+              style="width: 8%; letter-spacing: 1px;">
+            ID
+          </th>
 
-          <!-- text-end allinea il totale a destra -->
-          <th class="py-3 text-uppercase small fw-bold text-muted text-end" style="letter-spacing: 1px;">
+          <th class="py-3 text-uppercase small fw-bold text-muted"
+              style="width: 43%; letter-spacing: 1px;">
+            Cliente
+          </th>
+
+          <th class="py-3 text-uppercase small fw-bold text-muted text-center"
+              style="width: 16%; letter-spacing: 1px;">
+            Data
+          </th>
+
+          <th class="py-3 text-uppercase small fw-bold text-muted text-end"
+              style="width: 16%; letter-spacing: 1px;">
             Totale
           </th>
 
-          <!-- text-center centra il contenuto -->
-          <!-- pe-4 padding destro -->
           <th class="pe-4 py-3 text-uppercase small fw-bold text-muted text-center"
-              style="letter-spacing: 1px;">
+              style="width: 17%; letter-spacing: 1px;">
             Azioni
           </th>
+
+
         </tr>
         </thead>
 
@@ -87,7 +98,7 @@
 
             <tr class="hover-row">
 
-              <td class="ps-4 py-3 font-monospace text-secondary small">
+              <td class="ps-4 py-3 font-monospace text-secondary small text-center">
                 {{ prev.invoiceNumber || '---' }}
               </td>
 
@@ -96,7 +107,7 @@
               </td>
 
               <!-- date pipe per formattazione -->
-              <td class="py-3 text-muted small">
+              <td class="py-3 text-muted small text-center">
                 {{ prev.date | date:'dd MMM yyyy' }}
               </td>
 

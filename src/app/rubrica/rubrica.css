@@ -37,6 +37,7 @@
 /* * Sostituisce i bordi scuri standard di Bootstrap */
 .table td, .table th {
   border-bottom: 1px solid #f1f1f1;
+  /*border: 1px solid #f1f1f1; !* Bordo leggero per delimitare la griglia *!*/
 }
 
 /* Rimuove il bordo inferiore dall'ultima riga della tabella */

@@ -50,6 +50,7 @@
 
 .table td, .table th {
   border-bottom: 1px solid #f1f1f1;
+  /*border: 1px solid #f1f1f1; !* Bordo leggero per delimitare la griglia *!*/
 }
 
 /* * :last-child è un selettore strutturale.

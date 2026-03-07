@@ -2,7 +2,7 @@
 
   <!-- Header con azioni dinamiche -->
   <!-- mostraForm() controlla se siamo in modalità lista o in modalità form -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-5">
     <h2 class="mb-0">Rubrica Clienti</h2>
     <div>
       @if (mostraForm()) {
@@ -55,11 +55,30 @@
         <table class="table align-middle mb-0">
           <thead class="bg-light">
           <tr>
-            <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Ragione Sociale</th>
-            <th class="py-3 text-uppercase small fw-bold text-muted">Email</th>
-            <th class="py-3 text-uppercase small fw-bold text-muted">Telefono</th>
-            <th class="py-3 text-uppercase small fw-bold text-muted">P.IVA / C.F.</th>
-            <th class="pe-4 py-3 text-uppercase small fw-bold text-muted text-center">Azioni</th>
+            <th class="ps-4 py-3 text-uppercase small fw-bold text-muted"
+                style="width: 32%; letter-spacing: 1px;">
+              Ragione Sociale
+            </th>
+
+            <th class="py-3 text-uppercase small fw-bold text-muted"
+                style="width: 25%; letter-spacing: 1px;">
+              Email
+            </th>
+
+            <th class="py-3 text-uppercase small fw-bold text-center"
+                style="width: 16%; letter-spacing: 1px;">
+              Telefono
+            </th>
+
+            <th class="py-3 text-uppercase small fw-bold text-center"
+                style="width: 16%; letter-spacing: 1px;">
+              P.IVA / C.F.
+            </th>
+
+            <th class="pe-4 py-3 text-uppercase small fw-bold text-muted text-center"
+                style="width: 11%; letter-spacing: 1px;">
+              Azioni
+            </th>
           </tr>
           </thead>
 
@@ -71,8 +90,8 @@
                 <!-- Fallback visivo per campi opzionali -->
                 <td class="ps-4 py-3 fw-semibold text-dark">{{ cliente.nome }}</td>
                 <td class="py-3 text-muted small">{{ cliente.email || '---' }}</td>
-                <td class="py-3 text-muted small">{{ cliente.telefono || '---' }}</td>
-                <td class="py-3 font-monospace text-secondary small">{{ cliente.partitaIva || '---' }}</td>
+                <td class="py-3 text-muted text-center small">{{ cliente.telefono || '---' }}</td>
+                <td class="py-3 font-monospace text-secondary text-center small">{{ cliente.partitaIva || '---' }}</td>
 
                 <!-- Azioni per singolo cliente -->
                 <td class="pe-4 py-3 text-center">
