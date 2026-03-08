@@ -410,6 +410,14 @@ export class Preventivi implements OnInit {
         formData.append('oggetto', this.emailOggetto); // Ora passiamo l'oggetto modificabile
         formData.append('testo', this.emailMessaggio); // Ora passiamo il testo modificabile
 
+        // Recupera i dati di chi sta inviando (adatta questo in base a come salvi i dati dell'utente)
+        const utente = this.authService.getUtenteLoggato();
+        const nomeAzienda = utente?.nomeAzienda || 'LignoSuite User';
+        const emailUtente = utente?.email || 'noreply@tuosito.com';
+
+        formData.append('nomeMittente', nomeAzienda);
+        formData.append('emailMittente', emailUtente);
+
         this.preventiviService.inviaPdfPerEmail(formData).subscribe({
           next: (res) => {
             this.chiudiModalEmail(); // Chiudiamo la modale
