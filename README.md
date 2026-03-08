@@ -1,59 +1,35 @@
-# LignoSuite
+# LignoSuite - Frontend (Client Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+Questo repository contiene il codice sorgente del frontend per l'applicazione LignoSuite, un software gestionale per falegnamerie sviluppato in occasione dell'esame di Web Applications.
 
-## Development server
+STUDENTE: **Santagada Domenico**
+MATRICOLA: **213544**
 
-To start a local development server, run:
+L'applicazione (Single Page Application) permette agli utenti di registrarsi, autenticarsi, gestire la propria rubrica clienti e compilare preventivi completi di calcolo automatico di IVA, sconti e totali.
+L'interfaccia comunica tramite API RESTful con il backend Spring Boot.
 
-```bash
-ng serve
-```
+## Tecnologie Utilizzate
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+* **Framework:** Angular 17+ (con architettura Standalone Components)
+* **Linguaggio:** TypeScript, HTML5, CSS3
+* **Stile & UI:** Bootstrap 5, SweetAlert2 (per la gestione avanzata dei popup)
+* **Routing:** Angular Router con Route Guards (Protezione delle rotte private)
+* **Gestione Stato:** Angular Signals (per la reattività dell'interfaccia)
+* **Esportazione:** html2pdf.js per la generazione di preventivi in PDF.
 
-## Code scaffolding
+## Prerequisiti
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Per eseguire il progetto sul proprio computer è necessario aver installato:
 
-```bash
-ng generate component component-name
-```
+* **Node.js** (versione 18.x o superiore raccomandata).
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+* **NPM**
 
-```bash
-ng generate --help
-```
+* **Angular CLI**
 
-## Building
+## Per eseguire il progetto
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. Clonare il repository.
+2. Installa le dipendenze: Esegui questo comando per scaricare tutte le librerie necessarie (verrà creata la cartella node_modules): `npm install`.
+3. Avvia il server di sviluppo di Angular: `ng serve`.
+4. Apri il browser e naviga all'indirizzo `http://localhost:4200` per accedere all'applicazione.
