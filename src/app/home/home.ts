@@ -21,7 +21,9 @@ export class Home implements OnInit, AfterViewInit {
   ultimoPreventivoText = signal<string>('Nessun preventivo');
   ultimoPreventivoCliente = signal<string>('');
   totaleClienti = signal<number>(0);
-  preventiviUltimi30Giorni = signal<number>(0);
+
+  // Nuova variabile dinamica per il periodo selezionato
+  preventiviNelPeriodo = signal<number>(0);
 
   public chart: any;
   menuAperto = signal<boolean>(false);
@@ -78,13 +80,8 @@ export class Home implements OnInit, AfterViewInit {
     });
   }
 
-  /**
-   * Viene chiamata dal menu a tendina dell'HTML e ricalcola tutti i dati
-   */
   cambiaPeriodo(periodo: string) {
     this.periodoSelezionato.set(periodo);
-
-    // Controlliamo solo che il grafico esista. (Abbiamo rimosso il blocco dei preventivi vuoti)
     if (!this.chart) return;
 
     const labels: string[] = [];
@@ -92,7 +89,6 @@ export class Home implements OnInit, AfterViewInit {
     const oggi = new Date();
     oggi.setHours(23, 59, 59, 999);
 
-    // LOGICA PER MESI (1 Anno, 6 Mesi, 4 Mesi)
     if (periodo === '1 Anno' || periodo === '6 Mesi' || periodo === '4 Mesi') {
       const numMesi = periodo === '1 Anno' ? 12 : (periodo === '6 Mesi' ? 6 : 4);
       const mesiNomi = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
@@ -108,9 +104,7 @@ export class Home implements OnInit, AfterViewInit {
         const diffMesi = (oggi.getFullYear() - d.getFullYear()) * 12 + (oggi.getMonth() - d.getMonth());
         if (diffMesi >= 0 && diffMesi < numMesi) dati[(numMesi - 1) - diffMesi]++;
       });
-    }
-    // LOGICA PER SETTIMANE (2 Mesi -> 8 Settimane)
-    else if (periodo === '2 Mesi') {
+    } else if (periodo === '2 Mesi') {
       for (let i = 7; i >= 0; i--) {
         labels.push(i === 0 ? 'Questa sett.' : `- ${i} sett.`);
         dati.push(0);
@@ -120,9 +114,7 @@ export class Home implements OnInit, AfterViewInit {
         const diffGiorni = Math.floor((oggi.getTime() - d.getTime()) / (1000 * 3600 * 24));
         if (diffGiorni >= 0 && diffGiorni < 56) dati[7 - Math.floor(diffGiorni / 7)]++;
       });
-    }
-    // LOGICA GIORNALIERA (30 Giorni)
-    else if (periodo === '30 Giorni') {
+    } else if (periodo === '30 Giorni') {
       for (let i = 29; i >= 0; i--) {
         const d = new Date(oggi.getTime() - i * 24 * 3600 * 1000);
         labels.push(`${d.getDate()}/${d.getMonth() + 1}`);
@@ -135,10 +127,14 @@ export class Home implements OnInit, AfterViewInit {
       });
     }
 
-    // Aggiorna visivamente il grafico con i nuovi assi (e nuova animazione!)
+    // Aggiorna il grafico
     this.chart.data.labels = labels;
     this.chart.data.datasets[0].data = dati;
     this.chart.update();
+
+    // CALCOLA IL TOTALE DEI PREVENTIVI IN QUESTO PERIODO
+    const totale = dati.reduce((sum, val) => sum + val, 0);
+    this.preventiviNelPeriodo.set(totale);
   }
 
   private impostaDataOggi() {
@@ -156,10 +152,8 @@ export class Home implements OnInit, AfterViewInit {
   }
 
   private caricaStatistiche() {
-    // 1. CARICA PREVENTIVI
     this.preventiviService.getTuttiIPreventivi().subscribe({
       next: (preventivi) => {
-        // Salviamo sempre l'array, se è vuoto creiamo un array vuoto
         this.tuttiIPreventivi = preventivi || [];
 
         if (this.tuttiIPreventivi.length > 0) {
@@ -171,22 +165,17 @@ export class Home implements OnInit, AfterViewInit {
           this.ultimoPreventivoText.set(`N° ${ultimo.invoiceNumber} del ${this.parseDate(ultimo.date).toLocaleDateString('it-IT')}`);
           this.ultimoPreventivoCliente.set(ultimo.toName || 'Cliente non specificato');
 
-          const trentaGiorniFa = new Date();
-          trentaGiorniFa.setDate(trentaGiorniFa.getDate() - 30);
-          this.preventiviUltimi30Giorni.set(this.tuttiIPreventivi.filter((p: any) => this.parseDate(p.date) >= trentaGiorniFa).length);
-
         } else {
           this.totalePreventivi.set(0);
-          this.preventiviUltimi30Giorni.set(0);
+          this.preventiviNelPeriodo.set(0);
         }
 
-        // AGGIORNA IL GRAFICO SEMPRE (anche se non ci sono preventivi per disegnare le etichette giuste a 0)
+        // Ricalcola il grafico e il testo dinamicamente
         this.cambiaPeriodo(this.periodoSelezionato());
       },
       error: (err) => console.error('Errore nel caricamento dei preventivi', err)
     });
 
-    // 2. CARICA CLIENTI
     this.rubricaService.getClientiDalDb().subscribe({
       next: (clienti: any[]) => this.totaleClienti.set(clienti ? clienti.length : 0),
       error: (err) => console.error('Errore nel caricamento dei clienti', err)
