@@ -5,8 +5,7 @@
   align-items: center;
   justify-content: center;
   background-color: #f8f9fa; /* Sfondo grigio molto chiaro, coerente con le tue tabelle */
-  /* Margin negativo necessario per contrastare l'eventuale padding del body */
-  margin: -1.5rem;
+  margin: -1.5rem; /* Margin negativo necessario per contrastare l'eventuale padding del body */
 }
 
 .login-card {
