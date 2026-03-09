@@ -1,64 +1,113 @@
-<div class="container mt-4">
+<div class="container-fluid py-4 px-md-4">
 
-  <!-- INTESTAZIONE -->
-  <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+  <!-- INTESTAZIONE MODERNA -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5">
     <div>
-      <h2 class="mb-1 text-dark">Benvenuto, {{ nomeTitolare() }}</h2>
-      <p class="text-muted mb-0">Riepilogo della tua attività gestionale</p>
+      <h2 class="fw-bold text-dark mb-1">
+        Benvenuto, {{ nomeTitolare() }}
+        <span class="fs-4 text-muted fw-normal">di {{ nomeTitolare() }}</span>
+      </h2>
+      <p class="text-secondary mb-0">Ecco cosa sta succedendo nel tuo gestionale oggi.</p>
     </div>
-    <div class="d-none d-md-block text-muted">
-      <span class="fs-6">{{ dataOggi() }}</span>
+    <div class="mt-3 mt-md-0">
+      <span
+        class="badge bg-white text-dark border p-2 px-3 rounded-pill shadow-sm fs-6 d-flex align-items-center gap-2">
+        <svg fill="currentColor" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+        </svg>
+        {{ dataOggi() }}
+      </span>
     </div>
   </div>
 
-  <!-- CARDS STATISTICHE -->
-  <div class="row mb-4">
+  <!-- CARDS STATISTICHE ACCATTIVANTI CON SFONDO TENUE -->
+  <div class="row g-4 mb-5">
 
     <!-- Card 1: Totale Preventivi -->
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm border-0 h-100 stat-card">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h6 class="text-muted text-uppercase mb-2">Totale Preventivi</h6>
-          <h2 class="mb-0 text-primary">{{ totalePreventivi() }}</h2>
+    <div class="col-md-4">
+      <div class="card shadow border h-100 stat-card border-primary-custom" style="background-color: #f4f8ff;">
+        <div class="card-body p-4 d-flex align-items-center">
+          <div class="flex-grow-1">
+            <h6 class="text-muted text-uppercase fw-semibold mb-2">Totale Preventivi</h6>
+            <h2 class="fw-bold mb-0 text-dark">{{ totalePreventivi() }}</h2>
+          </div>
+          <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+            <svg fill="currentColor" height="28" viewBox="0 0 16 16" width="28" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Card 2: Ultimo Preventivo -->
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm border-0 h-100 stat-card">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h6 class="text-muted text-uppercase mb-2">Ultimo Preventivo</h6>
-          <h5 class="mb-0 mt-1 text-dark">{{ ultimoPreventivoText() }}</h5>
+    <div class="col-md-4">
+      <div class="card shadow border h-100 stat-card border-success-custom" style="background-color: #f4fbf4;">
+        <div class="card-body p-4 d-flex align-items-center">
+          <div class="flex-grow-1">
+            <h6 class="text-muted text-uppercase fw-semibold mb-2">Ultimo Preventivo</h6>
+            <h5 class="fw-bold mb-1 text-dark text-truncate" style="max-width: 200px;"
+                title="{{ ultimoPreventivoCliente() }}">
+              {{ ultimoPreventivoCliente() }}
+            </h5>
+            <p class="mb-0 text-secondary small fw-medium">{{ ultimoPreventivoText() }}</p>
+          </div>
+          <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success ms-2">
+            <svg fill="currentColor" height="28" viewBox="0 0 16 16" width="28" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+              <path
+                d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Card 3: Clienti in Rubrica -->
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm border-0 h-100 stat-card">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h6 class="text-muted text-uppercase mb-2">Clienti in Rubrica</h6>
-          <h2 class="mb-0 text-primary">{{ totaleClienti() }}</h2>
+    <div class="col-md-4">
+      <div class="card shadow border h-100 stat-card border-warning-custom" style="background-color: #fff9f4;">
+        <div class="card-body p-4 d-flex align-items-center">
+          <div class="flex-grow-1">
+            <h6 class="text-muted text-uppercase fw-semibold mb-2">Clienti in Rubrica</h6>
+            <h2 class="fw-bold mb-0 text-dark">{{ totaleClienti() }}</h2>
+          </div>
+          <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+            <svg fill="currentColor" height="28" viewBox="0 0 16 16" width="28" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8Zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022ZM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816ZM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- WIDGET RIEPILOGO RECENTE E AZIONI -->
+  <!-- WIDGET RIEPILOGO RECENTE SENZA BOTTONI -->
   <div class="row">
-    <div class="col-md-12">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-light border-bottom">
-          <h5 class="mb-0 text-dark">Attività Recente</h5>
-        </div>
-        <div class="card-body py-4">
-          <p class="text-secondary  fs-5">
-            Negli ultimi 30 giorni sono stati creati <strong class="text-dark">{{ preventiviUltimi30Giorni() }}</strong>
-            preventivi.
-          </p>
-
+    <div class="col-12">
+      <div class="card shadow border activity-card">
+        <div class="row g-0">
+          <div class="col-md-8 p-4 p-md-5 d-flex flex-column justify-content-center">
+            <h4 class="fw-bold text-dark mb-3">Ottimo lavoro! 🚀</h4>
+            <p class="text-secondary fs-5 mb-0" style="line-height: 1.6;">
+              Negli ultimi 30 giorni hai registrato la creazione di
+              <strong class="text-primary fs-4">{{ preventiviUltimi30Giorni() }}</strong> nuovi preventivi.
+            </p>
+          </div>
+          <div class="col-md-4 d-none d-md-flex align-items-center justify-content-center p-4">
+            <!-- Icona grafica decorativa -->
+            <svg fill="#0d6efd" height="120" style="opacity: 0.15;" viewBox="0 0 16 16" width="120"
+                 xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h9zM3 2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H3z"/>
+              <path
+                d="M5.5 6a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 1 0v-5a.5.5 0 0 0-.5-.5zm2 0a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 1 0v-5a.5.5 0 0 0-.5-.5zm2 0a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 1 0v-5a.5.5 0 0 0-.5-.5z"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
