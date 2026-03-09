@@ -17,7 +17,6 @@
   </div>
 
   <div class="row g-4 mb-5">
-
     <div class="col-md-4">
       <div class="card shadow border h-100 stat-card border-primary-custom" style="background-color: #e6f0ff;">
         <div class="card-body p-4 d-flex align-items-center">
@@ -63,10 +62,9 @@
         </div>
       </div>
     </div>
-
   </div>
 
-  <div class="row">
+  <div class="row mb-5">
     <div class="col-12">
       <div class="card shadow border activity-card">
         <div class="row g-0">
@@ -79,6 +77,53 @@
           </div>
           <div class="col-md-4 d-none d-md-flex align-items-center justify-content-center p-4">
             <i class="bi bi-journal-text text-primary" style="font-size: 7.5rem; opacity: 0.15;"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card shadow border">
+        <div class="card-body p-4 p-md-5">
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h5 class="fw-bold text-dark mb-1">Andamento Preventivi</h5>
+              <p class="text-secondary small mb-0">Statistiche relative al periodo: {{ periodoSelezionato() }}</p>
+            </div>
+
+            <div class="dropdown">
+              <button (click)="menuAperto.set(!menuAperto())"
+                      class="btn bg-white border shadow-sm dropdown-toggle fw-semibold d-flex justify-content-between align-items-center"
+                      style="width: 160px; padding: 0.5rem 1rem; border-radius: 8px;"
+                      type="button">
+                <span class="text-dark"><i class="bi bi-calendar-week text-primary me-2"></i> {{ periodoSelezionato() }}</span>
+              </button>
+
+              <ul [class.show]="menuAperto()" class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2"
+                  style="width: 160px; border-radius: 8px;">
+                <li><a (click)="cambiaPeriodo('30 Giorni'); menuAperto.set(false)" class="dropdown-item rounded py-2"
+                       style="cursor: pointer;">30 Giorni</a></li>
+                <li><a (click)="cambiaPeriodo('2 Mesi'); menuAperto.set(false)" class="dropdown-item rounded py-2"
+                       style="cursor: pointer;">2 Mesi</a></li>
+                <li><a (click)="cambiaPeriodo('4 Mesi'); menuAperto.set(false)" class="dropdown-item rounded py-2"
+                       style="cursor: pointer;">4 Mesi</a></li>
+                <li><a (click)="cambiaPeriodo('6 Mesi'); menuAperto.set(false)" class="dropdown-item rounded py-2"
+                       style="cursor: pointer;">6 Mesi</a></li>
+                <li>
+                  <hr class="dropdown-divider my-1">
+                </li>
+                <li><a (click)="cambiaPeriodo('1 Anno'); menuAperto.set(false)"
+                       class="dropdown-item rounded py-2 fw-semibold text-primary" style="cursor: pointer;">1 Anno</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="height: 350px; position: relative;">
+            <canvas #preventiviChart id="preventiviChart"></canvas>
           </div>
         </div>
       </div>
