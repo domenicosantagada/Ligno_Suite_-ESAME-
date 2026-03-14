@@ -6,6 +6,7 @@ import {Auth} from '../auth/auth';
 export interface Articolo {
   id?: number;
   nome: string;
+  descrizione?: string; // ? serve per dire che può essere null o undefined
   prezzoAcquisto: number;
   fornitore: string;
   dataAcquisto: string | null; // Può essere stringa (YYYY-MM-DD) o null
