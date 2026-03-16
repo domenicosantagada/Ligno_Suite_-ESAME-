@@ -5,7 +5,7 @@
   <!-- d-flex per posizionare gli elementi in una riga -->
   <!-- justify-content-between per separare gli elementi con spazi tra loro -->
   <!-- align-items-center per centrare verticalmente gli elementi -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-5">
 
     <!-- mb-0 per rimuovere il margine inferiore, h2 per il titolo principale -->
     <h2 class="mb-0">Impostazioni Azienda</h2>
@@ -42,7 +42,7 @@
       <!-- border-0 per rimuovere il bordo -->
       <!-- bg-white per sfondo bianco -->
       <!-- mb-4 per margine inferiore -->
-      <div class="card p-4 shadow-sm border-0 bg-white mb-4">
+      <div class="card p-4 shadow border bg-white mb-4 rounded-4">
         <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-building me-2"></i>Dati Aziendali</h5>
 
         <div class="row g-3">
@@ -100,7 +100,7 @@
         </div>
       </div>
 
-      <div class="card p-4 shadow-sm border-0 bg-white mb-4">
+      <div class="card p-4 shadow border bg-white mb-4 rounded-4">
         <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-geo-alt me-2"></i>Sede Legale / Indirizzo</h5>
 
         <div class="row g-3">
@@ -130,7 +130,7 @@
         </div>
       </div>
 
-      <div class="card p-4 shadow-sm border-0 bg-white">
+      <div class="card p-4 shadow border bg-white rounded-4">
         <h5 class="mb-4 text-primary border-bottom pb-2"><i class="bi bi-person me-2"></i>Dati Titolare</h5>
         <div class="row g-3">
           <div class="col-md-6">
@@ -150,14 +150,14 @@
 
     <div class="col-lg-4">
 
-      <div class="card p-4 shadow-sm border-0 bg-white text-center h-100">
+      <div class="card p-4 shadow border bg-white rounded-4">
         <h5 class="mb-4 text-primary border-bottom pb-2 text-start"><i class="bi bi-image me-2"></i>Logo per Preventivi
         </h5>
 
         <p class="text-muted small mb-4">Carica il logo della tua falegnameria. Verrà inserito automaticamente
           nell'intestazione dei PDF.</p>
 
-        <div [class.has-image]="profilo().logoBase64" class="logo-upload-box mb-3 position-relative">
+        <div [class.has-image]="profilo().logoBase64" class="logo-upload-box  position-relative">
 
           @if (profilo().logoBase64) {
             <img [src]="profilo().logoBase64" alt="Logo Azienda" class="img-fluid logo-preview">
