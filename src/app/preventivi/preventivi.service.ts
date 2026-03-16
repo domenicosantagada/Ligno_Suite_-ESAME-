@@ -250,8 +250,7 @@ export class PreventiviService {
 
   /**
    * Sincronizza silenziosamente i dati dell'emittente con quelli attuali del LocalStorage.
-   * Essendo "silenzioso" (non aggiorna hasUnsavedChanges), non fa scattare
-   * la nuvoletta rossa appena apri la pagina.
+   * non fa scattare l'evento di modifiche non salvate.
    */
   allineaDatiEmittenteSilenzioso() {
     const utente = this.authService.getUtenteLoggato();

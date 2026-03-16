@@ -23,10 +23,13 @@ export class App implements OnInit {
    * DEPENDENCY INJECTION
    */
   router = inject(Router); // Serve per comandare la navigazione via codice (es. dopo il logout, rimanda al Login)
-  authService = inject(Auth); // servizio di autenticazzione per gestire login/logout e stato di autenticazione
+  authService = inject(Auth); // servizio di autenticazione per gestire login/logout e stato di autenticazione
 
-  // Serve per gestire il menu dropdown di navigazione
+  // Serve per gestire il menu dropdown di navigazione ("Gestione")
   menuGestioneAperto = signal(false);
+
+  // NUOVO: Serve per gestire il menu a comparsa "Hamburger" su schermi piccoli (Smartphone)
+  menuHamburgerAperto = signal(false);
 
   // Nome dell'applicazione
   protected readonly title = signal('LingoSuite');
@@ -36,22 +39,48 @@ export class App implements OnInit {
   toggleMenuGestione(event: Event) {
     // Serve per "fermare" il click solamente sull'oggetto che ha generato l'evento,
     // evitando che venga propagato anche al di sotto e cosi al documento generando
-    // la chiusura del menu causa fun. chiuduMenuSeClicchiFuori
+    // la chiusura del menu causa fun. chiudiMenuSeClicchiFuori
     event.stopPropagation();
 
     // inverte il valore del menu (se è aperto lo chiude, se è chiuso lo apre)
     this.menuGestioneAperto.update(v => !v);
   }
 
+  /**
+   * NUOVO: Metodo per aprire o chiudere il menu Hamburger (su mobile)
+   */
+  toggleMenuHamburger(event: Event) {
+    // Come per il menu gestione, blocca la propagazione del click per non farlo chiudere subito
+    event.stopPropagation();
+
+    // Inverte il valore del menu hamburger
+    this.menuHamburgerAperto.update(v => !v);
+  }
+
+  /**
+   * NUOVO: Metodo per chiudere esplicitamente l'Hamburger.
+   * Viene richiamato dall'HTML ogni volta che clicchiamo su una voce del menu.
+   */
+  chiudiMenuHamburger() {
+    this.menuHamburgerAperto.set(false);
+  }
+
   /* *
    * @HostListener
    * Serve per ascoltare un evento su tutta la pagina web per poter chiudere il menu dropdown
-   * quando l'utente clicca fuori dal menu.
+   * e per il menu hamburger quando l'utente clicca fuori.
    */
   @HostListener('document:click')
   chiudiMenuSeClicchiFuori() {
+
+    // Chiude il menu Gestione se era aperto
     if (this.menuGestioneAperto()) {
       this.menuGestioneAperto.set(false);
+    }
+
+    // NUOVO: Chiude anche il menu Hamburger se era aperto
+    if (this.menuHamburgerAperto()) {
+      this.menuHamburgerAperto.set(false);
     }
   }
 
