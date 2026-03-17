@@ -66,7 +66,7 @@ export class Preventivi implements OnInit {
     return this.clienti().filter(c => c.nome.toLowerCase().includes(term));
   });
   // --- VARIABILI PER LA MODALE EMAIL ---
-  mostraModalEmail = false;
+  mostraModalEmail = signal(false);
 
   /* ==========================================================================
      LOGICA DI AUTOCOMPLETAMENTO
@@ -349,5 +349,88 @@ export class Preventivi implements OnInit {
       this.preventiviService.riordinaItem(this.draggedIndex, dropIndex);
     }
     this.draggedIndex = null;
+  }
+
+  /* Apre la modale e precompila i campi */
+  apriModalEmail() {
+    const invoice = this.invoice();
+    const numero = invoice.invoiceNumber ?? 'ND';
+    const nomeCliente = invoice.toName || 'Cliente';
+    const nomePulito = nomeCliente.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+
+    // Precompilazione dei campi
+    this.emailNomeFile = `PREV_${nomePulito}.pdf`;
+    this.emailDestinatario = invoice.toEmail || '';
+    this.emailOggetto = `Preventivo - ${nomeCliente}`;
+    this.emailMessaggio = `Gentile ${nomeCliente},\n\nIn allegato trova il preventivo richiesto.\n\nRimaniamo a disposizione per qualsiasi chiarimento.\n\nCordiali saluti.\n\n${invoice.fromName || 'La tua azienda'}`;
+
+    // Mostra la finestra modale
+    this.mostraModalEmail.set(true);
+  }
+
+  /* Chiude la modale annullando l'operazione */
+  chiudiModalEmail() {
+    this.mostraModalEmail.set(false);
+  }
+
+  /* Funzione che effettivamente genera il PDF e manda i dati al server */
+  confermaInvioEmail() {
+    if (!this.emailDestinatario || this.emailDestinatario.trim() === '') {
+      Swal.fire('Attenzione', 'Inserisci l\'email del destinatario.', 'warning');
+      return;
+    }
+
+    const element = document.getElementById('invoice-preview-container');
+    if (element) {
+      const fileName = this.emailNomeFile;
+
+      const opt: any = {
+        margin: [2, 2], // Margine in mm (top/bottom, left/right), prima dell'ai era 8,8
+        filename: fileName,
+        image: {type: 'jpeg', quality: 1}, // Qualità fotografica, se aumento troppo, il file diventa pesante. Max -> 1.0 min -> 0.1
+        html2canvas: {scale: 7, useCORS: true}, // Scala per la renderizzazione (più alto = migliore qualità ma più lento), useCORS per caricare immagini da altre origini
+        jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}, // Foglio standard A4
+        pagebreak: {mode: ['css', 'legacy']} // Gestisce il salto pagina se il preventivo è troppo lungo
+      };
+
+      Swal.fire({
+        title: 'Generazione e invio in corso...',
+        text: 'Attendi un istante',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      html2pdf().set(opt).from(element).output('blob').then((pdfBlob: Blob) => {
+
+        const formData = new FormData();
+        formData.append('file', pdfBlob, fileName);
+        formData.append('destinatario', this.emailDestinatario);
+        formData.append('oggetto', this.emailOggetto); // Ora passiamo l'oggetto modificabile
+        formData.append('testo', this.emailMessaggio); // Ora passiamo il testo modificabile
+
+        // Recupera i dati di chi sta inviando (adatta questo in base a come salvi i dati dell'utente)
+        const utente = this.authService.getUtenteLoggato();
+        const nomeAzienda = utente?.nomeAzienda || 'LignoSuite User';
+        const emailUtente = utente?.email || 'noreply@tuosito.com';
+
+        formData.append('nomeMittente', nomeAzienda);
+        formData.append('emailMittente', emailUtente);
+
+        this.preventiviService.inviaPdfPerEmail(formData).subscribe({
+          next: (res) => {
+            this.chiudiModalEmail(); // Chiudiamo la modale
+            Swal.fire('Inviato!', 'Il preventivo è stato inviato via email con successo.', 'success');
+          },
+          error: (err) => {
+            console.error(err);
+            Swal.fire('Errore', 'Si è verificato un problema durante l\'invio dell\'email.', 'error');
+          }
+        });
+      });
+    } else {
+      Swal.fire('Errore', 'Impossibile generare il PDF. Passa alla visualizzazione anteprima.', 'error');
+    }
   }
 }
