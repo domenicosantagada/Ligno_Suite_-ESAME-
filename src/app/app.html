@@ -1,55 +1,39 @@
 @if (router.url !== '/login' && router.url !== '/register' && isLoggedIn()) {
 
-  <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
-    <div class="container-fluid">
+  @if (isFalegname()) {
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
+      <div class="container-fluid">
 
-      <div class="d-flex align-items-center" style="flex: 1;">
-
-        @if (isCliente()) {
-          <a (click)="chiudiMenuHamburger()" [routerLink]="['/dashboard-cliente']" class="navbar-brand m-0"
-             style="cursor: pointer;">
-            <img alt="Logo" class="d-inline-block align-text-top" height="70" src="image/LignoSuiteLogo.svg">
-          </a>
-        }
-
-        @if (isFalegname()) {
+        <div class="d-flex align-items-center" style="flex: 1;">
           <a (click)="chiudiMenuHamburger()" [routerLink]="['/home']" class="navbar-brand m-0" style="cursor: pointer;">
             <img alt="Logo" class="d-inline-block align-text-top" height="70" src="image/LignoSuiteLogo.svg">
           </a>
-        }
+        </div>
 
-      </div>
-
-      <div (click)="$event.stopPropagation()" [class.show]="menuHamburgerAperto()"
-           class="collapse navbar-collapse justify-content-center" id="navbarContenuto" style="flex: 0 1 auto;">
-        <ul class="navbar-nav mb-2 mb-lg-0">
-
-          @if (isFalegname()) {
+        <div (click)="$event.stopPropagation()" [class.show]="menuHamburgerAperto()"
+             class="collapse navbar-collapse justify-content-center" id="navbarContenutoFalegname"
+             style="flex: 0 1 auto;">
+          <ul class="navbar-nav mb-2 mb-lg-0">
             <li class="nav-item">
               <a (click)="chiudiMenuHamburger()" [routerLink]="['/lista-preventivi']" class="nav-link custom-link">Preventivi</a>
             </li>
-
             <li class="nav-item">
               <a (click)="chiudiMenuHamburger()" [routerLink]="['/preventivi']" class="nav-link custom-link">Nuovo
                 Documento</a>
             </li>
-
             <li class="nav-item">
               <a (click)="chiudiMenuHamburger()" [routerLink]="['/taglio-pannelli']" class="nav-link custom-link">Taglio
                 Pannelli</a>
             </li>
-
             <li class="nav-item">
               <a (click)="chiudiMenuHamburger()" [routerLink]="['/prezzario']"
                  class="nav-link custom-link">Prezzario</a>
             </li>
-
             <li class="nav-item dropdown">
               <a (click)="toggleMenuGestione($event)" [class.show]="menuGestioneAperto()"
                  class="nav-link custom-link dropdown-toggle d-flex align-items-center" style="cursor: pointer;">
                 Gestione <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem; margin-top: 2px;"></i>
               </a>
-
               <ul [class.show]="menuGestioneAperto()" class="dropdown-menu custom-dropdown-menu">
                 <li>
                   <a (click)="menuGestioneAperto.set(false); chiudiMenuHamburger()" [routerLink]="['/rubrica']"
@@ -61,38 +45,68 @@
                 </li>
               </ul>
             </li>
-          }
+            <li class="nav-item d-lg-none mt-3 mb-2">
+              <button (click)="logout()" class="btn btn-outline-danger btn-sm px-4 rounded-pill w-100" type="button">
+                <i class="bi bi-box-arrow-in-right"></i> Esci
+              </button>
+            </li>
+          </ul>
+        </div>
 
-          @if (isCliente()) {
+        <div class="d-flex justify-content-end align-items-center" style="flex: 1;">
+          <button (click)="logout()" class="btn btn-outline-danger btn-sm px-4 rounded-pill me-2 d-none d-lg-block"
+                  type="button">
+            <i class="bi bi-box-arrow-in-right"></i> Esci
+          </button>
+          <button (click)="toggleMenuHamburger($event)" class="navbar-toggler border-0" type="button">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+
+      </div>
+    </nav>
+  }
+
+  @if (isCliente()) {
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
+      <div class="container-fluid">
+
+        <div class="d-flex align-items-center" style="flex: 1;">
+          <a (click)="chiudiMenuHamburger()" [routerLink]="['/dashboard-cliente']" class="navbar-brand m-0"
+             style="cursor: pointer;">
+            <img alt="Logo" class="d-inline-block align-text-top" height="70" src="image/LignoSuiteLogo.svg">
+          </a>
+        </div>
+
+        <div (click)="$event.stopPropagation()" [class.show]="menuHamburgerAperto()"
+             class="collapse navbar-collapse justify-content-center" id="navbarContenutoCliente"
+             style="flex: 0 1 auto;">
+          <ul class="navbar-nav mb-2 mb-lg-0">
             <li class="nav-item">
               <a (click)="chiudiMenuHamburger()" [routerLink]="['/impostazioni-cliente']" class="nav-link custom-link">Impostazioni</a>
             </li>
-          }
+            <li class="nav-item d-lg-none mt-3 mb-2">
+              <button (click)="logout()" class="btn btn-outline-danger btn-sm px-4 rounded-pill w-100" type="button">
+                <i class="bi bi-box-arrow-in-right"></i> Esci
+              </button>
+            </li>
+          </ul>
+        </div>
 
-          <li class="nav-item d-lg-none mt-3 mb-2">
-            <button (click)="logout()" class="btn btn-outline-danger btn-sm px-4 rounded-pill w-100" type="button">
-              <i class="bi bi-box-arrow-in-right"></i> Esci
-            </button>
-          </li>
-
-        </ul>
-      </div>
-
-      <div class="d-flex justify-content-end align-items-center" style="flex: 1;">
-
-        <button (click)="logout()" class="btn btn-outline-danger btn-sm px-4 rounded-pill me-2 d-none d-lg-block"
-                type="button">
-          <i class="bi bi-box-arrow-in-right"></i> Esci
-        </button>
-
-        <button (click)="toggleMenuHamburger($event)" class="navbar-toggler border-0" type="button">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="d-flex justify-content-end align-items-center" style="flex: 1;">
+          <button (click)="logout()" class="btn btn-outline-danger btn-sm px-4 rounded-pill me-2 d-none d-lg-block"
+                  type="button">
+            <i class="bi bi-box-arrow-in-right"></i> Esci
+          </button>
+          <button (click)="toggleMenuHamburger($event)" class="navbar-toggler border-0" type="button">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
 
       </div>
+    </nav>
+  }
 
-    </div>
-  </nav>
 }
 
 <div [class.container]="router.url !== '/login' && router.url !== '/register'"
