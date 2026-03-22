@@ -3,9 +3,8 @@ import {HttpClient} from '@angular/common/http';
 
 /**
  * SERVIZIO DI AUTENTICAZIONE E GESTIONE SESSIONE
- * @Injectable: Definisce la classe come un servizio che può essere iniettato.
- * providedIn: 'root' garantisce che il servizio sia un "Singleton", ovvero ne esiste
- * una sola istanza condivisa tra tutti i componenti dell'applicazione.
+ * @Injectable: Decoratore Angular che serve a dichiarare che la classe può partecipare al sistema di Dependency Injection (DI).
+ * providedIn: 'root' indica che questo servizio è singleton globale
  */
 @Injectable({
   providedIn: 'root'
@@ -21,8 +20,8 @@ export class Auth {
 
   /**
    * Effettua la richiesta di Login al backend.
-   * @param dati Oggetto contenente le credenziali (email e password).
-   * @returns Un Observable che emetterà i dati dell'utente se le credenziali sono corrette.
+   * dati: Un oggetto che contiene le credenziali dell'utente in formato JSON.
+   * Restituisce un Observable che rappresenta la risposta del server
    */
   login(dati: any) {
     return this.http.post(`${this.apiUrl}/login`, dati);
@@ -46,7 +45,7 @@ export class Auth {
   /* ==========================================================================
      GESTIONE DELLA PERSISTENZA (SESSIONE LOCALE)
      Questi metodi gestiscono il LocalStorage per mantenere l'utente loggato
-     anche dopo il ricaricamento della pagina (F5).
+     anche dopo il ricaricamento della pagina.
      ========================================================================== */
 
   /**
@@ -59,9 +58,9 @@ export class Auth {
   }
 
   /**
-   * Recupera i dati dell'utente attualmente loggato.
-   * Esegue il "parsing" della stringa JSON per tornare a un oggetto utilizzabile dal codice.
-   * @returns L'oggetto utente o null se non è stata trovata alcuna sessione attiva.
+   * Recupera i dati dell'utente attualmente loggato dal LocalStorage.
+   * Controlla se esiste la chiave 'utente' e, se sì, converte la stringa JSON
+   * in un oggetto JavaScript. Se la chiave non esiste, restituisce null.
    */
   getUtenteLoggato() {
     const utenteString = localStorage.getItem('utente');
@@ -75,9 +74,7 @@ export class Auth {
   logout() {
     localStorage.removeItem('utente');
 
-    // Ricarica l'applicazione e rimanda al login.
-    // Fondamentale per svuotare la memoria locale del browser
-    // ed evitare che i dati di un utente si mescolino con il successivo!
+    // Ricarica la pagina e porta l'utente al login
     window.location.href = '/login';
   }
 

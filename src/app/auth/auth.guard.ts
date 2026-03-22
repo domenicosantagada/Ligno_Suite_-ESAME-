@@ -11,8 +11,8 @@ import {Auth} from './auth';
 export const authGuard: CanActivateFn = (route, state) => {
 
   // DEPENDENCY INJECTION FUNZIONALE
-  const authService = inject(Auth); // Il nostro servizio che gestisce il LocalStorage
-  const router = inject(Router);   // Il router di Angular per gestire i reindirizzamenti
+  const authService = inject(Auth); // Il servizio che gestisce il LocalStorage
+  const router = inject(Router);   // Il di Angular per gestire i reindirizzamenti
 
   /**
    * 1. IL CONTROLLO
