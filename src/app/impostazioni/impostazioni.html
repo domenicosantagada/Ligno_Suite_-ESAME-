@@ -1,24 +1,21 @@
-<!-- Contenitore principale -->
-<!-- conteiner-fluid server per far estendere il contenuto su tutta la larghezza, py-4 per padding verticale -->
+<!-- Contenitore principale esteso su tutta la larghezza con padding verticale -->
 <div class="container-fluid py-4">
 
-  <!-- d-flex per posizionare gli elementi in una riga -->
-  <!-- justify-content-between per separare gli elementi con spazi tra loro -->
-  <!-- align-items-center per centrare verticalmente gli elementi -->
+  <!-- Riga per titolo e pulsanti principali -->
   <div class="d-flex justify-content-between align-items-center mb-5">
 
-    <!-- mb-0 per rimuovere il margine inferiore, h2 per il titolo principale -->
+    <!-- Titolo principale -->
     <h2 class="mb-0">Impostazioni Azienda</h2>
 
+    <!-- Pulsanti Azioni -->
     <div>
-      <!-- (evento)="azione da eseguire" -->
-      <!-- class="btn btn-primary btn-sm px-4 rounded-pill" applica lo stile Bootstrap al bottone -->
+      <!-- Bottone Annulla modifiche -->
+      <!-- Data Binding: (Evento) -->
       <button (click)="annullaModifiche()" class="btn btn-outline-secondary btn-sm px-4 rounded-pill me-2">
         <i class="bi bi-arrow-counterclockwise"></i> Annulla
       </button>
 
-      <!-- [proprietà]="valore" per disabilitare il bottone se mancano i campi obbligatori o se c'è un errore email -->
-      <!-- btn-success per il colore verde, btn-sm per dimensione piccola, px-4 per padding orizzontale, rounded-pill per bordi arrotondati -->
+      <!-- Bottone Salva impostazioni -->
       <button (click)="salvaImpostazioni()"
               [disabled]="!profilo().nomeAzienda || !profilo().email || erroreEmail"
               class="btn btn-success btn-sm px-4 rounded-pill">
@@ -28,29 +25,21 @@
 
   </div>
 
-  <!-- row per creare una nuova riga bootstrap -->
-  <!-- g-4 rappresenta lo spazio tra le colonne-->
+  <!-- Righe principali dei dati azienda -->
   <div class="row g-4">
 
-    <!-- col per definire una colonna-->
-    <!-- lg-8 per definire una colonna di larghezza 8 -->
+    <!-- Colonna sinistra: dati aziendali e titolare -->
     <div class="col-lg-8">
 
-      <!-- card (contenitore con stile bootstrap) -->
-      <!-- p-4 per padding interno -->
-      <!-- shadow-sm per ombra leggera -->
-      <!-- border-0 per rimuovere il bordo -->
-      <!-- bg-white per sfondo bianco -->
-      <!-- mb-4 per margine inferiore -->
+      <!-- Card: Dati Aziendali -->
       <div class="card p-4 shadow border bg-white mb-4 rounded-4">
-        <h5 class="mb-4  border-bottom pb-2"><i class="bi bi-building me-2"></i>Dati Aziendali</h5>
-        <!-- text-primary per il colore del testo blu -->
+        <h5 class="mb-4 border-bottom pb-2">
+          <i class="bi bi-building me-2"></i>Dati Aziendali
+        </h5>
 
         <div class="row g-3">
-
-          <!-- col-md-12 per definire una colonna di larghezza 12 -->
+          <!-- Nome Azienda -->
           <div class="col-md-12">
-
             <label class="form-label text-muted small mb-1">Nome Azienda / Ragione Sociale *</label>
             <input (ngModelChange)="updateProfilo({nomeAzienda: $event})"
                    [class.is-invalid]="!profilo().nomeAzienda"
@@ -63,23 +52,31 @@
 
           </div>
 
+          <!-- Partita IVA -->
           <div class="col-md-6">
-
             <label class="form-label text-muted small mb-1">Partita IVA</label>
-            <input (ngModelChange)="updateProfilo({partitaIva: $event})" [ngModel]="profilo().partitaIva"
+            <!-- Data Binding: (Evento) -->
+            <!-- Data Binding: [proprietà] -->
+            <input (ngModelChange)="updateProfilo({partitaIva: $event})"
+                   [ngModel]="profilo().partitaIva"
                    class="form-control text-uppercase" type="text">
-
           </div>
 
+          <!-- Codice Fiscale -->
           <div class="col-md-6">
-
             <label class="form-label text-muted small mb-1">Codice Fiscale</label>
-            <input (ngModelChange)="updateProfilo({codiceFiscale: $event})" [ngModel]="profilo().codiceFiscale"
+            <!-- Data Binding: (Evento) -->
+            <!-- Data Binding: [proprietà] -->
+            <input (ngModelChange)="updateProfilo({codiceFiscale: $event})"
+                   [ngModel]="profilo().codiceFiscale"
                    class="form-control text-uppercase" type="text">
           </div>
 
+          <!-- Email Aziendale -->
           <div class="col-md-6">
             <label class="form-label text-muted small mb-1">Email Aziendale *</label>
+            <!-- Data Binding: (Evento) -->
+            <!-- Data Binding: [proprietà] -->
             <input (ngModelChange)="updateProfilo({email: $event}); erroreEmail = ''"
                    [class.is-invalid]="!profilo().email || erroreEmail"
                    [ngModel]="profilo().email"
@@ -93,55 +90,66 @@
 
           </div>
 
+          <!-- Telefono / Cellulare -->
           <div class="col-md-6">
             <label class="form-label text-muted small mb-1">Telefono / Cellulare</label>
-            <input (ngModelChange)="updateProfilo({telefono: $event})" [ngModel]="profilo().telefono"
+            <!-- Data Binding: (Evento) -->
+            <!-- Data Binding: [proprietà] -->
+            <input (ngModelChange)="updateProfilo({telefono: $event})"
+                   [ngModel]="profilo().telefono"
                    class="form-control" type="text">
           </div>
         </div>
       </div>
 
+      <!-- Card: Sede Legale / Indirizzo -->
       <div class="card p-4 shadow border bg-white mb-4 rounded-4">
-        <h5 class="mb-4  border-bottom pb-2"><i class="bi bi-geo-alt me-2"></i>Sede Legale / Indirizzo</h5>
-
+        <h5 class="mb-4 border-bottom pb-2"><i class="bi bi-geo-alt me-2"></i>Sede Legale / Indirizzo</h5>
         <div class="row g-3">
           <div class="col-md-12">
             <label class="form-label text-muted small mb-1">Indirizzo (Via/Piazza e numero)</label>
-            <input (ngModelChange)="updateProfilo({indirizzo: $event})" [ngModel]="profilo().indirizzo"
+            <input (ngModelChange)="updateProfilo({indirizzo: $event})"
+                   [ngModel]="profilo().indirizzo"
                    class="form-control text-capitalize" type="text">
           </div>
 
           <div class="col-md-5">
             <label class="form-label text-muted small mb-1">Città</label>
-            <input (ngModelChange)="updateProfilo({citta: $event})" [ngModel]="profilo().citta"
-                   class="form-control text-capitalize"
-                   type="text">
+            <input (ngModelChange)="updateProfilo({citta: $event})"
+                   [ngModel]="profilo().citta"
+                   class="form-control text-capitalize" type="text">
           </div>
+
           <div class="col-md-3">
             <label class="form-label text-muted small mb-1">CAP</label>
-            <input (ngModelChange)="updateProfilo({cap: $event})" [ngModel]="profilo().cap"
-                   class="form-control text-uppercase"
-                   type="text">
+            <input (ngModelChange)="updateProfilo({cap: $event})"
+                   [ngModel]="profilo().cap"
+                   class="form-control text-uppercase" type="text">
           </div>
+
           <div class="col-md-4">
             <label class="form-label text-muted small mb-1">Provincia (Sigla)</label>
-            <input (ngModelChange)="updateProfilo({provincia: $event})" [ngModel]="profilo().provincia"
+            <input (ngModelChange)="updateProfilo({provincia: $event})"
+                   [ngModel]="profilo().provincia"
                    class="form-control text-uppercase" maxlength="2" placeholder="Es. RM" type="text">
           </div>
         </div>
       </div>
 
+      <!-- Card: Dati Titolare -->
       <div class="card p-4 shadow border bg-white rounded-4">
-        <h5 class="mb-4  border-bottom pb-2"><i class="bi bi-person me-2"></i>Dati Titolare</h5>
+        <h5 class="mb-4 border-bottom pb-2"><i class="bi bi-person me-2"></i>Dati Titolare</h5>
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label text-muted small mb-1">Nome</label>
-            <input (ngModelChange)="updateProfilo({nomeTitolare: $event})" [ngModel]="profilo().nomeTitolare"
+            <input (ngModelChange)="updateProfilo({nomeTitolare: $event})"
+                   [ngModel]="profilo().nomeTitolare"
                    class="form-control text-capitalize" type="text">
           </div>
           <div class="col-md-6">
             <label class="form-label text-muted small mb-1">Cognome</label>
-            <input (ngModelChange)="updateProfilo({cognomeTitolare: $event})" [ngModel]="profilo().cognomeTitolare"
+            <input (ngModelChange)="updateProfilo({cognomeTitolare: $event})"
+                   [ngModel]="profilo().cognomeTitolare"
                    class="form-control text-capitalize" type="text">
           </div>
         </div>
@@ -149,14 +157,13 @@
 
     </div>
 
+    <!-- Colonna destra: Logo -->
     <div class="col-lg-4">
-
       <div class="card p-4 shadow border bg-white rounded-4">
-        <h5 class="mb-4  border-bottom pb-2 text-start"><i class="bi bi-image me-2"></i>Logo per Preventivi
-        </h5>
-
-        <p class="text-muted small mb-4">Carica il logo della tua falegnameria. Verrà inserito automaticamente
-          nell'intestazione dei PDF.</p>
+        <h5 class="mb-4 border-bottom pb-2 text-start"><i class="bi bi-image me-2"></i>Logo per Preventivi</h5>
+        <p class="text-muted small mb-4">
+          Carica il logo della tua azienda. Verrà inserito automaticamente nei PDF.
+        </p>
 
         <div [class.has-image]="profilo().logoBase64" class="logo-upload-box  position-relative">
 
@@ -174,13 +181,15 @@
             </div>
           }
 
-          <input (change)="onLogoSelected($event)" [disabled]="!!profilo().logoBase64" accept="image/png, image/jpeg"
+          <!-- Input file invisibile -->
+          <input (change)="onLogoSelected($event)"
+                 [disabled]="!!profilo().logoBase64"
+                 accept="image/png, image/jpeg"
                  class="file-input"
                  type="file">
         </div>
 
       </div>
-
     </div>
 
   </div>
