@@ -105,12 +105,12 @@
 
         <thead class="bg-light">
         <tr>
-          <th class="ps-4 py-3 text-uppercase small fw-bold text-muted"
+          <th class="ps-4 py-3 text-uppercase small fw-bold text-muted text-center"
               style="width: 35%; letter-spacing: 1px;">
             Materiale
           </th>
 
-          <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 24%; letter-spacing: 1px;">
+          <th class="py-3 text-uppercase small fw-bold text-muted text-center" style="width: 24%; letter-spacing: 1px;">
             Fornitore
           </th>
 
@@ -118,7 +118,7 @@
             Data Acquisto
           </th>
 
-          <th class="py-3 text-uppercase small fw-bold text-muted text-end" style="width: 13%; letter-spacing: 1px;">
+          <th class="py-3 text-uppercase small fw-bold text-muted text-center" style="width: 13%; letter-spacing: 1px;">
             Prezzo
           </th>
 
@@ -133,13 +133,13 @@
           @for (articolo of articoliFiltrati(); track articolo.id) {
             <tr class="hover-row">
               <td class="ps-4 py-3 fw-semibold text-dark">{{ articolo.nome }}</td>
-              <td class="py-3 text-muted small">{{ articolo.fornitore || '---' }}</td>
+              <td class="py-3 text-muted small text-center">{{ articolo.fornitore || '---' }}</td>
 
               <td class="py-3 text-center text-muted small">
                 {{ articolo.dataAcquisto | date:'dd MMM yyyy' }}
               </td>
 
-              <td class="py-3 text-end fw-bold text-dark">
+              <td class="py-3 text-center fw-bold text-dark">
                 € {{ articolo.prezzoAcquisto | number:'1.2-2' }} <span
                 class="text-muted small fw-normal">/ {{ articolo.unitaMisura }}</span>
               </td>
