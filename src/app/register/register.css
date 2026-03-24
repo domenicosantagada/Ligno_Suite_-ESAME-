@@ -3,11 +3,7 @@
 /* Centra il contenuto (verticale + orizzontale) */
 .login-wrapper {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background-color: #ffffff;
-  margin: -1.5rem; /* compensa padding globale */
 }
 
 /* Card con larghezza controllata */
