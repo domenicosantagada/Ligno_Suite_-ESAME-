@@ -21,7 +21,7 @@ L'applicazione (Single Page Application) permette agli utenti di registrarsi sce
 
 ---
 
-## 🚀 Avvio Rapido con Docker (Consigliato)
+## Avvio Rapido con Docker
 
 L'intero ecosistema LignoSuite (Database, Backend Java e Frontend Angular) è stato dockerizzato per garantire un avvio immediato e senza configurazioni locali complesse.
 
@@ -35,7 +35,7 @@ Per avviare il progetto tramite Docker:
 
 ---
 
-## 🛠️ Configurazione e Avvio Manuale (Ambiente di Sviluppo)
+## Configurazione e Avvio Manuale
 
 Se desideri eseguire il frontend localmente senza Docker, segui queste istruzioni.
 
