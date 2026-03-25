@@ -216,14 +216,20 @@ export class PreventiviService {
 
   getTuttiIPreventivi() {
     const utenteLoggato = this.authService.getUtenteLoggato();
+    // console.log("utenteLoggato", utenteLoggato);
+
     const utenteId = utenteLoggato ? utenteLoggato.id : 0;
+    // console.log("utenteId", utenteId);
+
+    // La chiamata HTTP include l'utenteId come parametro per filtrare i preventivi solo di quell'utente
+    // e deve ritornare un array di preventivi (InvoiceData[]) che poi la ListaPreventiviComponent mostrerà in tabella.
     return this.http.get<InvoiceData[]>(`${this.apiUrl}?utenteId=${utenteId}`);
   }
 
   getPreventiviPerCliente(email: string) {
     return this.http.get<InvoiceData[]>(`${this.apiUrl}/cliente?email=${email}`);
   }
-  
+
   eliminaPreventivoDalDb(id: number) {
     // 1. Recupera i dati dell'utente loggato dal servizio Auth
     const utenteLoggato = this.authService.getUtenteLoggato();

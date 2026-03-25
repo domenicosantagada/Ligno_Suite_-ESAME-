@@ -43,9 +43,11 @@ export class Login {
     if (this.loginForm.valid) {
 
       // Invia i dati del form al backend
+      // subscribe serve per rimanere in ascolto della risposta (next) o per gestire gli errori (error)
       this.authService.login(this.loginForm.value).subscribe({
 
         // Se il server accetta le credenziali (tutto ok)
+        // ora dovremmo avere un obserbable che contiene l'utente loggato
         next: (utente: any) => {
           // Salva l'utente nel LocalStorage (così non deve rifare il login se aggiorna la pagina)
           this.authService.setUtenteLoggato(utente);
