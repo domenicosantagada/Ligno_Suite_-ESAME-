@@ -1,4 +1,4 @@
-@if (isLoggedIn()) {
+@if (isLoggedIn() && router.url !== '/login' && router.url !== '/register') {
 
   @if (isFalegname()) {
     <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
