@@ -21,7 +21,25 @@ L'applicazione (Single Page Application) permette agli utenti di registrarsi sce
 
 ---
 
-## Prerequisiti
+## 🚀 Avvio Rapido con Docker (Consigliato)
+
+L'intero ecosistema LignoSuite (Database, Backend Java e Frontend Angular) è stato dockerizzato per garantire un avvio immediato e senza configurazioni locali complesse.
+
+**Il file di orchestrazione (`docker-compose.yml`) si trova nel repository del Backend.**
+
+Per avviare il progetto tramite Docker:
+
+1. Assicurati di clonare **entrambi i repository** (Frontend e Backend) all'interno della stessa cartella genitore in modo che siano affiancati.
+2. Segui le istruzioni dettagliate presenti nel **[README del Backend](https://github.com/domenicosantagada/Ligno_Suite_API-ESAME-.git)** per configurare le API Key ed eseguire il comando di avvio (`docker-compose up --build`).
+3. Una volta avviato Docker, il frontend sarà compilato e servito tramite Nginx all'indirizzo: **http://localhost**
+
+---
+
+## 🛠️ Configurazione e Avvio Manuale (Ambiente di Sviluppo)
+
+Se desideri eseguire il frontend localmente senza Docker, segui queste istruzioni.
+
+### Prerequisiti Locali
 
 Per eseguire il progetto sul proprio ambiente locale è necessario aver installato:
 
