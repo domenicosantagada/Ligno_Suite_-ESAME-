@@ -21,7 +21,7 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copia la build di Angular (assicurati che il percorso corrisponda al nome in package.json)
-COPY --from=builder /app/dist/tool-falegnameria/browser /usr/share/nginx/html
+COPY --from=builder /app/dist/ToolFalegnameria/browser /usr/share/nginx/html
 
 # Aggiunge una configurazione per gestire il routing della Single Page Application
 RUN echo 'server { \
