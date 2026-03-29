@@ -42,6 +42,8 @@ export class Home implements OnInit, AfterViewInit {
     this.caricaDatiUtente();
   }
 
+  // ngAfterViewInit serve per assicurarsi che il canvas sia presente nel DOM prima di inizializzare Chart.js
+  // il canvas è quell'elemento che
   ngAfterViewInit(): void {
     // Assicura che il canvas sia pronto prima di creare il grafico
     requestAnimationFrame(() => {
