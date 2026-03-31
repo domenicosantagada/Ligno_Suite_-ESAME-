@@ -50,7 +50,7 @@ export class App implements OnInit {
   }
 
   /**
-   * NUOVO: Metodo per aprire o chiudere il menu Hamburger (su mobile)
+   * Metodo per aprire o chiudere il menu Hamburger (su mobile)
    */
   toggleMenuHamburger(event: Event) {
     // Come per il menu gestione, blocca la propagazione del click per non farlo chiudere subito
@@ -61,7 +61,7 @@ export class App implements OnInit {
   }
 
   /**
-   * NUOVO: Metodo per chiudere esplicitamente l'Hamburger.
+   * Metodo per chiudere esplicitamente l'Hamburger.
    * Viene richiamato dall'HTML ogni volta che clicchiamo su una voce del menu.
    */
   chiudiMenuHamburger() {

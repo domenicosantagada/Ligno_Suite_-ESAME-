@@ -58,7 +58,10 @@ export const routes: Routes = [
   {path: "rubrica", component: Rubrica, canActivate: [authGuard]},
   {path: "impostazioni", component: Impostazioni, canActivate: [authGuard]},
 
-
+  /**
+   * Rotte per il cliente (accessibili solo se l'utente è loggato come cliente)
+   * Anche queste rotte sono protette da authGuard, che verifica se l'utente è autenticato e ha il ruolo di cliente.
+   */
   {path: "dashboard-cliente", component: DashboardCliente, canActivate: [authGuard]},
   {path: "impostazioni-cliente", component: ImpostazioniCliente, canActivate: [authGuard]}
 ];

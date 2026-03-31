@@ -53,6 +53,7 @@ export class Login {
           this.authService.setUtenteLoggato(utente);
 
           //Controllo del ruolo per il reindirizzamento
+          // con === controlliamo sia il valaore che il tipo
           if (utente.ruolo === 'CLIENTE') {
             // Se è un cliente, lo mandiamo alla sua dashboard (che creeremo tra poco)
             this.router.navigate(['/dashboard-cliente']);
