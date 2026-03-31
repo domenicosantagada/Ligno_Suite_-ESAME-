@@ -16,6 +16,8 @@
       </button>
 
       <!-- Bottone Salva impostazioni -->
+      <!-- Data Binding: (Evento) per associare un metodo ad un click -->
+      <!-- Data Binding: [property binding] per disabilitare il pulsante se i campi obbligatori non sono compilati o se c'è un errore nell'email -->
       <button (click)="salvaImpostazioni()"
               [disabled]="!profilo().nomeAzienda || !profilo().email || erroreEmail"
               class="btn btn-success btn-sm px-4 rounded-pill">
