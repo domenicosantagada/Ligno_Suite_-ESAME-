@@ -161,18 +161,24 @@ export class PreventiviService {
     const utenteId = utenteLoggato ? utenteLoggato.id : 0;
 
     // CAPIRE L'INTENZIONE DELL'UTENTE
-    // È una MODIFICA vera e propria solo se l'ID originario coincide con quello attuale.
     const isUpdate = this.originalInvoiceNumber && (this.originalInvoiceNumber === preventivoDaSalvare.invoiceNumber);
 
-    // LOGICA Salvataggio duplicati:
-    // L'utente aveva aperto il prev. N°10, ma ha cambiato il numero in 11 per farne uno nuovo.
-    // Dobbiamo rigenerare gli ID delle singole righe, altrimenti Hibernate/Spring Boot andrà in errore
-    // per violazione di chiavi primarie duplicate e non capirà che sono "nuovi" items.
+    // --- PULIZIA DEGLI ID PER HIBERNATE (RISOLVE L'ERRORE "Detached entity") ---
     if (this.originalInvoiceNumber && this.originalInvoiceNumber !== preventivoDaSalvare.invoiceNumber) {
-      preventivoDaSalvare.items.forEach((item: any, index: number) => {
-        // Usiamo una stringa temporanea. Quando Spring Boot (JPA) la riceverà,
-        // la ignorerà perché il suo @Id è di tipo Long e si autogenererà sul DB!
-        item.id = Date.now().toString() + '-' + index;
+      // 1. L'utente sta "clonando" un preventivo cambiandogli il numero.
+      // Dobbiamo dire a Hibernate che l'intero preventivo e TUTTI i suoi item sono NUOVI.
+      preventivoDaSalvare.id = null;
+      preventivoDaSalvare.items.forEach((item: any) => {
+        item.id = null; // JPA capirà che deve fare delle nuove INSERT
+      });
+    } else {
+      // 2. Normale salvataggio o update.
+      // Dobbiamo settare a null solo gli ID "temporanei" (le stringhe create da Angular)
+      // in modo che JPA li inserisca come nuove righe, aggiornando invece quelli esistenti (numerici).
+      preventivoDaSalvare.items.forEach((item: any) => {
+        if (typeof item.id === 'string') {
+          item.id = null;
+        }
       });
     }
 
