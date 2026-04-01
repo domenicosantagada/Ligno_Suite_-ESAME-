@@ -119,15 +119,14 @@ export class Preventivi implements OnInit {
 
     // 3. RECUPERO LOGO AZIENDALE (Logica separata)
     if (this.isCliente()) {
-      // SE SEI UN CLIENTE:
-      // Il preventivo ha salvato al suo interno l'ID del falegname (utenteId).
-      // Usiamo quell'ID per chiedere al server i dati del falegname (incluso il logo).
-      const idFalegname = this.invoice().utenteId;
+      // Recuperiamo l'ID dall'oggetto 'utente' che arriva dal backend
+      const idFalegname = (this.invoice() as any).utente?.id;
 
       if (idFalegname) {
         this.authService.getUtenteById(idFalegname).subscribe({
           next: (falegname: any) => {
             if (falegname && falegname.logoBase64) {
+              // Ora il logo verrà impostato correttamente
               this.logoAzienda.set(falegname.logoBase64);
             }
           },

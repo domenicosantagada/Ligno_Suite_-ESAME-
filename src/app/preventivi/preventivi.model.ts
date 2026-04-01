@@ -53,6 +53,8 @@ export interface InvoiceData {
   discount: number; // Sconto applicato in Euro
   total: number; // Totale finale (Imponibile + IVA - Sconto)
 
+  utente?: { id: number; logoBase64?: string; nomeAzienda?: string };
+
   // --- RELAZIONI DEL DATABASE ---
   // Collega questo preventivo all'ID del tuo account utente.
   // È opzionale perché viene valorizzato dal Service un attimo prima di salvare nel DB.
