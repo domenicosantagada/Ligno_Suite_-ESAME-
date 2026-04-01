@@ -40,22 +40,14 @@ export class RubricaService {
    */
   salvaClienteNelDb(cliente: Cliente) {
     const utenteLoggato = this.authService.getUtenteLoggato();
-
-    if (utenteLoggato) {
-      // Sicurezza: prima di inviare i dati al server, leghiamo esplicitamente
-      // questo cliente all'ID dell'utente loggato.
-      cliente.utenteId = utenteLoggato.id;
-    }
-
-    // LOGICA DI BIFORCAZIONE (Nuovo vs Esistente)
+    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
+    
     if (cliente.id) {
-      // Se il cliente ha già un ID, significa che esiste già nel database.
-      // Usiamo il metodo HTTP PUT per SOVRASCRIVERE i suoi vecchi dati.
-      return this.http.put<Cliente>(`${this.apiUrl}/${cliente.id}`, cliente);
+      // PUT con query param
+      return this.http.put<Cliente>(`${this.apiUrl}/${cliente.id}?utenteId=${utenteId}`, cliente);
     } else {
-      // Se NON ha un ID, è un cliente appena creato nel form.
-      // Usiamo il metodo HTTP POST per INSERIRLO come nuova riga nel database.
-      return this.http.post<Cliente>(this.apiUrl, cliente);
+      // POST con query param
+      return this.http.post<Cliente>(`${this.apiUrl}?utenteId=${utenteId}`, cliente);
     }
   }
 

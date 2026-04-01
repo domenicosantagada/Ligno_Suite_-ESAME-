@@ -139,6 +139,7 @@ export class PreventiviService {
   salvaPreventivoNelDb() {
     const data = this.invoice();
 
+    // Validazioni base
     if (!data.invoiceNumber || data.invoiceNumber <= 0) {
       Swal.fire('Attenzione', 'Inserire un numero di preventivo valido.', 'warning');
       return;
@@ -152,33 +153,39 @@ export class PreventiviService {
     // Copia profonda per evitare di modificare inavvertitamente lo stato in memoria
     const preventivoDaSalvare = JSON.parse(JSON.stringify(data));
 
+    // --- MODIFICA ARCHITETTURALE (REFACTORING JPA) ---
+    // Recuperiamo l'utente loggato ma NON inquiniamo più il JSON del preventivo.
+    // Dato che il backend ora usa JPA (@ManyToOne Utente), si aspetta un oggetto Utente intero, non un semplice ID.
+    // Passiamo quindi l'utenteId in modo RESTful e sicuro tramite la query string dell'URL.
     const utenteLoggato = this.authService.getUtenteLoggato();
-    if (utenteLoggato) {
-      preventivoDaSalvare.utenteId = utenteLoggato.id;
-    }
+    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
 
     // CAPIRE L'INTENZIONE DELL'UTENTE
     // È una MODIFICA vera e propria solo se l'ID originario coincide con quello attuale.
     const isUpdate = this.originalInvoiceNumber && (this.originalInvoiceNumber === preventivoDaSalvare.invoiceNumber);
 
-    // LOGICA Salvataggio:
+    // LOGICA Salvataggio duplicati:
     // L'utente aveva aperto il prev. N°10, ma ha cambiato il numero in 11 per farne uno nuovo.
     // Dobbiamo rigenerare gli ID delle singole righe, altrimenti Hibernate/Spring Boot andrà in errore
-    // per violazione di chiavi primarie duplicate.
+    // per violazione di chiavi primarie duplicate e non capirà che sono "nuovi" items.
     if (this.originalInvoiceNumber && this.originalInvoiceNumber !== preventivoDaSalvare.invoiceNumber) {
       preventivoDaSalvare.items.forEach((item: any, index: number) => {
+        // Usiamo una stringa temporanea. Quando Spring Boot (JPA) la riceverà,
+        // la ignorerà perché il suo @Id è di tipo Long e si autogenererà sul DB!
         item.id = Date.now().toString() + '-' + index;
       });
     }
 
     if (isUpdate && preventivoDaSalvare.id !== undefined) {
-      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}`, preventivoDaSalvare).subscribe({
+      // CHIAMATA PUT (Aggiornamento)
+      // Passiamo utenteId come parametro URL (?utenteId=...)
+      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
         next: () => {
           Swal.fire({
             title: 'Aggiornato!',
             text: 'Preventivo aggiornato con successo!',
             icon: 'success',
-            timer: 1000, // Si chiude da solo dopo 1.5 secondi!
+            timer: 1000, // Si chiude da solo dopo 1 secondo!
             showConfirmButton: false
           });
           this.hasUnsavedChanges.set(false);
@@ -189,7 +196,9 @@ export class PreventiviService {
         }
       });
     } else {
-      this.http.post<InvoiceData>(this.apiUrl, preventivoDaSalvare).subscribe({
+      // CHIAMATA POST (Creazione nuovo)
+      // Passiamo utenteId come parametro URL (?utenteId=...)
+      this.http.post<InvoiceData>(`${this.apiUrl}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
         next: (rispostaDb: any) => {
           Swal.fire({
             title: 'Salvato!',
@@ -199,6 +208,8 @@ export class PreventiviService {
             showConfirmButton: false
           });
           this.originalInvoiceNumber = preventivoDaSalvare.invoiceNumber;
+
+          // Aggiorniamo lo stato interno con l'ID REALE generato dal database
           this.invoice.update(current => ({...current, id: rispostaDb.id}));
           this.hasUnsavedChanges.set(false);
         },
@@ -347,21 +358,21 @@ export class PreventiviService {
     return {subtotal, taxAmount, total};
   }
 
-  // Metodo per salvare automaticamente il preventivo in modo silenzioso
   private eseguiAutoSalvataggioSilenzioso() {
     const data = this.invoice();
 
-    // Validazione silenziosa: se mancano i dati minimi, ignoriamo il salvataggio
     if (!data.invoiceNumber || data.invoiceNumber <= 0) return;
     if (!data.toName || data.toName.trim() === '') return;
 
     const preventivoDaSalvare = JSON.parse(JSON.stringify(data));
+
+    // Recupero ID pulito
     const utenteLoggato = this.authService.getUtenteLoggato();
-    if (utenteLoggato) preventivoDaSalvare.utenteId = utenteLoggato.id;
+    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
+    // RIMOSSO preventivoDaSalvare.utenteId = utenteLoggato.id; (Errore JPA)
 
     const isUpdate = this.originalInvoiceNumber && (this.originalInvoiceNumber === preventivoDaSalvare.invoiceNumber);
 
-    // Gestione id righe
     if (this.originalInvoiceNumber && this.originalInvoiceNumber !== preventivoDaSalvare.invoiceNumber) {
       preventivoDaSalvare.items.forEach((item: any, index: number) => {
         item.id = Date.now().toString() + '-' + index;
@@ -369,22 +380,21 @@ export class PreventiviService {
     }
 
     if (isUpdate && preventivoDaSalvare.id) {
-      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}`, preventivoDaSalvare).subscribe({
+      // POST Parametri URL aggiornati
+      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
         next: () => {
           console.log('Auto-salvataggio: preventivo aggiornato.');
-          // Torna la nuvoletta verde!
           this.hasUnsavedChanges.set(false);
         },
         error: (err) => console.error('Errore auto-salvataggio', err)
       });
     } else {
-      this.http.post<InvoiceData>(this.apiUrl, preventivoDaSalvare).subscribe({
+      // POST Parametri URL aggiornati
+      this.http.post<InvoiceData>(`${this.apiUrl}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
         next: (rispostaDb: any) => {
           console.log('Auto-salvataggio: nuovo preventivo creato.');
           this.originalInvoiceNumber = rispostaDb.invoiceNumber;
           this.invoice.update(current => ({...current, id: rispostaDb.id}));
-
-          // Torna la nuvoletta verde!
           this.hasUnsavedChanges.set(false);
         },
         error: (err) => console.error('Errore auto-salvataggio creazione', err)
