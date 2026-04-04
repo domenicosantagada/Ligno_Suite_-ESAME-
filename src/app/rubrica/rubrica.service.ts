@@ -17,7 +17,7 @@ export class RubricaService {
   private http = inject(HttpClient);
 
   // L'indirizzo base del backend Spring Boot per la gestione dei clienti
-  private apiUrl = 'http://localhost:8080/api/clienti';
+  private apiUrl = 'https://lignosuite-backend.onrender.com/api/clienti';
 
   /**
    * RECUPERA I CLIENTI (READ - Metodo HTTP GET)

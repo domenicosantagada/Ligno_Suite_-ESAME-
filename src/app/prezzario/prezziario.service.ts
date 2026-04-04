@@ -17,8 +17,8 @@ export interface Articolo {
 })
 export class PrezzarioService {
   private http = inject(HttpClient);
-  
-  private apiUrl = 'http://localhost:8080/api/articoli';
+
+  private apiUrl = 'https://lignosuite-backend.onrender.com/api/articoli';
 
   /**
    * Recupera gli articoli legati SOLO all'utente loggato

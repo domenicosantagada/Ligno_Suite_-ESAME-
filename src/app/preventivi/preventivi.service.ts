@@ -32,7 +32,7 @@ export class PreventiviService {
 
   private http = inject(HttpClient);
   private authService = inject(Auth);
-  private apiUrl = 'http://localhost:8080/api/preventivi';
+  private apiUrl = 'https://lignosuite-backend.onrender.com/api/preventivi';
   // creaiamo un subject per il salvataggio automatico
   private autoSaveSubject = new Subject<void>();
 
@@ -267,7 +267,7 @@ export class PreventiviService {
 
   /* metodo per utilizzare l'API del linguaggio AI per generare una descrizione voce preventivo accurata*/
   miglioraDescrizioneConIA(testoBreve: string): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/ai/genera-descrizione', {testo: testoBreve});
+    return this.http.post<any>('https://lignosuite-backend.onrender.com/api/ai/genera-descrizione', {testo: testoBreve});
   }
 
   /**
@@ -287,7 +287,7 @@ export class PreventiviService {
   }
 
   inviaPdfPerEmail(formData: FormData) {
-    return this.http.post('http://localhost:8080/api/email/invia-preventivo', formData);
+    return this.http.post('https://lignosuite-backend.onrender.com/api/email/invia-preventivo', formData);
   }
 
   /**
