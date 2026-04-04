@@ -111,11 +111,11 @@ export class Impostazioni implements OnInit {
       ...this.profilo()
     };
 
-    this.authService.updateProfilo(utenteLoggato.id, datiDaInviare).subscribe({
-      next: (utenteAggiornatoDalDb) => {
-        // aggiorna sessione locale
-        this.authService.setUtenteLoggato(utenteAggiornatoDalDb);
 
+    this.authService.updateProfilo(datiDaInviare).subscribe({
+      next: (utenteAggiornatoDalDb: any) => {
+        // 2. Usiamo il nuovo metodo
+        this.authService.aggiornaUtenteLocale(utenteAggiornatoDalDb);
         // aggiorna backup
         this.datiOriginali = JSON.parse(JSON.stringify(this.profilo()));
 

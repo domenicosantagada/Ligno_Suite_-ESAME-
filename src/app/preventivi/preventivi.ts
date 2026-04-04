@@ -117,26 +117,16 @@ export class Preventivi implements OnInit {
       }
     });
 
-    // 3. RECUPERO LOGO AZIENDALE (Logica separata)
+    // 3. RECUPERO LOGO AZIENDALE
     if (this.isCliente()) {
-      // Recuperiamo l'ID dall'oggetto 'utente' che arriva dal backend
-      const idFalegname = (this.invoice() as any).utente?.id;
+      // Magia del Backend: l'oggetto 'utente' (con il logo) viaggia già attaccato al preventivo!
+      const falegname = (this.invoice() as any).utente;
 
-      if (idFalegname) {
-        this.authService.getUtenteById(idFalegname).subscribe({
-          next: (falegname: any) => {
-            if (falegname && falegname.logoBase64) {
-              // Ora il logo verrà impostato correttamente
-              this.logoAzienda.set(falegname.logoBase64);
-            }
-          },
-          error: (err) => console.error('Impossibile recuperare il logo del falegname', err)
-        });
+      if (falegname && falegname.logoBase64) {
+        this.logoAzienda.set(falegname.logoBase64);
       }
-
     } else {
-
-      // 3. Caricamento del Logo aziendale del falegname
+      // 3. Caricamento del Logo aziendale del falegname (loggato)
       if (utenteLoggato && utenteLoggato.logoBase64) {
         this.logoAzienda.set(utenteLoggato.logoBase64);
       }
@@ -144,9 +134,8 @@ export class Preventivi implements OnInit {
       // 4. Caricamento rubrica in background per far funzionare l'autocompletamento
       this.rubricaService.getClientiDalDb().subscribe({
         next: (dati) => this.clienti.set(dati),
-        error: (err) => console.error('Errore caricamento clienti:', err)
+        error: (err: any) => console.error('Errore caricamento clienti:', err) // Aggiunto ": any" per risolvere l'errore TS7006
       });
-
     }
   }
 

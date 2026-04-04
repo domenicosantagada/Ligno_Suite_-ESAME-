@@ -51,16 +51,9 @@ export class PreventiviService {
   }
 
   ottieniProssimoNumero() {
-    const utenteLoggato = this.authService.getUtenteLoggato();
-    if (!utenteLoggato) return;
-
-    this.http.get<number>(`${this.apiUrl}/next-number?utenteId=${utenteLoggato.id}`).subscribe({
+    // RIMOSSO l'estrazione dell'utente
+    this.http.get<number>(`${this.apiUrl}/next-number`).subscribe({
       next: (nextNum) => {
-        // vecchia versione che chiamava il metodo updateInvoice() e faceva scattare la nuvoletta rossa (hasUnsavedChanges)
-        //this.updateInvoice({invoiceNumber: nextNum});
-
-        // Modifichiamo direttamente il Signal senza chiamare this.updateInvoice()
-        // In questo modo NON scatta la nuvoletta rossa (hasUnsavedChanges)
         this.invoice.update(current => ({...current, invoiceNumber: nextNum}));
       },
       error: (err) => console.error('Errore durante il calcolo del progressivo:', err)
@@ -153,12 +146,6 @@ export class PreventiviService {
     // Copia profonda per evitare di modificare inavvertitamente lo stato in memoria
     const preventivoDaSalvare = JSON.parse(JSON.stringify(data));
 
-    // --- MODIFICA ARCHITETTURALE (REFACTORING JPA) ---
-    // Recuperiamo l'utente loggato ma NON inquiniamo più il JSON del preventivo.
-    // Dato che il backend ora usa JPA (@ManyToOne Utente), si aspetta un oggetto Utente intero, non un semplice ID.
-    // Passiamo quindi l'utenteId in modo RESTful e sicuro tramite la query string dell'URL.
-    const utenteLoggato = this.authService.getUtenteLoggato();
-    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
 
     // CAPIRE L'INTENZIONE DELL'UTENTE
     const isUpdate = this.originalInvoiceNumber && (this.originalInvoiceNumber === preventivoDaSalvare.invoiceNumber);
@@ -185,7 +172,7 @@ export class PreventiviService {
     if (isUpdate && preventivoDaSalvare.id !== undefined) {
       // CHIAMATA PUT (Aggiornamento)
       // Passiamo utenteId come parametro URL (?utenteId=...)
-      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
+      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}`, preventivoDaSalvare).subscribe({
         next: () => {
           Swal.fire({
             title: 'Aggiornato!',
@@ -204,7 +191,7 @@ export class PreventiviService {
     } else {
       // CHIAMATA POST (Creazione nuovo)
       // Passiamo utenteId come parametro URL (?utenteId=...)
-      this.http.post<InvoiceData>(`${this.apiUrl}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
+      this.http.post<InvoiceData>(this.apiUrl, preventivoDaSalvare).subscribe({
         next: (rispostaDb: any) => {
           Swal.fire({
             title: 'Salvato!',
@@ -232,15 +219,7 @@ export class PreventiviService {
   }
 
   getTuttiIPreventivi() {
-    const utenteLoggato = this.authService.getUtenteLoggato();
-    // console.log("utenteLoggato", utenteLoggato);
-
-    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
-    // console.log("utenteId", utenteId);
-
-    // La chiamata HTTP include l'utenteId come parametro per filtrare i preventivi solo di quell'utente
-    // e deve ritornare un array di preventivi (InvoiceData[]) che poi la ListaPreventiviComponent mostrerà in tabella.
-    return this.http.get<InvoiceData[]>(`${this.apiUrl}?utenteId=${utenteId}`);
+    return this.http.get<InvoiceData[]>(this.apiUrl);
   }
 
   getPreventiviPerCliente(email: string) {
@@ -248,13 +227,7 @@ export class PreventiviService {
   }
 
   eliminaPreventivoDalDb(id: number) {
-    // 1. Recupera i dati dell'utente loggato dal servizio Auth
-    const utenteLoggato = this.authService.getUtenteLoggato();
-    // recuperiamo l'ID dell'utente loggato se esiste altrimenti 0
-    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
-
-    // 2. Aggiunge l'utenteId come parametro URL nella richiesta DELETE
-    return this.http.delete(`${this.apiUrl}/${id}?utenteId=${utenteId}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
   resetInvoice() {
@@ -371,12 +344,6 @@ export class PreventiviService {
     if (!data.toName || data.toName.trim() === '') return;
 
     const preventivoDaSalvare = JSON.parse(JSON.stringify(data));
-
-    // Recupero ID pulito
-    const utenteLoggato = this.authService.getUtenteLoggato();
-    const utenteId = utenteLoggato ? utenteLoggato.id : 0;
-    // RIMOSSO preventivoDaSalvare.utenteId = utenteLoggato.id; (Errore JPA)
-
     const isUpdate = this.originalInvoiceNumber && (this.originalInvoiceNumber === preventivoDaSalvare.invoiceNumber);
 
     if (this.originalInvoiceNumber && this.originalInvoiceNumber !== preventivoDaSalvare.invoiceNumber) {
@@ -386,8 +353,8 @@ export class PreventiviService {
     }
 
     if (isUpdate && preventivoDaSalvare.id) {
-      // POST Parametri URL aggiornati
-      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
+      // PUT senza parametri URL (sicurezza gestita dall'Interceptor)
+      this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}`, preventivoDaSalvare).subscribe({
         next: () => {
           console.log('Auto-salvataggio: preventivo aggiornato.');
           this.hasUnsavedChanges.set(false);
@@ -395,8 +362,8 @@ export class PreventiviService {
         error: (err) => console.error('Errore auto-salvataggio', err)
       });
     } else {
-      // POST Parametri URL aggiornati
-      this.http.post<InvoiceData>(`${this.apiUrl}?utenteId=${utenteId}`, preventivoDaSalvare).subscribe({
+      // POST senza parametri URL (sicurezza gestita dall'Interceptor)
+      this.http.post<InvoiceData>(this.apiUrl, preventivoDaSalvare).subscribe({
         next: (rispostaDb: any) => {
           console.log('Auto-salvataggio: nuovo preventivo creato.');
           this.originalInvoiceNumber = rispostaDb.invoiceNumber;

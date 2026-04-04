@@ -86,4 +86,10 @@ export class Auth {
     this.utenteLoggato.set(false);
     window.location.href = '/login';
   }
+
+  // Aggiorna solo i dati utente nel LocalStorage (usato quando si modifica il profilo)
+  aggiornaUtenteLocale(utente: any) {
+    localStorage.setItem('utente', JSON.stringify(utente));
+    this.utenteLoggato.set(true);
+  }
 }

@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
+import {Observable} from 'rxjs';
 import {Auth} from '../auth/auth';
 
 export interface Articolo {
@@ -26,20 +26,14 @@ export class PrezzarioService {
    * Recupera gli articoli legati SOLO all'utente loggato
    */
   getArticoliDalDb(): Observable<Articolo[]> {
-    const utente = this.authService.getUtenteLoggato();
-    if (!utente) return throwError(() => new Error('Utente non loggato'));
-
-    return this.http.get<Articolo[]>(`${this.apiUrl}/utente/${utente.id}`);
+    return this.http.get<Articolo[]>(this.apiUrl);
   }
 
   /**
    * Salva un nuovo articolo associandolo all'utente loggato
    */
   aggiungiArticolo(articolo: Articolo): Observable<Articolo> {
-    const utente = this.authService.getUtenteLoggato();
-    if (!utente) return throwError(() => new Error('Utente non loggato'));
-
-    return this.http.post<Articolo>(`${this.apiUrl}/utente/${utente.id}`, articolo);
+    return this.http.post<Articolo>(this.apiUrl, articolo);
   }
 
   /**
