@@ -48,9 +48,12 @@ export class Login {
 
         // Se il server accetta le credenziali (tutto ok)
         // ora dovremmo avere un obserbable che contiene l'utente loggato
-        next: (utente: any) => {
-          // Salva l'utente nel LocalStorage (così non deve rifare il login se aggiorna la pagina)
-          this.authService.setUtenteLoggato(utente);
+        next: (response: any) => {
+          // Salva sia il token che i dati dell'utente nel LocalStorage
+          this.authService.setSessione(response.token, response.utente);
+
+          // Estraiamo l'utente per il controllo del ruolo
+          const utente = response.utente;
 
           //Controllo del ruolo per il reindirizzamento
           // con === controlliamo sia il valaore che il tipo

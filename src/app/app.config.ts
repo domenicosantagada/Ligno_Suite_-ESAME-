@@ -3,17 +3,15 @@ import {provideRouter} from '@angular/router';
 
 // Importa l'elenco delle rotte definite in app.routes.ts
 import {routes} from './app.routes';
-// Serve per far comunicare Angular con il servizio HTTP (servizio di backend -> Spring Boot)
-import {provideHttpClient} from '@angular/common/http';
+// Importiamo withInterceptors
+import {provideHttpClient, withInterceptors} from '@angular/common/http';
+import {authInterceptor} from './auth/auth.interceptor'; // Importiamo il nostro interceptor
 
 export const appConfig: ApplicationConfig = {
-
-  // Providers globali iniettabili tramite Dependency Injection (DI)
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // inizializza il router con le rotte definite in app.routes.ts
     provideRouter(routes),
-    // inizializza il modulo http usato nei componenti (service) per fare chiamate GET, POST, PUT, DELETE
-    provideHttpClient()
+    // Aggiungiamo l'interceptor al client HTTP
+    provideHttpClient(withInterceptors([authInterceptor]))
   ]
 };

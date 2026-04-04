@@ -43,30 +43,33 @@ export class Auth {
    * Aggiorna i dati del profilo aziendale sul database.
    * Utilizza il metodo HTTP PUT per la modifica di una risorsa esistente.
    */
-  updateProfilo(id: number, dati: any) {
-    return this.http.put(`${this.apiUrl}/update/${id}`, dati);
+  updateProfilo(dati: any) {
+    return this.http.put(`${this.apiUrl}/update`, dati);
   }
 
-  /* ==========================================================================
-     GESTIONE DELLA PERSISTENZA (SESSIONE LOCALE)
-     Questi metodi gestiscono il LocalStorage per mantenere l'utente loggato
-     anche dopo il ricaricamento della pagina.
-     ========================================================================== */
 
   /**
-   * Memorizza l'oggetto utente nel browser.
-   * Trasforma l'oggetto JavaScript in una stringa JSON, poiché il LocalStorage
-   * può salvare solo dati testuali.
+   *  Recupera i dati del profilo personale dell'utente loggato.
+   *  Utilizza il metodo HTTP GET per ottenere le informazioni dal server.
    */
-  setUtenteLoggato(utente: any) {
-    localStorage.setItem('utente', JSON.stringify(utente));
-    this.utenteLoggato.set(true); // Aggiorna il signal utenteLoggato
+  getProfiloPersonale() {
+    return this.http.get(`${this.apiUrl}/me`);
   }
 
   /**
-   * Recupera i dati dell'utente attualmente loggato dal LocalStorage.
-   * Controlla se esiste la chiave 'utente' e, se sì, converte la stringa JSON
-   * in un oggetto JavaScript. Se la chiave non esiste, restituisce null.
+   *  Settiamo la sessione dell'utente dopo un login o una registrazione riusciti.
+   *  Salviamo il token di autenticazione e i dati dell'utente nel LocalStorage del browser.
+   *  Aggiorniamo la signal utenteLoggato a true per indicare che l'utente è ora loggato.
+   */
+  setSessione(token: string, utente: any) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('utente', JSON.stringify(utente));
+    this.utenteLoggato.set(true);
+  }
+
+  /**
+   * Recupera i dati dell'utente loggato dal LocalStorage.
+   * Se i dati esistono, li restituisce come oggetto JSON. Altrimenti, restituisce null.
    */
   getUtenteLoggato() {
     const utenteString = localStorage.getItem('utente');
@@ -74,22 +77,13 @@ export class Auth {
   }
 
   /**
-   * Effettua il logout distruggendo la sessione locale.
-   * Rimuove la chiave 'utente' dal LocalStorage, invalidando l'accesso lato client.
+   * Effettua il logout dell'utente. Rimuove il token e i dati dell'utente dal LocalStorage,
+   * aggiorna la signal utenteLoggato a false e reindirizza l'utente alla pagina di login.
    */
   logout() {
+    localStorage.removeItem('token');
     localStorage.removeItem('utente');
-
-    this.utenteLoggato.set(false); // Aggiorna il signal utenteLoggato
-
-    // Ricarica la pagina e porta l'utente al login
+    this.utenteLoggato.set(false);
     window.location.href = '/login';
-  }
-
-  /**
-   * Recupera i dati di un utente specifico dal database usando il suo ID.
-   */
-  getUtenteById(id: number) {
-    return this.http.get(`${this.apiUrl}/${id}`);
   }
 }
