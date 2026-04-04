@@ -1,7 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 // HttpClient serve per fare richieste di rete (GET, POST, PUT, DELETE) verso il server
 import {HttpClient} from '@angular/common/http';
-import {Auth} from '../auth/auth';
 import {Cliente} from './rubrica'; // Importa l'interfaccia (la "forma" dei dati) da rubrica.ts
 
 /**
@@ -16,7 +15,6 @@ export class RubricaService {
 
   // Strumenti iniettati
   private http = inject(HttpClient);
-  private authService = inject(Auth);
 
   // L'indirizzo base del backend Spring Boot per la gestione dei clienti
   private apiUrl = 'http://localhost:8080/api/clienti';

@@ -385,7 +385,7 @@ export class Preventivi implements OnInit {
     const nomePulito = nomeCliente.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
 
     // Precompilazione dei campi
-    this.emailNomeFile = `PREV_${nomePulito}.pdf`;
+    this.emailNomeFile = `PREV_${numero}_${nomePulito}.pdf`;
     this.emailDestinatario = invoice.toEmail || '';
     this.emailOggetto = `Preventivo - ${nomeCliente}`;
     this.emailMessaggio = `Gentile ${nomeCliente},\n\nIn allegato trova il preventivo richiesto.\n\nRimaniamo a disposizione per qualsiasi chiarimento.\n\nCordiali saluti.\n\n${invoice.fromName || 'La tua azienda'}`;
@@ -445,7 +445,7 @@ export class Preventivi implements OnInit {
         formData.append('emailMittente', emailUtente);
 
         this.preventiviService.inviaPdfPerEmail(formData).subscribe({
-          next: (res) => {
+          next: () => {
             this.chiudiModalEmail(); // Chiudiamo la modale
             Swal.fire('Inviato!', 'Il preventivo è stato inviato via email con successo.', 'success');
           },

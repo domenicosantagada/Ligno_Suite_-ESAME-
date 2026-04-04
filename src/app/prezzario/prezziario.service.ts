@@ -1,7 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Auth} from '../auth/auth';
 
 export interface Articolo {
   id?: number;
@@ -18,8 +17,7 @@ export interface Articolo {
 })
 export class PrezzarioService {
   private http = inject(HttpClient);
-  private authService = inject(Auth);
-
+  
   private apiUrl = 'http://localhost:8080/api/articoli';
 
   /**

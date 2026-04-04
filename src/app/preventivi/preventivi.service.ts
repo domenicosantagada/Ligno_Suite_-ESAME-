@@ -323,15 +323,12 @@ export class PreventiviService {
    * Logica matematica di base del documento: Imponibile + IVA - Sconto
    */
   private calculateTotals(items: InvoiceItem[], taxRate: number | string, discount: number = 0) {
-    const subtotal = items.reduce((sum, item) => {
-      const amount = typeof item.amount === 'number' ? item.amount : 0;
-      return sum + amount;
-    }, 0);
+    const subtotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
 
     const rate = typeof taxRate === 'number' ? taxRate : taxRate === '' ? 0 : Number(taxRate);
     const taxAmount = (subtotal * rate) / 100;
 
-    const discountVal = typeof discount === 'number' ? discount : Number(discount) || 0;
+    const discountVal = Number(discount) || 0;
     const total = (subtotal + taxAmount) - discountVal;
 
     return {subtotal, taxAmount, total};
