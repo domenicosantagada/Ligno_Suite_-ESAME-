@@ -43,6 +43,8 @@ export class CanvasTaglioComponent implements OnChanges, AfterViewInit {
     window.addEventListener('resize', () => this.resizeCanvasAndDraw());
   }
 
+  // --- GESTIONE EVENTI MOUSE ---
+
   @HostListener('wheel', ['$event'])
   onWheel(e: WheelEvent) {
     e.preventDefault(); // Evita che la pagina scorra
@@ -67,8 +69,6 @@ export class CanvasTaglioComponent implements OnChanges, AfterViewInit {
 
     this.disegna();
   }
-
-  // --- GESTIONE EVENTI MOUSE ---
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(e: MouseEvent) {
@@ -108,6 +108,8 @@ export class CanvasTaglioComponent implements OnChanges, AfterViewInit {
     this.disegna();
   }
 
+  // --- MOTORE DI DISEGNO ---
+
   disegna() {
     const canvas = this.canvasRef.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -140,7 +142,50 @@ export class CanvasTaglioComponent implements OnChanges, AfterViewInit {
     ctx.lineWidth = 3;
     ctx.strokeRect(0, 0, drawStockW, drawStockH);
 
-    // 2. Pezzi (Placed Panels)
+    // ---------------------------------------------------------
+    // 2. DISEGNO DEGLI SCARTI (Linee Tratteggiate e testo)
+    // ---------------------------------------------------------
+    if (this.pannello.scarti && this.pannello.scarti.length > 0) {
+      this.pannello.scarti.forEach((s) => {
+        const sx = (s.x || 0) * scale;
+        const sy = (s.y || 0) * scale;
+        const sw = (s.w || 0) * scale;
+        const sh = (s.h || 0) * scale;
+
+        // Colore sfondo scarto: Grigio semitrasparente
+        ctx.fillStyle = 'rgba(220, 220, 220, 0.6)';
+        ctx.fillRect(sx, sy, sw, sh);
+
+        // Bordo scarto: Tratteggiato Grigio scuro
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]); // CREA IL TRATTEGGIO! (5px linea, 5px spazio)
+        ctx.strokeRect(sx, sy, sw, sh);
+        ctx.setLineDash([]); // RESETTA IL TRATTEGGIO (FONDAMENTALE per non tratteggiare i pezzi normali)
+
+        // Testo Scarto: Corsivo, Grigio scuro
+        ctx.fillStyle = '#404040';
+        ctx.font = 'italic 10px Arial';
+
+        // Formatta a 1 decimale se ci sono virgole per evitare testi troppo lunghi
+        const dimW = Number.isInteger(s.w) ? s.w : s.w.toFixed(1);
+        const dimH = Number.isInteger(s.h) ? s.h : s.h.toFixed(1);
+        const testoS = `Scarto ${dimW}x${dimH}`;
+
+        // Misura se il testo ci entra nel rettangolo
+        const testoWidth = ctx.measureText(testoS).width;
+
+        if (sw > testoWidth + 5 && sh > 15) {
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(testoS, sx + 5, sy + 5);
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 3. Pezzi (Placed Panels)
+    // ---------------------------------------------------------
     ctx.lineWidth = 1;
     this.pannello.pezzi.forEach((p) => {
       const px = (p.x || 0) * scale;
@@ -156,7 +201,7 @@ export class CanvasTaglioComponent implements OnChanges, AfterViewInit {
       ctx.strokeStyle = 'rgb(0, 102, 204)';
       ctx.strokeRect(px, py, pw, ph);
 
-      // 3. Testi
+      // Testi per i pezzi utili
       ctx.fillStyle = '#000000';
       const title = (p.ruotato ? '↺ ' : '') + p.nome;
       const dimensions = `${p.altezzaTaglio} x ${p.larghezzaTaglio}`;
@@ -189,7 +234,10 @@ export class CanvasTaglioComponent implements OnChanges, AfterViewInit {
 
     ctx.restore();
 
-    // 4. Overlay Controlli (Come in Java, disegnato fuori dal ctx.restore per non essere zoomato)
+    /*
+    // ---------------------------------------------------------
+    // 4. Overlay Controlli
+    // ---------------------------------------------------------
     ctx.fillStyle = 'rgba(0, 0, 0, 0.67)'; // Color(0, 0, 0, 170)
 
     // Disegno rettangolo arrotondato (supportato nei browser moderni)
@@ -206,9 +254,8 @@ export class CanvasTaglioComponent implements OnChanges, AfterViewInit {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText("🖱 Rotellina: Zoom | Trascina: Sposta | Doppio clic: Resetta vista", 25, 30);
+  */
   }
-
-  // --- MOTORE DI DISEGNO ---
 
   private resizeCanvasAndDraw() {
     const canvas = this.canvasRef.nativeElement;

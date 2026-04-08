@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Pezzo, RisultatoOttimizzazione, RisultatoPannello} from './taglio-pannelli.model';
+import {Pezzo, RisultatoOttimizzazione, RisultatoPannello, Scarto} from './taglio-pannelli.model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,13 +9,11 @@ export class TaglioPannelliService {
   constructor() {
   }
 
-  // questo metodo viene chiamato dal componente taglio-pannelli.component.html
-  // e viene utilizzato per ottimizzare il taglio dei pannelli in base ai dati
-  // forniti dal componente taglio-pannelli.component.ts
+  // Metodo principale chiamato dal componente
   public ottimizzaTaglio(larghezzaPannello: number, altezzaPannello: number, spessoreLama: number, margine: number, pezziInput: Pezzo[]): RisultatoOttimizzazione {
     const espansi: Pezzo[] = [];
 
-    // 1. Espande i pezzi in base alla quantità (es. se qt=3, crea 3 pezzi singoli)
+    // 1. Espande i pezzi in base alla quantità
     pezziInput.forEach((p, idx) => {
       for (let q = 0; q < p.quantita; q++) {
         espansi.push({
@@ -30,14 +28,11 @@ export class TaglioPannelliService {
       }
     });
 
-    // 2. Definiamo diverse strategie di ordinamento dei pezzi (Euristiche)
+    // 2. Strategie di ordinamento (Euristiche)
     const strategieOrdinamento = [
-      // Area decrescente (dal più grande al più piccolo)
-      (a: Pezzo, b: Pezzo) => (b.larghezza * b.altezza) - (a.larghezza * a.altezza),
-      // Lato più lungo decrescente
-      (a: Pezzo, b: Pezzo) => Math.max(b.larghezza, b.altezza) - Math.max(a.larghezza, a.altezza),
-      // Perimetro decrescente
-      (a: Pezzo, b: Pezzo) => (b.larghezza + b.altezza) - (a.larghezza + a.altezza)
+      (a: Pezzo, b: Pezzo) => (b.larghezza * b.altezza) - (a.larghezza * a.altezza), // Area decrescente
+      (a: Pezzo, b: Pezzo) => Math.max(b.larghezza, b.altezza) - Math.max(a.larghezza, a.altezza), // Lato più lungo
+      (a: Pezzo, b: Pezzo) => (b.larghezza + b.altezza) - (a.larghezza + a.altezza) // Perimetro decrescente
     ];
 
     let migliorRisultato: RisultatoOttimizzazione | null = null;
@@ -49,7 +44,6 @@ export class TaglioPannelliService {
         const pezziCorrenti = [...espansi].sort(strategia);
         const risultato = this.eseguiSingolaOttimizzazione(larghezzaPannello, altezzaPannello, spessoreLama, margine, pezziCorrenti, taglioVerticale);
 
-        // Salviamo il risultato migliore (meno pannelli usati o, a parità di pannelli, scarto minore)
         if (!migliorRisultato ||
           risultato.pannelli.length < migliorRisultato.pannelli.length ||
           (risultato.pannelli.length === migliorRisultato.pannelli.length && risultato.efficienza > migliorRisultato.efficienza)) {
@@ -68,14 +62,20 @@ export class TaglioPannelliService {
     let rimanenti = [...listaPezzi];
 
     while (rimanenti.length > 0) {
+      // ORA RECUPERIAMO SIA I PEZZI CHE GLI SCARTI DALLA GHIGLIOTTINA
       const risultatoTaglio = this.taglioGhigliottina(pannelloRef, rimanenti, spessoreLama, margine, taglioVerticale);
-      const posizionatiSulPannello = risultatoTaglio.filter(p => p.posizionato);
-      const nonPosizionati = risultatoTaglio.filter(p => !p.posizionato);
+
+      const posizionatiSulPannello = risultatoTaglio.posizionati.filter(p => p.posizionato);
+      const nonPosizionati = risultatoTaglio.posizionati.filter(p => !p.posizionato);
+
+      // Filtriamo gli scarti troppo piccoli (es. strisce sotto i 2cm) per evitare che il canvas si riempia di "polvere" visiva
+      const scartiUtili = risultatoTaglio.scarti.filter(s => s.w > 20 && s.h > 20);
 
       const risultatoPannello: RisultatoPannello = {
         pezzi: posizionatiSulPannello,
         pannelloLarghezza: larghezzaPannello,
-        pannelloAltezza: altezzaPannello
+        pannelloAltezza: altezzaPannello,
+        scarti: scartiUtili // <-- GLI SCARTI VENGONO INSERITI QUI!
       };
 
       if (nonPosizionati.length === rimanenti.length) {
@@ -108,18 +108,21 @@ export class TaglioPannelliService {
   }
 
   // --- Algoritmo Guillotine con Regola di Split dinamica ---
+  // MODIFICATO IL TIPO DI RITORNO: restituisce un oggetto con { posizionati, scarti }
   private taglioGhigliottina(pannello: {
     w: number,
     h: number
-  }, listaPezzi: Pezzo[], spessoreLama: number, margine: number, taglioVerticale: boolean): Pezzo[] {
-    const spaziLiberi = [{
+  }, listaPezzi: Pezzo[], spessoreLama: number, margine: number, taglioVerticale: boolean): {
+    posizionati: Pezzo[],
+    scarti: Scarto[]
+  } {
+    const spaziLiberi: Scarto[] = [{
       x: margine, y: margine, w: pannello.w - 2 * margine, h: pannello.h - 2 * margine
     }];
     const posizionati: Pezzo[] = [];
 
     const puoEntrare = (rect: any, pw: number, ph: number) => pw <= rect.w && ph <= rect.h;
 
-    // Punteggio: preferiamo lo spazio che lascia l'area rimanente più compatta
     const calcolaPunteggio = (rect: any, pw: number, ph: number) => {
       const area = rect.w * rect.h - pw * ph;
       const latoCorto = Math.min(rect.w - pw, rect.h - ph);
@@ -135,7 +138,6 @@ export class TaglioPannelliService {
       for (let i = 0; i < spaziLiberi.length; i++) {
         const spazio = spaziLiberi[i];
 
-        // Inserimento standard
         if (puoEntrare(spazio, pezzo.larghezza, pezzo.altezza)) {
           const s = calcolaPunteggio(spazio, pezzo.larghezza, pezzo.altezza);
           if (!migliorPunteggio || s.area < migliorPunteggio.area || (s.area === migliorPunteggio.area && s.latoCorto < migliorPunteggio.latoCorto)) {
@@ -146,7 +148,6 @@ export class TaglioPannelliService {
           }
         }
 
-        // Inserimento ruotato
         if (pezzo.puoRuotare && puoEntrare(spazio, pezzo.altezza, pezzo.larghezza)) {
           const s = calcolaPunteggio(spazio, pezzo.altezza, pezzo.larghezza);
           if (!migliorPunteggio || s.area < migliorPunteggio.area || (s.area === migliorPunteggio.area && s.latoCorto < migliorPunteggio.latoCorto)) {
@@ -180,7 +181,7 @@ export class TaglioPannelliService {
       const wDestra = r.w - larghezzaT - spessoreLama;
       const hSopra = r.h - altezzaT - spessoreLama;
 
-      // Divisione del pannello rimanente (SPLIT)
+      // SPLIT
       if (taglioVerticale) {
         if (wDestra > 0) spaziLiberi.push({x: r.x + larghezzaT + spessoreLama, y: r.y, w: wDestra, h: r.h});
         if (hSopra > 0) spaziLiberi.push({x: r.x, y: r.y + altezzaT + spessoreLama, w: larghezzaT, h: hSopra});
@@ -192,6 +193,7 @@ export class TaglioPannelliService {
       spaziLiberi.splice(indiceMigliore, 1);
     }
 
-    return posizionati;
+    // ALLA FINE DEL CALCOLO: restituiamo sia i pezzi che lo spazio avanzato
+    return {posizionati, scarti: spaziLiberi};
   }
 }

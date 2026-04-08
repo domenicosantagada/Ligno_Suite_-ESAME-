@@ -21,6 +21,7 @@ export interface RisultatoPannello {
   pannelloAltezza: number;
   pezzi: Pezzo[];
   nonPosizionabili?: Pezzo[];
+  scarti?: Scarto[];
 }
 
 export interface RisultatoOttimizzazione {
@@ -28,4 +29,11 @@ export interface RisultatoOttimizzazione {
   efficienza: number;
   areaUsata: number;
   areaScarto: number;
+}
+
+export interface Scarto {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
