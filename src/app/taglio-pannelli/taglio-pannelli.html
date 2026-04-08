@@ -258,29 +258,24 @@
       </div>
 
       <div class="col-lg-9">
-        <div class="card shadow border bg-white rounded-4 h-100 overflow-hidden">
+        <div class="card shadow border bg-white rounded-4 h-100 overflow-hidden d-flex flex-column">
+
           <div
             class="card-header bg-transparent border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
-            <h6 class="fw-bold text-dark mb-0 small text-uppercase" style="letter-spacing: 1px;">Vista CAD -
-              Pannello {{ indicePannelloAttivo + 1 }}</h6>
-
-            <div class="d-flex align-items-center gap-2" style="width: 150px;">
-              <i class="bi bi-zoom-out text-secondary small"></i>
-              <input [(ngModel)]="zoomImmagine" class="form-range form-range-sm focus-ring-dark shadow-none" max="100"
-                     min="10" type="range">
-              <i class="bi bi-zoom-in text-secondary small"></i>
-            </div>
+            <h6 class="fw-bold text-dark mb-0 small text-uppercase" style="letter-spacing: 1px;">
+              Vista CAD - Pannello {{ indicePannelloAttivo + 1 }}
+            </h6>
           </div>
 
-          <div class="card-body p-4 overflow-auto d-flex justify-content-center align-items-start"
-               style="min-height: 500px; background-color: #fcfcfc;">
+          <div class="card-body p-0 d-flex justify-content-center align-items-center flex-grow-1"
+               style="min-height: 550px; background-color: #fcfcfc;">
+
             <app-canvas-taglio
-              [colori]="COLORI_PEZZI"
               [indicePannello]="indicePannelloAttivo"
               [pannello]="risultatoOttimizzazione.pannelli[indicePannelloAttivo]"
-              [zoom]="zoomImmagine"
-              class="shadow-sm border border-secondary-subtle">
+              class="w-100 h-100">
             </app-canvas-taglio>
+
           </div>
         </div>
       </div>
