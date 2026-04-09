@@ -84,6 +84,49 @@ export class TaglioPannelli {
     return !(entraDritto || entraRuotato);
   }
 
+// Verifica se specificamente l'ALTEZZA sta causando l'errore
+  isAltezzaErrata(p: Pezzo): boolean {
+    if (!p.altezza || !p.larghezza) return false;
+    if (!this.isFuoriMisura(p)) return false; // Se entra tutto, nessun errore
+
+    const hMax = this.pannelloAltezza - (this.marginePannello * 2);
+    const wMax = this.pannelloLarghezza - (this.marginePannello * 2);
+
+    if (!p.puoRuotare) {
+      // Se non può ruotare, l'altezza deve entrare per forza nell'altezza del pannello
+      return p.altezza > hMax;
+    } else {
+      // Se può ruotare, controlliamo i lati massimi e minimi
+      const maxPannello = Math.max(hMax, wMax);
+      const minPannello = Math.min(hMax, wMax);
+
+      if (p.altezza > maxPannello) return true; // Supera addirittura il lato più lungo
+      if (p.altezza > minPannello && p.larghezza > minPannello) return true; // Entrambi superano il lato corto
+      return false;
+    }
+  }
+
+  // Verifica se specificamente la LARGHEZZA sta causando l'errore
+  isLarghezzaErrata(p: Pezzo): boolean {
+    if (!p.altezza || !p.larghezza) return false;
+    if (!this.isFuoriMisura(p)) return false;
+
+    const hMax = this.pannelloAltezza - (this.marginePannello * 2);
+    const wMax = this.pannelloLarghezza - (this.marginePannello * 2);
+
+    if (!p.puoRuotare) {
+      // Se non può ruotare, la larghezza deve entrare nella larghezza del pannello
+      return p.larghezza > wMax;
+    } else {
+      const maxPannello = Math.max(hMax, wMax);
+      const minPannello = Math.min(hMax, wMax);
+
+      if (p.larghezza > maxPannello) return true; // Supera addirittura il lato più lungo
+      if (p.altezza > minPannello && p.larghezza > minPannello) return true; // Entrambi superano il lato corto
+      return false;
+    }
+  }
+
   calcolaTaglio() {
     // Filtriamo i pezzi per assicurarci che abbiano misure e quantità valide
     const pezziValidi = this.pezzi.filter(p => p.larghezza > 0 && p.altezza > 0 && p.quantita > 0);

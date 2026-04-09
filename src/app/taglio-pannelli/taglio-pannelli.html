@@ -146,14 +146,14 @@
 
                 <td class="py-3">
                   <input [(ngModel)]="p.altezza"
-                         [class.is-invalid]="isFuoriMisura(p)"
+                         [class.is-invalid]="isAltezzaErrata(p)"
                          class="form-control form-control-sm table-input"
                          type="number">
                 </td>
 
                 <td class="py-3">
                   <input [(ngModel)]="p.larghezza"
-                         [class.is-invalid]="isFuoriMisura(p)"
+                         [class.is-invalid]="isLarghezzaErrata(p)"
                          class="form-control form-control-sm table-input"
                          type="number">
                 </td>
