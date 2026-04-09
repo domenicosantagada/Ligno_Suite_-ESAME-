@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {ChangeDetectorRef, Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {jsPDF} from 'jspdf';
@@ -39,6 +39,7 @@ export class TaglioPannelli {
   zoomImmagine: number = 30;
 
   private taglioService = inject(TaglioPannelliService);
+  private cdr = inject(ChangeDetectorRef);
 
   get quantitaTotale(): number {
     return this.pezzi.reduce((sum, p) => sum + (p.quantita || 0), 0);
@@ -359,10 +360,13 @@ export class TaglioPannelli {
       title: 'Distinta Importata!',
       text: `Configurazione caricata e ${this.pezzi.length} pezzi aggiunti in lista.`,
       icon: 'success',
-      confirmButtonColor: '#212529', // Stile bottone dark per conformità grafica
-      timer: 2500, // Si chiude da solo dopo 2.5 secondi
+      confirmButtonColor: '#212529',
+      timer: 1000,
       showConfirmButton: false
     });
+
+    // Avvisa Angular di aggiornare l'interfaccia istantaneamente
+    this.cdr.detectChanges();
   }
 
   private generaImmaginePannello(pannello: any): string {
