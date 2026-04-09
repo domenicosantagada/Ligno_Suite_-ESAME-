@@ -171,7 +171,7 @@ export class TaglioPannelli {
     this.cambiaScheda('risultato');
   }
 
-  // --- ESPORTAZIONE PDF ---
+// --- ESPORTAZIONE PDF ---
   esportaPDF() {
     if (!this.risultatoOttimizzazione) return;
 
@@ -187,23 +187,42 @@ export class TaglioPannelli {
     const oggi = new Date().toLocaleDateString('it-IT');
     let paginaNum = 1;
 
+    // Funzione di appoggio per disegnare intestazione e piè di pagina
+    const drawHeaderFooter = (pageNum: number) => {
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150); // Colore Grigio per Header e Footer
+
+      // Intestazione
+      doc.setFont("helvetica", "normal");
+      doc.text(`${oggi}`, 14, 15);
+      doc.setFont("helvetica", "bold");
+      doc.text('Ligno Suite - Ottimizzazione Taglio', 196, 15, {align: 'right'});
+
+      // Piè di pagina
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.text(`Pagina ${pageNum}`, 105, 290, {align: 'center'});
+
+      // RESET COLOR: Da qui in poi tutto il testo sarà NERO
+      doc.setTextColor(0, 0, 0);
+    };
+
     pannelli.forEach((pannello, i) => {
+      // Aggiungi una nuova pagina per i pannelli successivi al primo
       if (i > 0) {
         doc.addPage();
         paginaNum++;
       }
 
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`${oggi}`, 14, 15);
-      doc.setFont("helvetica", "bold");
-      doc.text('Ligno Suite - Ottimizzazione Taglio', 196, 15, {align: 'right'});
+      // Disegna sempre Header e Footer appena si crea/inizia la pagina
+      drawHeaderFooter(paginaNum);
 
       let startY = 25;
 
+      // Riepilogo Globale solo sulla prima pagina
       if (i === 0) {
         doc.setFontSize(14);
-        doc.setTextColor(31, 41, 55);
+        doc.setFont("helvetica", "bold");
         doc.text('RIEPILOGO GLOBALE PROGETTO', 14, startY);
 
         doc.setFontSize(10);
@@ -218,10 +237,11 @@ export class TaglioPannelli {
 
         startY += 8;
         doc.setDrawColor(200, 200, 200);
-        doc.line(14, startY, 196, startY);
+        doc.line(14, startY, 196, startY); // Linea divisoria
         startY += 10;
       }
 
+      // Titolo del singolo pannello
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text(`PANNELLO ${i + 1}`, 14, startY);
@@ -231,7 +251,7 @@ export class TaglioPannelli {
 
       const areaP = (pannello.pannelloLarghezza * pannello.pannelloAltezza);
       let pAreaUsata = 0;
-      pannello.pezzi.forEach(p => pAreaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0));
+      pannello.pezzi.forEach((p: any) => pAreaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0));
       const pAreaScarto = areaP - pAreaUsata;
 
       doc.text(`Area usata: ${(pAreaUsata / 1000000).toFixed(3)} m² (${((pAreaUsata / areaP) * 100).toFixed(1)}%)`, 14, startY);
@@ -240,11 +260,11 @@ export class TaglioPannelli {
       doc.text(`Pezzi ricavati: ${pannello.pezzi.length}`, 14, startY);
       startY += 10;
 
+      // Immagine del pannello
       const imgData = this.generaImmaginePannello(pannello);
       if (imgData) {
-        // Questi valori DEVONO corrispondere a quelli usati in generaImmaginePannello
-        const SCALA_IMG = 1.0;
-        const PAD_IMG = 40;
+        const SCALA_IMG = 2.0;
+        const PAD_IMG = 40 * SCALA_IMG;
         const origW = pannello.pannelloLarghezza * SCALA_IMG + PAD_IMG * 2;
         const origH = pannello.pannelloAltezza * SCALA_IMG + PAD_IMG * 2;
 
@@ -258,34 +278,45 @@ export class TaglioPannelli {
         startY += finalH + 12;
       }
 
+      // --- NUOVA LISTA PEZZI (Colonna Singola) ---
       doc.setFont("helvetica", "bold");
-      doc.text("Qtà | Dimensioni (H x L) | Descrizione", 14, startY);
-      doc.line(14, startY + 2, 196, startY + 2);
+      doc.text("Qtà", 14, startY);
+      doc.text("Dimensioni (H x L)", 28, startY);
+      doc.text("Descrizione", 80, startY);
+      doc.line(14, startY + 2, 196, startY + 2); // Linea sotto l'intestazione
       doc.setFont("helvetica", "normal");
       startY += 8;
 
-      let currentX = 14;
       const pezziOrdinati = [...pannello.pezzi].sort((a, b) => (b.larghezzaTaglio! * b.altezzaTaglio!) - (a.larghezzaTaglio! * a.altezzaTaglio!));
 
       pezziOrdinati.forEach((p) => {
-        if (startY > 280) {
+        // Se arriviamo troppo in fondo alla pagina, creiamone una nuova
+        if (startY > 275) {
           doc.addPage();
           paginaNum++;
-          startY = 20;
-          currentX = 14;
-        }
-        const rot = p.ruotato ? " [Ruotato]" : "";
-        doc.text(`1x   ${p.altezzaTaglio} x ${p.larghezzaTaglio} mm   -   ${p.nome} ${rot}`, currentX, startY);
-        currentX += 95;
-        if (currentX > 150) {
-          currentX = 14;
-          startY += 6;
-        }
-      });
+          drawHeaderFooter(paginaNum); // Intestazione/Piè della nuova pagina
 
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`Pagina ${paginaNum}`, 105, 290, {align: 'center'});
+          startY = 25;
+
+          // Ripeti l'intestazione della tabella sulla nuova pagina
+          doc.setFont("helvetica", "bold");
+          doc.text("Qtà", 14, startY);
+          doc.text("Dimensioni (H x L)", 28, startY);
+          doc.text("Descrizione", 80, startY);
+          doc.line(14, startY + 2, 196, startY + 2);
+          doc.setFont("helvetica", "normal");
+          startY += 8;
+        }
+
+        const rot = p.ruotato ? " [Ruotato]" : "";
+
+        // Colonne precise e allineate
+        doc.text("1x", 14, startY);
+        doc.text(`${p.altezzaTaglio} x ${p.larghezzaTaglio} mm`, 28, startY);
+        doc.text(`${p.nome}${rot}`, 80, startY);
+
+        startY += 6; // Spaziatura tra le righe
+      });
     });
 
     doc.save(`Schemi_Taglio_${oggi.replace(/\//g, '-')}.pdf`);
