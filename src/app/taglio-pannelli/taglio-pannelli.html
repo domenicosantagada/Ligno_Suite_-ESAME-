@@ -84,6 +84,10 @@
               <button (click)="calcolaTaglio()" class="btn btn-dark rounded-pill w-100 py-2 fw-medium shadow-sm">
                 <i class="bi"></i> Calcola Ottimizzazione
               </button>
+
+              <button (click)="importaCSV()" class="btn btn-outline-secondary rounded-pill w-100 py-2 fw-medium mt-2">
+                <i class="bi bi-upload me-1"></i> Importa da CSV
+              </button>
             </div>
 
           </div>
@@ -254,6 +258,10 @@
 
         <button (click)="esportaPDF()" class="btn btn-dark rounded-pill w-100 fw-medium shadow-sm mb-4">
           <i class="bi bi-file-pdf me-1"></i> Scarica PDF
+        </button>
+
+        <button (click)="esportaCSV()" class="btn btn-outline-secondary rounded-pill w-100 fw-medium mb-4">
+          <i class="bi bi-download me-1"></i> Scarica CSV
         </button>
       </div>
 

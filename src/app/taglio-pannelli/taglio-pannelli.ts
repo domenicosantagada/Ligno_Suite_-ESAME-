@@ -221,6 +221,15 @@ export class TaglioPannelli {
     doc.save(`Schemi_Taglio_${oggi.replace(/\//g, '-')}.pdf`);
   }
 
+  // Esporta in CSV
+  esportaCSV() {
+
+  }
+
+  protected importaCSV() {
+    // Funzione per importare i pezzi da un file CSV
+  }
+
   private generaImmaginePannello(pannello: any): string {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
