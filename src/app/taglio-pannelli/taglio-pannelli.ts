@@ -223,7 +223,47 @@ export class TaglioPannelli {
 
   // Esporta in CSV
   esportaCSV() {
+    // Usiamo il punto e virgola come separatore (Standard per Excel in lingua italiana)
+    const separatore = ';';
+    let csv = '';
 
+    // --- BLOCCO 1: Impostazioni Generali ---
+    csv += 'IMPOSTAZIONI PANNELLO\n';
+    csv += `Altezza (mm)${separatore}Larghezza (mm)${separatore}Spessore Lama (mm)${separatore}Margine (mm)\n`;
+    csv += `${this.pannelloAltezza}${separatore}${this.pannelloLarghezza}${separatore}${this.spessoreLama}${separatore}${this.marginePannello}\n\n`;
+
+    // --- BLOCCO 2: Distinta dei Pezzi ---
+    csv += 'DISTINTA PEZZI\n';
+    csv += `Descrizione${separatore}Altezza (mm)${separatore}Larghezza (mm)${separatore}Quantita${separatore}Rotazione\n`;
+
+    this.pezzi.forEach(p => {
+      // Traduciamo il booleano in Si / No
+      const rotazione = p.puoRuotare ? 'Si' : 'No';
+
+      // Puliamo la descrizione: se l'utente ha inserito dei "a capo" o dei "punti e virgola" nel nome,
+      // li sostituiamo per evitare che "rompano" la struttura del file CSV
+      let nomePulito = p.nome || '';
+      nomePulito = nomePulito.replace(/(\r\n|\n|\r)/gm, " ").replace(/;/g, ",");
+
+      csv += `${nomePulito}${separatore}${p.altezza}${separatore}${p.larghezza}${separatore}${p.quantita}${separatore}${rotazione}\n`;
+    });
+
+    // --- CREAZIONE E DOWNLOAD DEL FILE ---
+    // \ufeff è il BOM (Byte Order Mark) per UTF-8: suggerisce ad Excel la corretta codifica del testo
+    const blob = new Blob(["\ufeff", csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+
+    const oggi = new Date().toLocaleDateString('it-IT').replace(/\//g, '-');
+    link.setAttribute('download', `Distinta_Taglio_${oggi}.csv`);
+
+    // Aggiunge temporaneamente il link alla pagina, lo clicca e lo rimuove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url); // Libera la memoria
   }
 
   protected importaCSV() {
