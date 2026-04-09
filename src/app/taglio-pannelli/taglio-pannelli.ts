@@ -254,11 +254,13 @@ export class TaglioPannelli {
       pannello.pezzi.forEach((p: any) => pAreaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0));
       const pAreaScarto = areaP - pAreaUsata;
 
+      // TRE COLONNE SULLA STESSA RIGA PER RISPARMIARE SPAZIO
       doc.text(`Area usata: ${(pAreaUsata / 1000000).toFixed(3)} m² (${((pAreaUsata / areaP) * 100).toFixed(1)}%)`, 14, startY);
-      doc.text(`Scarto: ${(pAreaScarto / 1000000).toFixed(3)} m² (${((pAreaScarto / areaP) * 100).toFixed(1)}%)`, 120, startY);
-      startY += 6;
-      doc.text(`Pezzi ricavati: ${pannello.pezzi.length}`, 14, startY);
-      startY += 10;
+      doc.text(`Scarto: ${(pAreaScarto / 1000000).toFixed(3)} m² (${((pAreaScarto / areaP) * 100).toFixed(1)}%)`, 80, startY);
+      doc.text(`Pezzi ricavati: ${pannello.pezzi.length}`, 145, startY);
+
+      // Incrementiamo startY una volta sola con un margine più compatto
+      startY += 8;
 
       // Immagine del pannello
       const imgData = this.generaImmaginePannello(pannello);
