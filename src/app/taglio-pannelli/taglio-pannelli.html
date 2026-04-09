@@ -136,34 +136,55 @@
               </thead>
 
               <tbody>
-              <tr *ngFor="let p of pezzi; let i = index" class="hover-row">
+              <tr *ngFor="let p of pezzi; let i = index" [class.table-danger]="isFuoriMisura(p)" class="hover-row">
+
                 <td class="ps-4 py-3">
-                  <div class="d-flex align-items-center">
-                    <input [(ngModel)]="p.nome" class="form-control form-control-sm table-input"
-                           placeholder="Nome pezzo" type="text">
-                  </div>
+                  <input [(ngModel)]="p.nome"
+                         class="form-control form-control-sm table-input"
+                         placeholder="Nome pezzo" type="text">
                 </td>
-                <td class="py-3"><input [(ngModel)]="p.altezza" class="form-control form-control-sm table-input"
-                                        type="number"></td>
-                <td class="py-3"><input [(ngModel)]="p.larghezza" class="form-control form-control-sm table-input"
-                                        type="number"></td>
-                <td class="py-3"><input [(ngModel)]="p.quantita" class="form-control form-control-sm table-input"
-                                        min="1" type="number"></td>
+
+                <td class="py-3">
+                  <input [(ngModel)]="p.altezza"
+                         [class.is-invalid]="isFuoriMisura(p)"
+                         class="form-control form-control-sm table-input"
+                         type="number">
+                </td>
+
+                <td class="py-3">
+                  <input [(ngModel)]="p.larghezza"
+                         [class.is-invalid]="isFuoriMisura(p)"
+                         class="form-control form-control-sm table-input"
+                         type="number">
+                </td>
+
+                <td class="py-3">
+                  <input [(ngModel)]="p.quantita"
+                         class="form-control form-control-sm table-input"
+                         min="1" type="number">
+                </td>
+
                 <td class="py-3">
                   <div class="form-check form-switch mt-1">
                     <input [(ngModel)]="p.puoRuotare" [id]="'rot'+i" class="form-check-input focus-ring-dark"
                            role="switch" type="checkbox">
-                    <label [for]="'rot'+i"
-                           class="form-check-label small text-secondary">{{ p.puoRuotare ? 'Libera' : 'Fissa' }}</label>
+                    <label [class.text-danger]="isFuoriMisura(p) && !p.puoRuotare"
+                           [for]="'rot'+i"
+                           class="form-check-label small text-secondary">
+                      {{ p.puoRuotare ? 'Libera' : 'Fissa' }}
+                    </label>
                   </div>
                 </td>
+
                 <td class="pe-4 py-3 text-center">
                   <div class="d-flex justify-content-center">
-                    <button (click)="rimuoviPezzo(i)" class="action-icon text-danger-hover" title="Elimina">
+                    <button (click)="rimuoviPezzo(i)" class="action-icon text-danger-hover border-0 bg-transparent"
+                            title="Elimina">
                       <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </td>
+
               </tr>
 
               <tr *ngIf="pezzi.length === 0">

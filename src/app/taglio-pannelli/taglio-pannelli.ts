@@ -17,7 +17,7 @@ import {CanvasTaglioComponent} from './taglio-pannelli.component';
 export class TaglioPannelli {
 
   schedaAttiva: 'input' | 'risultato' = 'input';
-  
+
   // Configurazione Pannello Iniziale (Altezza x Larghezza)
   presetPannello: string = '1220x2440';
   pannelloAltezza: number = 1220;
@@ -69,12 +69,19 @@ export class TaglioPannelli {
     this.pezzi.splice(index, 1);
   }
 
-  zoomIn() {
-    if (this.zoomImmagine < 100) this.zoomImmagine += 5;
-  }
+  // --- CONTROLLO REAL-TIME MISURE ---
+  isFuoriMisura(p: Pezzo): boolean {
+    // Se non ha ancora inserito le misure, non segnaliamo errore
+    if (!p.altezza || !p.larghezza) return false;
 
-  zoomOut() {
-    if (this.zoomImmagine > 10) this.zoomImmagine -= 5;
+    const hMax = this.pannelloAltezza - (this.marginePannello * 2);
+    const wMax = this.pannelloLarghezza - (this.marginePannello * 2);
+
+    const entraDritto = p.larghezza <= wMax && p.altezza <= hMax;
+    const entraRuotato = p.puoRuotare && (p.altezza <= wMax && p.larghezza <= hMax);
+
+    // Se non entra né dritto né ruotato, è fuori misura (restituisce true)
+    return !(entraDritto || entraRuotato);
   }
 
   calcolaTaglio() {
