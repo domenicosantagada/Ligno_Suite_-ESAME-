@@ -187,137 +187,144 @@ export class TaglioPannelli {
     const oggi = new Date().toLocaleDateString('it-IT');
     let paginaNum = 1;
 
-    // Funzione di appoggio per disegnare intestazione e piè di pagina
+    // Funzione per Header e Footer
     const drawHeaderFooter = (pageNum: number) => {
       doc.setFontSize(10);
-      doc.setTextColor(150, 150, 150); // Colore Grigio per Header e Footer
-
-      // Intestazione
+      doc.setTextColor(150, 150, 150);
       doc.setFont("helvetica", "normal");
       doc.text(`${oggi}`, 14, 15);
       doc.setFont("helvetica", "bold");
       doc.text('Ligno Suite - Ottimizzazione Taglio', 196, 15, {align: 'right'});
-
-      // Piè di pagina
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.text(`Pagina ${pageNum}`, 105, 290, {align: 'center'});
-
-      // RESET COLOR: Da qui in poi tutto il testo sarà NERO
       doc.setTextColor(0, 0, 0);
     };
 
-    pannelli.forEach((pannello, i) => {
-      // Aggiungi una nuova pagina per i pannelli successivi al primo
-      if (i > 0) {
-        doc.addPage();
-        paginaNum++;
-      }
+    // ==========================================
+    // PAGINA 1: RIEPILOGO E LOGO
+    // ==========================================
+    drawHeaderFooter(paginaNum);
 
-      // Disegna sempre Header e Footer appena si crea/inizia la pagina
+    // --- LOGO FALEGNAMERIA ---
+    // Placeholder per il logo: un rettangolo con testo
+    // NOTA: Per inserire il tuo logo reale, usa: doc.addImage('BASE64_STRING', 'PNG', 14, 25, 40, 20);
+    doc.setDrawColor(200, 200, 200);
+    doc.rect(14, 25, 50, 25);
+    doc.setFontSize(8);
+    doc.text("LOGO FALEGNAMERIA", 39, 40, {align: 'center'});
+
+    let startY = 65;
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text('RIEPILOGO GLOBALE PROGETTO', 14, startY);
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    startY += 12;
+    doc.text(`Pannelli utilizzati: ${pannelli.length}`, 14, startY);
+    doc.text(`Dimensione pannello: ${this.pannelloAltezza} x ${this.pannelloLarghezza} mm`, 80, startY);
+
+    startY += 8;
+    doc.text(`Totale pezzi prodotti: ${this.quantitaTotale}`, 14, startY); // Conteggio pezzi
+    doc.text(`Spessore lama/taglio: ${this.spessoreLama} mm`, 80, startY);
+
+    startY += 12;
+    doc.setFont("helvetica", "bold");
+    doc.text(`Efficienza totale: ${percUsata}%`, 14, startY);
+
+    doc.setFont("helvetica", "normal");
+    startY += 8;
+    doc.text(`Area totale utilizzata: ${areaUsata.toFixed(3)} m²`, 14, startY);
+    doc.text(`Area totale scarto: ${areaScarto.toFixed(3)} m² (${percScarto}%)`, 80, startY);
+
+    // --- SEZIONE NOTE ---
+    startY = 200;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Note:", 14, startY);
+
+    doc.setDrawColor(180, 180, 180);
+    for (let n = 0; n < 6; n++) {
+      const lineY = startY + 10 + (n * 10);
+      doc.line(14, lineY, 196, lineY);
+    }
+
+    // ==========================================
+    // PAGINE SUCCESSIVE: PANNELLI
+    // ==========================================
+    pannelli.forEach((pannello, i) => {
+      doc.addPage();
+      paginaNum++;
       drawHeaderFooter(paginaNum);
 
-      let startY = 25;
-
-      // Riepilogo Globale solo sulla prima pagina
-      if (i === 0) {
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text('RIEPILOGO GLOBALE PROGETTO', 14, startY);
-
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        startY += 8;
-        doc.text(`Pannelli utilizzati: ${pannelli.length} (Misura: ${this.pannelloAltezza} x ${this.pannelloLarghezza} mm)`, 14, startY);
-        doc.text(`Spessore lama/taglio: ${this.spessoreLama} mm`, 120, startY);
-
-        startY += 6;
-        doc.text(`Totale area utilizzata: ${areaUsata.toFixed(3)} m² (${percUsata}%)`, 14, startY);
-        doc.text(`Totale area avanzata: ${areaScarto.toFixed(3)} m² (${percScarto}%)`, 120, startY);
-
-        startY += 8;
-        doc.setDrawColor(200, 200, 200);
-        doc.line(14, startY, 196, startY); // Linea divisoria
-        startY += 10;
-      }
-
-      // Titolo del singolo pannello
+      let pY = 25;
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text(`PANNELLO ${i + 1}`, 14, startY);
+      doc.text(`PANNELLO ${i + 1}`, 14, pY);
+
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      startY += 8;
+      pY += 8;
 
       const areaP = (pannello.pannelloLarghezza * pannello.pannelloAltezza);
       let pAreaUsata = 0;
       pannello.pezzi.forEach((p: any) => pAreaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0));
       const pAreaScarto = areaP - pAreaUsata;
 
-      // TRE COLONNE SULLA STESSA RIGA PER RISPARMIARE SPAZIO
-      doc.text(`Area usata: ${(pAreaUsata / 1000000).toFixed(3)} m² (${((pAreaUsata / areaP) * 100).toFixed(1)}%)`, 14, startY);
-      doc.text(`Scarto: ${(pAreaScarto / 1000000).toFixed(3)} m² (${((pAreaScarto / areaP) * 100).toFixed(1)}%)`, 80, startY);
-      doc.text(`Pezzi ricavati: ${pannello.pezzi.length}`, 145, startY);
+      doc.text(`Area usata: ${(pAreaUsata / 1000000).toFixed(3)} m² (${((pAreaUsata / areaP) * 100).toFixed(1)}%)`, 14, pY);
+      doc.text(`Scarto: ${(pAreaScarto / 1000000).toFixed(3)} m² (${((pAreaScarto / areaP) * 100).toFixed(1)}%)`, 80, pY);
+      doc.text(`Pezzi ricavati: ${pannello.pezzi.length}`, 145, pY);
 
-      // Incrementiamo startY una volta sola con un margine più compatto
-      startY += 8;
+      pY += 8;
 
-      // Immagine del pannello
+      // Immagine
       const imgData = this.generaImmaginePannello(pannello);
       if (imgData) {
         const SCALA_IMG = 2.0;
         const PAD_IMG = 40 * SCALA_IMG;
         const origW = pannello.pannelloLarghezza * SCALA_IMG + PAD_IMG * 2;
         const origH = pannello.pannelloAltezza * SCALA_IMG + PAD_IMG * 2;
-
         const ratio = Math.min(182 / origW, 110 / origH);
         const finalW = origW * ratio;
         const finalH = origH * ratio;
 
-        doc.addImage(imgData, 'PNG', 14, startY, finalW, finalH);
+        doc.addImage(imgData, 'PNG', 14, pY, finalW, finalH);
         doc.setDrawColor(200, 200, 200);
-        doc.rect(14, startY, finalW, finalH);
-        startY += finalH + 12;
+        doc.rect(14, pY, finalW, finalH);
+        pY += finalH + 12;
       }
 
-      // --- NUOVA LISTA PEZZI (Colonna Singola) ---
+      // Tabella Pezzi
       doc.setFont("helvetica", "bold");
-      doc.text("Qtà", 14, startY);
-      doc.text("Dimensioni (H x L)", 28, startY);
-      doc.text("Descrizione", 80, startY);
-      doc.line(14, startY + 2, 196, startY + 2); // Linea sotto l'intestazione
+      doc.text("Qtà", 14, pY);
+      doc.text("Dimensioni (H x L)", 28, pY);
+      doc.text("Descrizione", 80, pY);
+      doc.line(14, pY + 2, 196, pY + 2);
       doc.setFont("helvetica", "normal");
-      startY += 8;
+      pY += 8;
 
       const pezziOrdinati = [...pannello.pezzi].sort((a, b) => (b.larghezzaTaglio! * b.altezzaTaglio!) - (a.larghezzaTaglio! * a.altezzaTaglio!));
 
       pezziOrdinati.forEach((p) => {
-        // Se arriviamo troppo in fondo alla pagina, creiamone una nuova
-        if (startY > 275) {
+        if (pY > 275) {
           doc.addPage();
           paginaNum++;
-          drawHeaderFooter(paginaNum); // Intestazione/Piè della nuova pagina
-
-          startY = 25;
-
-          // Ripeti l'intestazione della tabella sulla nuova pagina
+          drawHeaderFooter(paginaNum);
+          pY = 25;
           doc.setFont("helvetica", "bold");
-          doc.text("Qtà", 14, startY);
-          doc.text("Dimensioni (H x L)", 28, startY);
-          doc.text("Descrizione", 80, startY);
-          doc.line(14, startY + 2, 196, startY + 2);
+          doc.text("Qtà", 14, pY);
+          doc.text("Dimensioni (H x L)", 28, pY);
+          doc.text("Descrizione", 80, pY);
+          doc.line(14, pY + 2, 196, pY + 2);
           doc.setFont("helvetica", "normal");
-          startY += 8;
+          pY += 8;
         }
-
         const rot = p.ruotato ? " [Ruotato]" : "";
-
-        // Colonne precise e allineate
-        doc.text("1x", 14, startY);
-        doc.text(`${p.altezzaTaglio} x ${p.larghezzaTaglio} mm`, 28, startY);
-        doc.text(`${p.nome}${rot}`, 80, startY);
-
-        startY += 6; // Spaziatura tra le righe
+        doc.text("1x", 14, pY);
+        doc.text(`${p.altezzaTaglio} x ${p.larghezzaTaglio} mm`, 28, pY);
+        doc.text(`${p.nome}${rot}`, 80, pY);
+        pY += 6;
       });
     });
 
