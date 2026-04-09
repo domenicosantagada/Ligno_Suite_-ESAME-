@@ -266,8 +266,103 @@ export class TaglioPannelli {
     URL.revokeObjectURL(url); // Libera la memoria
   }
 
+  // Importa i dati da un file CSV
   protected importaCSV() {
-    // Funzione per importare i pezzi da un file CSV
+    // Creiamo "al volo" un input file nascosto
+    const inputNode = document.createElement('input');
+    inputNode.type = 'file';
+    inputNode.accept = '.csv';
+
+    // Restiamo in ascolto della scelta del file
+    inputNode.addEventListener('change', (event: any) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      // Quando il file è stato caricato in memoria dal browser
+      reader.onload = (e: any) => {
+        try {
+          const text = e.target.result;
+          this.processaCSV(text);
+        } catch (error) {
+          Swal.fire('Errore', 'Impossibile leggere il file CSV. Assicurati che sia stato generato dal sistema e non manomesso.', 'error');
+        }
+      };
+
+      // Avvia la lettura del file come testo
+      reader.readAsText(file);
+    });
+
+    // Simuliamo il click per aprire la finestra di selezione file di Windows/Mac
+    inputNode.click();
+  }
+
+  // Motore di elaborazione e conversione testo -> logica
+  private processaCSV(csvText: string) {
+    // 1. RESET TOTALE DELL'AMBIENTE (come se la pagina fosse ricaricata)
+    this.pezzi = [];
+    this.risultatoOttimizzazione = null; // Azzera eventuali layout calcolati
+    this.indicePannelloAttivo = 0;
+    this.zoomImmagine = 30;
+
+    // Rimuoviamo il BOM iniziale (se presente) e dividiamo il file in righe
+    let testoPulito = csvText.replace(/^\uFEFF/, '').trim();
+    const righe = testoPulito.split(/\r?\n/);
+
+    if (righe.length < 6) {
+      throw new Error('Il file non contiene righe sufficienti per essere valido.');
+    }
+
+    // 2. RECUPERO IMPOSTAZIONI PANNELLO
+    // La riga con i dati è l'indice 2 (0: Titolo blocco, 1: Intestazioni, 2: Dati)
+    const datiPannello = righe[2].split(';');
+    if (datiPannello.length >= 4) {
+      this.pannelloAltezza = Number(datiPannello[0]) || 0;
+      this.pannelloLarghezza = Number(datiPannello[1]) || 0;
+      this.spessoreLama = Number(datiPannello[2]) || 0;
+      this.marginePannello = Number(datiPannello[3]) || 0;
+
+      // Chiamiamo il metodo che aggiorna la tendina su "custom" o sul preset corretto
+      this.verificaPresetPersonalizzato();
+    }
+
+    // 3. RECUPERO DISTINTA PEZZI
+    // Cerchiamo la riga dove iniziano le colonne dei pezzi, per essere resistenti ad eventuali spazi vuoti
+    let startIndexPezzi = 6;
+    for (let i = 0; i < righe.length; i++) {
+      if (righe[i].startsWith('Descrizione;Altezza')) {
+        startIndexPezzi = i + 1; // I dati iniziano alla riga successiva
+        break;
+      }
+    }
+
+    // Cicliamo e importiamo i pezzi
+    for (let i = startIndexPezzi; i < righe.length; i++) {
+      const riga = righe[i].trim();
+      if (!riga) continue; // Salta righe vuote a fine file
+
+      const colonne = riga.split(';');
+      if (colonne.length >= 5) {
+        this.pezzi.push({
+          nome: colonne[0],
+          altezza: Number(colonne[1]) || 0,
+          larghezza: Number(colonne[2]) || 0,
+          quantita: Number(colonne[3]) || 1,
+          puoRuotare: colonne[4].trim().toLowerCase() === 'si'
+        });
+      }
+    }
+
+    // 4. FEEDBACK UTENTE
+    Swal.fire({
+      title: 'Distinta Importata!',
+      text: `Configurazione caricata e ${this.pezzi.length} pezzi aggiunti in lista.`,
+      icon: 'success',
+      confirmButtonColor: '#212529', // Stile bottone dark per conformità grafica
+      timer: 2500, // Si chiude da solo dopo 2.5 secondi
+      showConfirmButton: false
+    });
   }
 
   private generaImmaginePannello(pannello: any): string {
