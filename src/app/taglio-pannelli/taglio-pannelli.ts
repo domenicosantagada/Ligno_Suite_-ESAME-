@@ -87,21 +87,46 @@ export class TaglioPannelli {
     // Filtriamo i pezzi per assicurarci che abbiano misure e quantità valide
     const pezziValidi = this.pezzi.filter(p => p.larghezza > 0 && p.altezza > 0 && p.quantita > 0);
 
-    // BLOCCO ANTI-BUG: Controllo con popup SweetAlert2 standard (identico a quello dei preventivi)
     if (pezziValidi.length === 0) {
       Swal.fire('Attenzione', 'Inserisci almeno un pezzo nella distinta con dimensioni e quantità valide prima di calcolare l\'ottimizzazione.', 'warning');
-      this.risultatoOttimizzazione = null; // Resetta eventuali calcoli precedenti
+      this.risultatoOttimizzazione = null;
       return;
     }
 
-    // Se ci sono pezzi validi, calcola:
+    // --- NUOVO CONTROLLO: Verifica pezzi fisicamente impossibili ---
+    const hMax = this.pannelloAltezza - (this.marginePannello * 2);
+    const wMax = this.pannelloLarghezza - (this.marginePannello * 2);
+
+    const pezziImpossibili = pezziValidi.filter(p => {
+      // Controlla se entra mantenendo il suo orientamento nativo
+      const entraDritto = p.larghezza <= wMax && p.altezza <= hMax;
+      // Controlla se entra ruotandolo (solo se il pezzo è autorizzato a ruotare)
+      const entraRuotato = p.puoRuotare && (p.altezza <= wMax && p.larghezza <= hMax);
+
+      // Se non entra né dritto né ruotato, è un pezzo impossibile
+      return !(entraDritto || entraRuotato);
+    });
+
+    if (pezziImpossibili.length > 0) {
+      const nomi = pezziImpossibili.map(p => `<b>${p.nome}</b>`).join('<br>');
+      Swal.fire({
+        title: 'Pezzi fuori misura!',
+        html: `I seguenti pezzi sono più grandi del pannello (considerando i margini e i vincoli di rotazione) e non possono essere tagliati:<br><br>${nomi}<br><br>Modificali o rimuovili per procedere.`,
+        icon: 'error',
+        confirmButtonColor: '#212529'
+      });
+      return; // Blocchiamo il calcolo
+    }
+    // -------------------------------------------------------------
+
+    // Se tutti i pezzi sono validi, procedi col calcolo:
     this.risultatoOttimizzazione = this.taglioService.ottimizzaTaglio(
       this.pannelloLarghezza, this.pannelloAltezza, this.spessoreLama, this.marginePannello, pezziValidi
     );
     this.indicePannelloAttivo = 0;
     this.cambiaScheda('risultato');
   }
-
+  
   // --- ESPORTAZIONE PDF ---
   esportaPDF() {
     if (!this.risultatoOttimizzazione) return;

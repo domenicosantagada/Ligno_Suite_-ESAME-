@@ -78,9 +78,14 @@ export class TaglioPannelliService {
         scarti: scartiUtili // <-- GLI SCARTI VENGONO INSERITI QUI!
       };
 
-      if (nonPosizionati.length === rimanenti.length) {
-        risultatoPannello.nonPosizionabili = nonPosizionati;
-        pannelli.push(risultatoPannello);
+      // Se nessun pezzo è stato posizionato su questo nuovo pannello,
+      // significa che tutti i pezzi in "rimanenti" sono fisicamente troppo grandi
+      if (posizionatiSulPannello.length === 0) {
+        // Evitiamo di creare un pannello vuoto.
+        // Registriamo i pezzi scartati nell'ultimo pannello valido.
+        if (pannelli.length > 0) {
+          pannelli[pannelli.length - 1].nonPosizionabili = nonPosizionati;
+        }
         break;
       }
 
