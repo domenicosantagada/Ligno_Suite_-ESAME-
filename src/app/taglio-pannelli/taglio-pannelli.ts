@@ -227,7 +227,7 @@ export class TaglioPannelli {
     if (!ctx) return '';
 
     // Portiamo la scala a 4.0 per generare un'immagine in 4K/Altissima risoluzione
-    const SCALA = 4.0;
+    const SCALA = 2.0;
     const PAD = 40 * SCALA; // Scaliamo anche il padding
     const W = pannello.pannelloLarghezza * SCALA;
     const H = pannello.pannelloAltezza * SCALA;
