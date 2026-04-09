@@ -225,8 +225,17 @@ export class TaglioPannelli {
         if (logoAziendale.includes('image/png')) formato = 'PNG';
         else if (logoAziendale.includes('image/webp')) formato = 'WEBP';
 
-        // Disegniamo il logo sul PDF
-        doc.addImage(logoAziendale, formato, 14, 25, 50, 25);
+        // Leggiamo le proprietà originali dell'immagine per non deformarla
+        const imgProps = doc.getImageProperties(logoAziendale);
+
+        // Fissiamo l'altezza desiderata in millimetri
+        const altezzaFissa = 20;
+
+        // Calcoliamo la larghezza in base al rapporto (aspect ratio) originale
+        const larghezzaProporzionata = (imgProps.width / imgProps.height) * altezzaFissa;
+
+        // Disegniamo il logo sul PDF mantenendo le proporzioni perfette
+        doc.addImage(logoAziendale, formato, 14, 25, larghezzaProporzionata, altezzaFissa);
       } catch (err) {
         console.error("Errore durante l'inserimento del logo nel PDF", err);
         doc.setDrawColor(200, 200, 200);
@@ -245,7 +254,8 @@ export class TaglioPannelli {
     let startY = 65;
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text('RIEPILOGO GLOBALE PROGETTO', 14, startY);
+    // Impostiamo X a 105 (centro dell'A4) e diciamo di allineare al centro
+    doc.text('RIEPILOGO GLOBALE PROGETTO', 105, startY, {align: 'center'});
 
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
