@@ -17,13 +17,7 @@ import {CanvasTaglioComponent} from './taglio-pannelli.component';
 export class TaglioPannelli {
 
   schedaAttiva: 'input' | 'risultato' = 'input';
-
-  readonly COLORI_PEZZI = [
-    "#0d6efd", "#6ea8fe", "#0dcaf0", "#9eeaf9", "#198754",
-    "#a3cfbb", "#ffc107", "#ffe69c", "#fd7e14", "#ffc299",
-    "#dc3545", "#ea868f", "#6610f2", "#c5b3e6", "#d63384"
-  ];
-
+  
   // Configurazione Pannello Iniziale (Altezza x Larghezza)
   presetPannello: string = '1220x2440';
   pannelloAltezza: number = 1220;
@@ -126,7 +120,7 @@ export class TaglioPannelli {
     this.indicePannelloAttivo = 0;
     this.cambiaScheda('risultato');
   }
-  
+
   // --- ESPORTAZIONE PDF ---
   esportaPDF() {
     if (!this.risultatoOttimizzazione) return;
