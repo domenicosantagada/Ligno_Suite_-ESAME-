@@ -226,27 +226,26 @@ export class TaglioPannelli {
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
 
-    // Utilizziamo SCALA = 1 per avere un'ottima risoluzione nel PDF.
-    const SCALA = 1.0;
-    const PAD = 40;
+    // Portiamo la scala a 4.0 per generare un'immagine in 4K/Altissima risoluzione
+    const SCALA = 4.0;
+    const PAD = 40 * SCALA; // Scaliamo anche il padding
     const W = pannello.pannelloLarghezza * SCALA;
     const H = pannello.pannelloAltezza * SCALA;
 
     canvas.width = W + PAD * 2;
     canvas.height = H + PAD * 2;
 
-    // Spostiamo l'origine per lasciare il margine (padding)
     ctx.translate(PAD, PAD);
 
-    // 1. Pannello Grezzo (Stesso sfondo e bordo del web)
+    // 1. Pannello Grezzo
     ctx.fillStyle = 'rgb(250, 249, 246)';
     ctx.fillRect(0, 0, W, H);
 
     ctx.strokeStyle = '#333333';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 3 * SCALA; // Scaliamo lo spessore del bordo
     ctx.strokeRect(0, 0, W, H);
 
-    // 2. DISEGNO DEGLI SCARTI (Ora visibili anche nel PDF)
+    // 2. DISEGNO DEGLI SCARTI
     if (pannello.scarti && pannello.scarti.length > 0) {
       pannello.scarti.forEach((s: any) => {
         const sx = (s.x || 0) * SCALA;
@@ -254,76 +253,73 @@ export class TaglioPannelli {
         const sw = (s.w || 0) * SCALA;
         const sh = (s.h || 0) * SCALA;
 
-        // Colore sfondo scarto
         ctx.fillStyle = 'rgba(220, 220, 220, 0.6)';
         ctx.fillRect(sx, sy, sw, sh);
 
-        // Bordo scarto tratteggiato
         ctx.strokeStyle = 'gray';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1 * SCALA; // Spessore tratteggio
+        ctx.setLineDash([5 * SCALA, 5 * SCALA]); // Scaliamo anche la lunghezza dei tratti
         ctx.strokeRect(sx, sy, sw, sh);
-        ctx.setLineDash([]); // Resetta il tratteggio
+        ctx.setLineDash([]);
 
-        // Testo Scarto
         ctx.fillStyle = '#404040';
-        ctx.font = 'italic 12px Arial';
+        const fontSizeScarto = 12 * SCALA; // Font ad alta risoluzione
+        ctx.font = `italic ${fontSizeScarto}px Arial`;
 
         const dimW = Number.isInteger(s.w) ? s.w : s.w.toFixed(1);
         const dimH = Number.isInteger(s.h) ? s.h : s.h.toFixed(1);
         const testoS = `Scarto ${dimW}x${dimH}`;
         const testoWidth = ctx.measureText(testoS).width;
 
-        if (sw > testoWidth + 5 && sh > 15) {
+        if (sw > testoWidth + (5 * SCALA) && sh > (15 * SCALA)) {
           ctx.textAlign = 'left';
           ctx.textBaseline = 'top';
-          ctx.fillText(testoS, sx + 5, sy + 5);
+          ctx.fillText(testoS, sx + (5 * SCALA), sy + (5 * SCALA));
         }
       });
     }
 
-    // 3. Pezzi (Stesso azzurro e font del web)
-    ctx.lineWidth = 1;
+    // 3. Pezzi
+    ctx.lineWidth = 1 * SCALA;
     pannello.pezzi.forEach((p: any) => {
       const px = (p.x || 0) * SCALA;
       const py = (p.y || 0) * SCALA;
       const pw = (p.larghezzaTaglio || 0) * SCALA;
       const ph = (p.altezzaTaglio || 0) * SCALA;
 
-      // Colore riempimento azzurro
       ctx.fillStyle = 'rgba(173, 216, 230, 0.78)';
       ctx.fillRect(px, py, pw, ph);
 
-      // Colore bordo blu
       ctx.strokeStyle = 'rgb(0, 102, 204)';
       ctx.strokeRect(px, py, pw, ph);
 
-      // Testi per i pezzi
       ctx.fillStyle = '#000000';
       const title = (p.ruotato ? '↺ ' : '') + p.nome;
       const dimensions = `${p.altezzaTaglio} x ${p.larghezzaTaglio}`;
 
-      ctx.font = 'bold 14px Arial';
+      const fontTitleSize = 14 * SCALA; // Font ad alta risoluzione
+      const fontDimSize = 14 * SCALA;
+
+      ctx.font = `bold ${fontTitleSize}px Arial`;
       const titleWidth = ctx.measureText(title).width;
 
-      ctx.font = '14px Arial';
+      ctx.font = `${fontDimSize}px Arial`;
       const dimWidth = ctx.measureText(dimensions).width;
 
-      // Centrato se c'è spazio, altrimenti in alto a sinistra
-      if (pw > Math.max(titleWidth, dimWidth) + 10 && ph > 34) {
+      if (pw > Math.max(titleWidth, dimWidth) + (10 * SCALA) && ph > (34 * SCALA)) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText(title, px + pw / 2, py + ph / 2 - 6);
+        ctx.font = `bold ${fontTitleSize}px Arial`;
+        ctx.fillText(title, px + pw / 2, py + ph / 2 - (6 * SCALA));
 
-        ctx.font = '14px Arial';
-        ctx.fillText(dimensions, px + pw / 2, py + ph / 2 + 8);
-      } else if (pw > titleWidth + 5 && ph > 18) {
+        ctx.font = `${fontDimSize}px Arial`;
+        ctx.fillText(dimensions, px + pw / 2, py + ph / 2 + (8 * SCALA));
+      } else if (pw > titleWidth + (5 * SCALA) && ph > (18 * SCALA)) {
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText(title, px + 5, py + 5);
+        ctx.font = `bold ${fontTitleSize}px Arial`;
+        ctx.fillText(title, px + (5 * SCALA), py + (5 * SCALA));
       }
     });
 
