@@ -6,6 +6,7 @@ import Swal from 'sweetalert2'; // <-- Importazione di SweetAlert2
 import {Pezzo, RisultatoOttimizzazione} from './taglio-pannelli.model';
 import {TaglioPannelliService} from './taglio-pannelli.service';
 import {CanvasTaglioComponent} from './taglio-pannelli.component';
+import {Auth} from '../auth/auth';
 
 @Component({
   selector: 'app-taglio-pannelli',
@@ -33,6 +34,7 @@ export class TaglioPannelli {
   zoomImmagine: number = 30;
 
   private taglioService = inject(TaglioPannelliService);
+  private authService = inject(Auth);
   private cdr = inject(ChangeDetectorRef);
 
   get quantitaTotale(): number {
@@ -206,13 +208,39 @@ export class TaglioPannelli {
     // ==========================================
     drawHeaderFooter(paginaNum);
 
-    // --- LOGO FALEGNAMERIA ---
-    // Placeholder per il logo: un rettangolo con testo
-    // NOTA: Per inserire il tuo logo reale, usa: doc.addImage('BASE64_STRING', 'PNG', 14, 25, 40, 20);
-    doc.setDrawColor(200, 200, 200);
-    doc.rect(14, 25, 50, 25);
-    doc.setFontSize(8);
-    doc.text("LOGO FALEGNAMERIA", 39, 40, {align: 'center'});
+    // --- LOGO FALEGNAMERIA (Dal servizio Auth) ---
+    let logoAziendale = null;
+    try {
+      const utente = this.authService.getUtenteLoggato();
+      if (utente && utente.logoBase64) {
+        logoAziendale = utente.logoBase64 as string; // Recuperiamo il logo in Base64 dall'utente
+      }
+    } catch (e) {
+      console.error("Errore nella lettura del logo dal servizio Auth", e);
+    }
+
+    if (logoAziendale) {
+      try {
+        let formato = 'JPEG';
+        if (logoAziendale.includes('image/png')) formato = 'PNG';
+        else if (logoAziendale.includes('image/webp')) formato = 'WEBP';
+
+        // Disegniamo il logo sul PDF
+        doc.addImage(logoAziendale, formato, 14, 25, 50, 25);
+      } catch (err) {
+        console.error("Errore durante l'inserimento del logo nel PDF", err);
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(14, 25, 50, 25);
+        doc.setFontSize(8);
+        doc.text("ERRORE LOGO", 39, 40, {align: 'center'});
+      }
+    } else {
+      // Se l'utente non ha caricato nessun logo
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(14, 25, 50, 25);
+      doc.setFontSize(8);
+      doc.text("LOGO FALEGNAMERIA", 39, 40, {align: 'center'});
+    }
 
     let startY = 65;
     doc.setFontSize(18);
