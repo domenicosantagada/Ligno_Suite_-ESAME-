@@ -239,13 +239,21 @@ export class PreventiviService {
 
   /**
    * Carica un documento dalla lista Archivio per la visualizzazione/modifica.
-   * Utilizza il JSON.parse(JSON.stringify) per "scollegare" l'oggetto in memoria,
-   * evitando che modificando il preventivo si aggiornino involontariamente le scritte in tabella.
+   * Fa una chiamata GET per scaricare il DTO COMPLETO (con la lista degli items).
    */
-  caricaPreventivoPerModifica(prev: InvoiceData) {
-    this.originalInvoiceNumber = prev.invoiceNumber;
-    this.invoice.set(JSON.parse(JSON.stringify(prev)));
-    this.hasUnsavedChanges.set(false);
+  caricaPreventivoPerModifica(prev: any) {
+    // 1. Usiamo l'ID del preventivo riassuntivo per scaricare quello completo
+    this.http.get<InvoiceData>(`${this.apiUrl}/${prev.id}`).subscribe({
+      next: (prevCompleto) => {
+        // 2. Impostiamo i dati completi nel form
+        this.originalInvoiceNumber = prevCompleto.invoiceNumber;
+        this.invoice.set(prevCompleto);
+        this.hasUnsavedChanges.set(false);
+      },
+      error: (err) => {
+        console.error('Errore nel caricamento dei dettagli del preventivo:', err);
+      }
+    });
   }
 
   /**
