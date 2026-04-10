@@ -368,9 +368,9 @@ export class TaglioPannelli {
         (b.p.larghezzaTaglio * b.p.altezzaTaglio) - (a.p.larghezzaTaglio * a.p.altezzaTaglio)
       );
 
-      // 3. Stampiamo le righe raggruppate
+
+      // 3. Stampiamo le righe raggruppate dei PEZZI
       pezziRaggruppati.forEach((gruppo) => {
-        // Gestione di un eventuale salto pagina se la tabella diventa troppo lunga
         if (pY > 275) {
           doc.addPage();
           paginaNum++;
@@ -386,15 +386,80 @@ export class TaglioPannelli {
         }
 
         const rot = gruppo.p.ruotato ? " [Ruotato]" : "";
-
-        // Stampiamo con la quantità reale del gruppo
         doc.text(`${gruppo.qta}x`, 14, pY);
         doc.text(`${gruppo.p.altezzaTaglio} x ${gruppo.p.larghezzaTaglio} mm`, 28, pY);
         doc.text(`${gruppo.p.nome}${rot}`, 80, pY);
-
         pY += 6;
       });
-    });
+
+      // ==========================================
+      // 4. AGGIUNTA DEGLI SFRIDI (SCARTI) IN CODA
+      // ==========================================
+      if (pannello.scarti && pannello.scarti.length > 0) {
+        pY += 4; // Rigo vuoto di separazione
+
+        // Raggruppiamo gli sfridi
+        const scartiRaggruppati: { qta: number; s: any }[] = [];
+        pannello.scarti.forEach((scarto: any) => {
+          // Arrotondiamo per evitare problemi di decimali Javascript
+          const w = Math.round(scarto.w * 10) / 10;
+          const h = Math.round(scarto.h * 10) / 10;
+
+          // Per uno sfrido, l'orientamento non conta. Raggruppiamo lato lungo x lato corto.
+          const maxDim = Math.max(w, h);
+          const minDim = Math.min(w, h);
+
+          const esistente = scartiRaggruppati.find((rs) => rs.s.w === maxDim && rs.s.h === minDim);
+
+          if (esistente) {
+            esistente.qta++;
+          } else {
+            scartiRaggruppati.push({qta: 1, s: {w: maxDim, h: minDim}});
+          }
+        });
+
+        // Ordinamento sfridi per area decrescente
+        scartiRaggruppati.sort((a, b) => (b.s.w * b.s.h) - (a.s.w * a.s.h));
+
+        // Stile per gli sfridi: Corsivo e Grigio Scuro
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(100, 100, 100);
+
+        scartiRaggruppati.forEach((gruppo) => {
+          // Paginazione per gli sfridi
+          if (pY > 275) {
+            doc.addPage();
+            paginaNum++;
+            drawHeaderFooter(paginaNum);
+            pY = 25;
+            // Intestazione Tabella Ripetuta (Nero, Grassetto)
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(0, 0, 0);
+            doc.text("Qtà", 14, pY);
+            doc.text("Dimensioni (H x L)", 28, pY);
+            doc.text("Descrizione", 80, pY);
+            doc.line(14, pY + 2, 196, pY + 2);
+            pY += 8;
+            // Ripristino Stile Sfridi (Corsivo, Grigio)
+            doc.setFont("helvetica", "italic");
+            doc.setTextColor(100, 100, 100);
+          }
+
+          // Rimuove eventuali ".0" per misure intere pulite
+          const dimW = Number.isInteger(gruppo.s.w) ? gruppo.s.w : gruppo.s.w.toFixed(1);
+          const dimH = Number.isInteger(gruppo.s.h) ? gruppo.s.h : gruppo.s.h.toFixed(1);
+
+          doc.text(`${gruppo.qta}x`, 14, pY);
+          doc.text(`${dimH} x ${dimW} mm`, 28, pY);
+          doc.text(`Rimanenza`, 80, pY);
+          pY += 6;
+        });
+
+        // Reset dei colori e font per il pannello successivo
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+      }
+    }); // Fine ciclo forEach sui pannelli
 
     doc.save(`Schemi_Taglio_${oggi.replace(/\//g, '-')}.pdf`);
   }
