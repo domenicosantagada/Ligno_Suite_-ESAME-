@@ -193,19 +193,10 @@ export class Home implements OnInit, AfterViewInit {
         if (this.preventivi.length > 0) {
           this.totalePreventivi.set(this.preventivi.length);
 
-          // Ordina i preventivi per data decrescente e, a parità di data, per ID decrescente
-          const ordinati = [...this.preventivi].sort((a, b) => {
-            // 1. Controlla la differenza di data
-            const dateDiff = this.parseDate(b.date).getTime() - this.parseDate(a.date).getTime();
-
-            // Se le date sono diverse, usa l'ordinamento per data
-            if (dateDiff !== 0) {
-              return dateDiff;
-            }
-
-            // 2. Se le date sono identiche (creati lo stesso giorno), vince l'ID più alto (il più recente)
-            return b.id - a.id;
-          });
+          // Ordina i preventivi per data decrescente
+          const ordinati = [...this.preventivi].sort(
+            (a, b) => this.parseDate(b.date).getTime() - this.parseDate(a.date).getTime()
+          );
 
           const ultimo = ordinati[0];
           this.ultimoPreventivoText.set(`N° ${ultimo.invoiceNumber} del ${this.parseDate(ultimo.date).toLocaleDateString('it-IT')}`);
