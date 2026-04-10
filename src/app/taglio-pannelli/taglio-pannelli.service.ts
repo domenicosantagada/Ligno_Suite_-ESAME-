@@ -37,142 +37,139 @@ export class TaglioPannelliService {
 
     let migliorRisultato: RisultatoOttimizzazione | null = null;
 
-    // 3. Testiamo tutte le combinazioni
+    // 3. Testiamo le euristiche (Rimosso il loop verticale/orizzontale perché ora è dinamico)
     for (const strategia of strategieOrdinamento) {
-      for (const taglioVerticale of [true, false]) {
 
-        const pezziCorrenti = [...espansi].sort(strategia);
-        const risultato = this.eseguiSingolaOttimizzazione(larghezzaPannello, altezzaPannello, spessoreLama, margine, pezziCorrenti, taglioVerticale);
+      const pezziCorrenti = [...espansi].sort(strategia);
+      // Chiamata al nuovo motore Multi-Pannello
+      const risultato = this.eseguiSingolaOttimizzazione(larghezzaPannello, altezzaPannello, spessoreLama, margine, pezziCorrenti);
 
-        if (!migliorRisultato ||
-          risultato.pannelli.length < migliorRisultato.pannelli.length ||
-          (risultato.pannelli.length === migliorRisultato.pannelli.length && risultato.efficienza > migliorRisultato.efficienza)) {
-          migliorRisultato = risultato;
-        }
+      if (!migliorRisultato ||
+        risultato.pannelli.length < migliorRisultato.pannelli.length ||
+        (risultato.pannelli.length === migliorRisultato.pannelli.length && risultato.efficienza > migliorRisultato.efficienza)) {
+        migliorRisultato = risultato;
       }
     }
 
     return migliorRisultato!;
   }
 
-  // --- Esecuzione del singolo tentativo di ottimizzazione ---
-  private eseguiSingolaOttimizzazione(larghezzaPannello: number, altezzaPannello: number, spessoreLama: number, margine: number, listaPezzi: Pezzo[], taglioVerticale: boolean): RisultatoOttimizzazione {
-    const pannelloRef = {w: larghezzaPannello, h: altezzaPannello};
-    const pannelli: RisultatoPannello[] = [];
-    let rimanenti = [...listaPezzi];
+  // --- MOTORE GLOBALE: MULTI-PANNELLO + SPLIT DINAMICO ---
+  private eseguiSingolaOttimizzazione(larghezzaPannello: number, altezzaPannello: number, spessoreLama: number, margine: number, listaPezzi: Pezzo[]): RisultatoOttimizzazione {
 
-    while (rimanenti.length > 0) {
-      // ORA RECUPERIAMO SIA I PEZZI CHE GLI SCARTI DALLA GHIGLIOTTINA
-      const risultatoTaglio = this.taglioGhigliottina(pannelloRef, rimanenti, spessoreLama, margine, taglioVerticale);
+    // Invece di un solo pannello, gestiamo un array di "Pannelli sul tavolo"
+    const pannelliAperti: {
+      pannelloLarghezza: number,
+      pannelloAltezza: number,
+      pezzi: Pezzo[],
+      spaziLiberi: Scarto[],
+      nonPosizionabili: Pezzo[]
+    }[] = [];
 
-      const posizionatiSulPannello = risultatoTaglio.posizionati.filter(p => p.posizionato);
-      const nonPosizionati = risultatoTaglio.posizionati.filter(p => !p.posizionato);
-
-      // Filtriamo gli scarti troppo piccoli (es. strisce sotto i 2cm) per evitare che il canvas si riempia di "polvere" visiva
-      const scartiUtili = risultatoTaglio.scarti.filter(s => s.w > 20 && s.h > 20);
-
-      const risultatoPannello: RisultatoPannello = {
-        pezzi: posizionatiSulPannello,
+    // Funzione "magazziniere": Prende un pannello nuovo e lo mette sul tavolo
+    const aggiungiPannello = () => {
+      const nuovoPannello = {
         pannelloLarghezza: larghezzaPannello,
         pannelloAltezza: altezzaPannello,
-        scarti: scartiUtili // <-- GLI SCARTI VENGONO INSERITI QUI!
+        pezzi: [] as Pezzo[],              // <-- Diciamo a TS che è un array di Pezzi
+        spaziLiberi: [{
+          x: margine,
+          y: margine,
+          w: larghezzaPannello - 2 * margine,
+          h: altezzaPannello - 2 * margine
+        }] as Scarto[],
+        nonPosizionabili: [] as Pezzo[]    // <-- Diciamo a TS che è un array di Pezzi
       };
-
-      // Se nessun pezzo è stato posizionato su questo nuovo pannello,
-      // significa che tutti i pezzi in "rimanenti" sono fisicamente troppo grandi
-      if (posizionatiSulPannello.length === 0) {
-        // Evitiamo di creare un pannello vuoto.
-        // Registriamo i pezzi scartati nell'ultimo pannello valido.
-        if (pannelli.length > 0) {
-          pannelli[pannelli.length - 1].nonPosizionabili = nonPosizionati;
-        }
-        break;
-      }
-
-      pannelli.push(risultatoPannello);
-      rimanenti = nonPosizionati;
-    }
-
-    const areaTotalePannelli = pannelli.length * larghezzaPannello * altezzaPannello;
-
-    let areaUsata = 0;
-    pannelli.forEach(pnl => {
-      pnl.pezzi.forEach(p => {
-        areaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0);
-      });
-    });
-
-    const efficienza = areaTotalePannelli > 0 ? (areaUsata / areaTotalePannelli) * 100 : 0;
-
-    return {
-      pannelli,
-      efficienza,
-      areaUsata,
-      areaScarto: areaTotalePannelli - areaUsata
+      pannelliAperti.push(nuovoPannello);
+      return nuovoPannello;
     };
-  }
-
-  // --- Algoritmo Guillotine con Regola di Split dinamica ---
-  // MODIFICATO IL TIPO DI RITORNO: restituisce un oggetto con { posizionati, scarti }
-  private taglioGhigliottina(pannello: {
-    w: number,
-    h: number
-  }, listaPezzi: Pezzo[], spessoreLama: number, margine: number, taglioVerticale: boolean): {
-    posizionati: Pezzo[],
-    scarti: Scarto[]
-  } {
-    const spaziLiberi: Scarto[] = [{
-      x: margine, y: margine, w: pannello.w - 2 * margine, h: pannello.h - 2 * margine
-    }];
-    const posizionati: Pezzo[] = [];
 
     const puoEntrare = (rect: any, pw: number, ph: number) => pw <= rect.w && ph <= rect.h;
 
+    // Calcola quanto è "perfetto" l'incastro
     const calcolaPunteggio = (rect: any, pw: number, ph: number) => {
       const area = rect.w * rect.h - pw * ph;
       const latoCorto = Math.min(rect.w - pw, rect.h - ph);
       return {area, latoCorto};
     };
 
+    if (listaPezzi.length > 0) {
+      aggiungiPannello(); // Apriamo il primo pannello
+    }
+
+    // --- CICLO PRINCIPALE SU TUTTI I PEZZI ---
     for (const pezzo of listaPezzi) {
       let migliorPunteggio: any = null;
       let migliorSpazio: any = null;
+      let pannelloMigliore: any = null;
       let rotazioneMigliore = false;
-      let indiceMigliore = -1;
+      let indiceSpazioMigliore = -1;
 
-      for (let i = 0; i < spaziLiberi.length; i++) {
-        const spazio = spaziLiberi[i];
+      // 1. ESPLORAZIONE GLOBALE: Cerca l'incastro perfetto su TUTTI i pannelli aperti
+      for (const pannello of pannelliAperti) {
+        for (let i = 0; i < pannello.spaziLiberi.length; i++) {
+          const spazio = pannello.spaziLiberi[i];
 
-        if (puoEntrare(spazio, pezzo.larghezza, pezzo.altezza)) {
-          const s = calcolaPunteggio(spazio, pezzo.larghezza, pezzo.altezza);
-          if (!migliorPunteggio || s.area < migliorPunteggio.area || (s.area === migliorPunteggio.area && s.latoCorto < migliorPunteggio.latoCorto)) {
-            migliorPunteggio = s;
-            migliorSpazio = spazio;
-            rotazioneMigliore = false;
-            indiceMigliore = i;
+          // Prova a inserirlo dritto
+          if (puoEntrare(spazio, pezzo.larghezza, pezzo.altezza)) {
+            const s = calcolaPunteggio(spazio, pezzo.larghezza, pezzo.altezza);
+            if (!migliorPunteggio || s.area < migliorPunteggio.area || (s.area === migliorPunteggio.area && s.latoCorto < migliorPunteggio.latoCorto)) {
+              migliorPunteggio = s;
+              migliorSpazio = spazio;
+              pannelloMigliore = pannello;
+              rotazioneMigliore = false;
+              indiceSpazioMigliore = i;
+            }
           }
-        }
 
-        if (pezzo.puoRuotare && puoEntrare(spazio, pezzo.altezza, pezzo.larghezza)) {
-          const s = calcolaPunteggio(spazio, pezzo.altezza, pezzo.larghezza);
-          if (!migliorPunteggio || s.area < migliorPunteggio.area || (s.area === migliorPunteggio.area && s.latoCorto < migliorPunteggio.latoCorto)) {
-            migliorPunteggio = s;
-            migliorSpazio = spazio;
-            rotazioneMigliore = true;
-            indiceMigliore = i;
+          // Prova a inserirlo ruotato (se consentito)
+          if (pezzo.puoRuotare && puoEntrare(spazio, pezzo.altezza, pezzo.larghezza)) {
+            const s = calcolaPunteggio(spazio, pezzo.altezza, pezzo.larghezza);
+            if (!migliorPunteggio || s.area < migliorPunteggio.area || (s.area === migliorPunteggio.area && s.latoCorto < migliorPunteggio.latoCorto)) {
+              migliorPunteggio = s;
+              migliorSpazio = spazio;
+              pannelloMigliore = pannello;
+              rotazioneMigliore = true;
+              indiceSpazioMigliore = i;
+            }
           }
         }
       }
 
+      // 2. SE NON ENTRA DA NESSUNA PARTE, APRIAMO UN NUOVO PANNELLO
       if (!migliorSpazio) {
-        posizionati.push({...pezzo, posizionato: false});
-        continue;
+        const nuovoPannello = aggiungiPannello();
+        const spazio = nuovoPannello.spaziLiberi[0];
+
+        const entraDritto = puoEntrare(spazio, pezzo.larghezza, pezzo.altezza);
+        const entraRuotato = pezzo.puoRuotare && puoEntrare(spazio, pezzo.altezza, pezzo.larghezza);
+
+        // Controllo di sicurezza
+        if (!entraDritto && !entraRuotato) {
+          nuovoPannello.nonPosizionabili.push({...pezzo, posizionato: false});
+          continue;
+        }
+
+        pannelloMigliore = nuovoPannello;
+        migliorSpazio = spazio;
+        indiceSpazioMigliore = 0;
+
+        // Ottimizza l'inserimento nel nuovo pannello (Shorter Axis Rule)
+        if (entraDritto && entraRuotato) {
+          const sDritto = calcolaPunteggio(spazio, pezzo.larghezza, pezzo.altezza);
+          const sRuotato = calcolaPunteggio(spazio, pezzo.altezza, pezzo.larghezza);
+          rotazioneMigliore = (sRuotato.area < sDritto.area || (sRuotato.area === sDritto.area && sRuotato.latoCorto < sDritto.latoCorto));
+        } else {
+          rotazioneMigliore = !entraDritto;
+        }
       }
 
+      // 3. ESECUZIONE DEL TAGLIO
       const larghezzaT = rotazioneMigliore ? pezzo.altezza : pezzo.larghezza;
       const altezzaT = rotazioneMigliore ? pezzo.larghezza : pezzo.altezza;
 
-      posizionati.push({
+      // Salviamo il pezzo nel pannello vincitore
+      pannelloMigliore.pezzi.push({
         ...pezzo,
         x: migliorSpazio.x,
         y: migliorSpazio.y,
@@ -186,19 +183,65 @@ export class TaglioPannelliService {
       const wDestra = r.w - larghezzaT - spessoreLama;
       const hSopra = r.h - altezzaT - spessoreLama;
 
-      // SPLIT
-      if (taglioVerticale) {
-        if (wDestra > 0) spaziLiberi.push({x: r.x + larghezzaT + spessoreLama, y: r.y, w: wDestra, h: r.h});
-        if (hSopra > 0) spaziLiberi.push({x: r.x, y: r.y + altezzaT + spessoreLama, w: larghezzaT, h: hSopra});
+      // --- SPLIT DINAMICO (L'intelligenza) ---
+      if (wDestra >= hSopra) {
+        // Taglia verticalmente per massimizzare il blocco di destra
+        if (wDestra > 0) pannelloMigliore.spaziLiberi.push({
+          x: r.x + larghezzaT + spessoreLama,
+          y: r.y,
+          w: wDestra,
+          h: r.h
+        });
+        if (hSopra > 0) pannelloMigliore.spaziLiberi.push({
+          x: r.x,
+          y: r.y + altezzaT + spessoreLama,
+          w: larghezzaT,
+          h: hSopra
+        });
       } else {
-        if (wDestra > 0) spaziLiberi.push({x: r.x + larghezzaT + spessoreLama, y: r.y, w: wDestra, h: altezzaT});
-        if (hSopra > 0) spaziLiberi.push({x: r.x, y: r.y + altezzaT + spessoreLama, w: r.w, h: hSopra});
+        // Taglia orizzontalmente per massimizzare il blocco in basso
+        if (wDestra > 0) pannelloMigliore.spaziLiberi.push({
+          x: r.x + larghezzaT + spessoreLama,
+          y: r.y,
+          w: wDestra,
+          h: altezzaT
+        });
+        if (hSopra > 0) pannelloMigliore.spaziLiberi.push({
+          x: r.x,
+          y: r.y + altezzaT + spessoreLama,
+          w: r.w,
+          h: hSopra
+        });
       }
 
-      spaziLiberi.splice(indiceMigliore, 1);
+      // Eliminiamo il vecchio blocco libero
+      pannelloMigliore.spaziLiberi.splice(indiceSpazioMigliore, 1);
     }
 
-    // ALLA FINE DEL CALCOLO: restituiamo sia i pezzi che lo spazio avanzato
-    return {posizionati, scarti: spaziLiberi};
+    // 4. FORMATTAZIONE DEL RISULTATO PER L'INTERFACCIA GRAFICA
+    const pannelliRisultato: RisultatoPannello[] = pannelliAperti.map(p => ({
+      pannelloLarghezza: p.pannelloLarghezza,
+      pannelloAltezza: p.pannelloAltezza,
+      pezzi: p.pezzi,
+      scarti: p.spaziLiberi.filter(s => s.w > 20 && s.h > 20), // Pulizia scarti microscopici
+      nonPosizionabili: p.nonPosizionabili
+    })).filter(p => p.pezzi.length > 0 || p.nonPosizionabili.length > 0);
+
+    // Calcolo delle percentuali e riepiloghi globali
+    const areaTotalePannelli = pannelliRisultato.length * larghezzaPannello * altezzaPannello;
+    let areaUsata = 0;
+
+    pannelliRisultato.forEach(pnl => {
+      pnl.pezzi.forEach(p => areaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0));
+    });
+
+    const efficienza = areaTotalePannelli > 0 ? (areaUsata / areaTotalePannelli) * 100 : 0;
+
+    return {
+      pannelli: pannelliRisultato,
+      efficienza,
+      areaUsata,
+      areaScarto: areaTotalePannelli - areaUsata
+    };
   }
 }
