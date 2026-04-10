@@ -161,6 +161,7 @@ export class TaglioPannelli {
     }
     // -------------------------------------------------------------
 
+    /*
     // Mostriamo un avviso di caricamento perché il server potrebbe impiegare qualche secondo
     Swal.fire({
       title: 'Ottimizzazione in corso...',
@@ -170,6 +171,7 @@ export class TaglioPannelli {
         Swal.showLoading();
       }
     });
+     */
 
     // Chiamata asincrona al Backend (Spring Boot)
     this.taglioService.ottimizzaTaglio(
