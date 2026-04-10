@@ -330,10 +330,12 @@ export class TaglioPannelli {
         doc.addImage(imgData, 'PNG', 14, pY, finalW, finalH);
         doc.setDrawColor(200, 200, 200);
         doc.rect(14, pY, finalW, finalH);
+
+        // Questo è il punto in cui facciamo continuare la tabella subito sotto l'immagine!
         pY += finalH + 12;
       }
 
-      // Tabella Pezzi
+      // Tabella Pezzi - Intestazione
       doc.setFont("helvetica", "bold");
       doc.text("Qtà", 14, pY);
       doc.text("Dimensioni (H x L)", 28, pY);
@@ -342,9 +344,33 @@ export class TaglioPannelli {
       doc.setFont("helvetica", "normal");
       pY += 8;
 
-      const pezziOrdinati = [...pannello.pezzi].sort((a, b) => (b.larghezzaTaglio! * b.altezzaTaglio!) - (a.larghezzaTaglio! * a.altezzaTaglio!));
+      // 1. Raggruppiamo i pezzi identici di questo pannello
+      const pezziRaggruppati: { qta: number; p: any }[] = [];
 
-      pezziOrdinati.forEach((p) => {
+      pannello.pezzi.forEach((p: any) => {
+        // Un pezzo fa gruppo se ha stesso nome, stesse misure e stessa rotazione
+        const esistente = pezziRaggruppati.find(
+          (rp) => rp.p.nome === p.nome &&
+            rp.p.altezzaTaglio === p.altezzaTaglio &&
+            rp.p.larghezzaTaglio === p.larghezzaTaglio &&
+            rp.p.ruotato === p.ruotato
+        );
+
+        if (esistente) {
+          esistente.qta++; // Incrementa quantità
+        } else {
+          pezziRaggruppati.push({qta: 1, p: p}); // Aggiungi nuovo gruppo
+        }
+      });
+
+      // 2. Ordiniamo i gruppi per area decrescente
+      pezziRaggruppati.sort((a, b) =>
+        (b.p.larghezzaTaglio * b.p.altezzaTaglio) - (a.p.larghezzaTaglio * a.p.altezzaTaglio)
+      );
+
+      // 3. Stampiamo le righe raggruppate
+      pezziRaggruppati.forEach((gruppo) => {
+        // Gestione di un eventuale salto pagina se la tabella diventa troppo lunga
         if (pY > 275) {
           doc.addPage();
           paginaNum++;
@@ -358,10 +384,14 @@ export class TaglioPannelli {
           doc.setFont("helvetica", "normal");
           pY += 8;
         }
-        const rot = p.ruotato ? " [Ruotato]" : "";
-        doc.text("1x", 14, pY);
-        doc.text(`${p.altezzaTaglio} x ${p.larghezzaTaglio} mm`, 28, pY);
-        doc.text(`${p.nome}${rot}`, 80, pY);
+
+        const rot = gruppo.p.ruotato ? " [Ruotato]" : "";
+
+        // Stampiamo con la quantità reale del gruppo
+        doc.text(`${gruppo.qta}x`, 14, pY);
+        doc.text(`${gruppo.p.altezzaTaglio} x ${gruppo.p.larghezzaTaglio} mm`, 28, pY);
+        doc.text(`${gruppo.p.nome}${rot}`, 80, pY);
+
         pY += 6;
       });
     });
