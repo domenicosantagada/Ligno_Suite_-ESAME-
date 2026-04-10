@@ -139,17 +139,13 @@ export class TaglioPannelli {
       return;
     }
 
-    // --- NUOVO CONTROLLO: Verifica pezzi fisicamente impossibili ---
+    // --- CONTROLLO: Verifica pezzi fisicamente impossibili ---
     const hMax = this.pannelloAltezza - (this.marginePannello * 2);
     const wMax = this.pannelloLarghezza - (this.marginePannello * 2);
 
     const pezziImpossibili = pezziValidi.filter(p => {
-      // Controlla se entra mantenendo il suo orientamento nativo
       const entraDritto = p.larghezza <= wMax && p.altezza <= hMax;
-      // Controlla se entra ruotandolo (solo se il pezzo è autorizzato a ruotare)
       const entraRuotato = p.puoRuotare && (p.altezza <= wMax && p.larghezza <= hMax);
-
-      // Se non entra né dritto né ruotato, è un pezzo impossibile
       return !(entraDritto || entraRuotato);
     });
 
@@ -165,12 +161,39 @@ export class TaglioPannelli {
     }
     // -------------------------------------------------------------
 
-    // Se tutti i pezzi sono validi, procedi col calcolo:
-    this.risultatoOttimizzazione = this.taglioService.ottimizzaTaglio(
+    // Mostriamo un avviso di caricamento perché il server potrebbe impiegare qualche secondo
+    Swal.fire({
+      title: 'Ottimizzazione in corso...',
+      text: 'Il server sta calcolando il miglior incastro...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // Chiamata asincrona al Backend (Spring Boot)
+    this.taglioService.ottimizzaTaglio(
       this.pannelloLarghezza, this.pannelloAltezza, this.spessoreLama, this.marginePannello, pezziValidi
-    );
-    this.indicePannelloAttivo = 0;
-    this.cambiaScheda('risultato');
+    ).subscribe({
+      next: (risultatoDalServer) => {
+        // Quando il server risponde con successo
+        Swal.close(); // Chiudiamo il popup di caricamento
+
+        this.risultatoOttimizzazione = risultatoDalServer;
+        this.indicePannelloAttivo = 0;
+        this.cambiaScheda('risultato');
+
+        // ---> AGGIUNGI QUESTA RIGA <---
+        // Forza Angular a ridisegnare la pagina e il Canvas immediatamente
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        // Se Spring Boot è spento o c'è un errore
+        Swal.close();
+        console.error("Errore di connessione al backend:", err);
+        Swal.fire('Errore di Calcolo', 'Impossibile connettersi al server...', 'error');
+      }
+    });
   }
 
 // --- ESPORTAZIONE PDF ---
