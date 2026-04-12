@@ -33,6 +33,9 @@ export class TaglioPannelli {
   indicePannelloAttivo: number = 0;
   zoomImmagine: number = 30;
 
+  // ---> NUOVA VARIABILE PER IL CARICAMENTO <---
+  isCalcoloInCorso: boolean = false;
+
   private taglioService = inject(TaglioPannelliService);
   private authService = inject(Auth);
   private cdr = inject(ChangeDetectorRef);
@@ -161,44 +164,34 @@ export class TaglioPannelli {
     }
     // -------------------------------------------------------------
 
-    /*
-    // Mostriamo un avviso di caricamento perché il server potrebbe impiegare qualche secondo
-    Swal.fire({
-      title: 'Ottimizzazione in corso...',
-      text: 'Il server sta calcolando il miglior incastro...',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-     */
+    // ---> ATTIVIAMO LA BARRA DI CARICAMENTO <---
+    this.isCalcoloInCorso = true;
 
     // Chiamata asincrona al Backend (Spring Boot)
     this.taglioService.ottimizzaTaglio(
       this.pannelloLarghezza, this.pannelloAltezza, this.spessoreLama, this.marginePannello, pezziValidi
     ).subscribe({
       next: (risultatoDalServer) => {
-        // Quando il server risponde con successo
-        Swal.close(); // Chiudiamo il popup di caricamento
+        // ---> DISATTIVIAMO LA BARRA DI CARICAMENTO <---
+        this.isCalcoloInCorso = false;
 
         this.risultatoOttimizzazione = risultatoDalServer;
         this.indicePannelloAttivo = 0;
         this.cambiaScheda('risultato');
 
-        // ---> AGGIUNGI QUESTA RIGA <---
-        // Forza Angular a ridisegnare la pagina e il Canvas immediatamente
         this.cdr.detectChanges();
       },
       error: (err) => {
-        // Se Spring Boot è spento o c'è un errore
-        Swal.close();
+        // ---> DISATTIVIAMO LA BARRA DI CARICAMENTO ANCHE IN CASO DI ERRORE <---
+        this.isCalcoloInCorso = false;
+
         console.error("Errore di connessione al backend:", err);
         Swal.fire('Errore di Calcolo', 'Impossibile connettersi al server...', 'error');
       }
     });
   }
 
-// --- ESPORTAZIONE PDF ---
+  // --- ESPORTAZIONE PDF ---
   esportaPDF() {
     if (!this.risultatoOttimizzazione) return;
 
@@ -289,7 +282,7 @@ export class TaglioPannelli {
     doc.text(`Dimensione pannello: ${this.pannelloAltezza} x ${this.pannelloLarghezza} mm`, 80, startY);
 
     startY += 8;
-    doc.text(`Totale pezzi prodotti: ${this.quantitaTotale}`, 14, startY); // Conteggio pezzi
+    doc.text(`Totale pezzi prodotti: ${this.quantitaTotale}`, 14, startY);
     doc.text(`Spessore lama/taglio: ${this.spessoreLama} mm`, 80, startY);
 
     startY += 12;
@@ -484,7 +477,7 @@ export class TaglioPannelli {
         doc.setFont("helvetica", "normal");
         doc.setTextColor(0, 0, 0);
       }
-    }); // Fine ciclo forEach sui pannelli
+    });
 
     doc.save(`Schemi_Taglio_${oggi.replace(/\//g, '-')}.pdf`);
   }
@@ -570,7 +563,7 @@ export class TaglioPannelli {
   private processaCSV(csvText: string) {
     // 1. RESET TOTALE DELL'AMBIENTE (come se la pagina fosse ricaricata)
     this.pezzi = [];
-    this.risultatoOttimizzazione = null; // Azzera eventuali layout calcolati
+    this.risultatoOttimizzazione = null;
     this.indicePannelloAttivo = 0;
     this.zoomImmagine = 30;
 
