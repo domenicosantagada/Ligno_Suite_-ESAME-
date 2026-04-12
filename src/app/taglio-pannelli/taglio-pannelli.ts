@@ -35,6 +35,7 @@ export class TaglioPannelli {
 
   // ---> NUOVA VARIABILE PER IL CARICAMENTO <---
   isCalcoloInCorso: boolean = false;
+  isGenerazionePdfInCorso: boolean = false;
 
   private taglioService = inject(TaglioPannelliService);
   private authService = inject(Auth);
@@ -195,205 +196,168 @@ export class TaglioPannelli {
   esportaPDF() {
     if (!this.risultatoOttimizzazione) return;
 
-    const doc = new jsPDF('portrait', 'mm', 'a4');
-    const pannelli = this.risultatoOttimizzazione.pannelli;
+    // 1. Salviamo il risultato in una COSTANTE LOCALE prima del timeout.
+    // Questo rassicura TypeScript ed elimina l'errore "Object is possibly null"
+    const risultato = this.risultatoOttimizzazione;
 
-    const areaUsata = this.risultatoOttimizzazione.areaUsata / 1000000;
-    const areaScarto = this.risultatoOttimizzazione.areaScarto / 1000000;
-    const areaTot = areaUsata + areaScarto;
-    const percUsata = ((areaUsata / areaTot) * 100).toFixed(1);
-    const percScarto = ((areaScarto / areaTot) * 100).toFixed(1);
+    // 2. Accendiamo lo spinner del caricamento
+    this.isGenerazionePdfInCorso = true;
 
-    const oggi = new Date().toLocaleDateString('it-IT');
-    let paginaNum = 1;
-
-    // Funzione per Header e Footer
-    const drawHeaderFooter = (pageNum: number) => {
-      doc.setFontSize(10);
-      doc.setTextColor(150, 150, 150);
-      doc.setFont("helvetica", "normal");
-      doc.text(`${oggi}`, 14, 15);
-      doc.setFont("helvetica", "bold");
-      doc.text('Ligno Suite - Ottimizzazione Taglio', 196, 15, {align: 'right'});
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.text(`Pagina ${pageNum}`, 105, 290, {align: 'center'});
-      doc.setTextColor(0, 0, 0);
-    };
-
-    // ==========================================
-    // PAGINA 1: RIEPILOGO E LOGO
-    // ==========================================
-    drawHeaderFooter(paginaNum);
-
-    // --- LOGO FALEGNAMERIA (Dal servizio Auth) ---
-    let logoAziendale = null;
-    try {
-      const utente = this.authService.getUtenteLoggato();
-      if (utente && utente.logoBase64) {
-        logoAziendale = utente.logoBase64 as string; // Recuperiamo il logo in Base64 dall'utente
-      }
-    } catch (e) {
-      console.error("Errore nella lettura del logo dal servizio Auth", e);
-    }
-
-    if (logoAziendale) {
+    // 3. Settiamo un timer per far apparire lo spinner prima del freeze
+    setTimeout(() => {
       try {
-        let formato = 'JPEG';
-        if (logoAziendale.includes('image/png')) formato = 'PNG';
-        else if (logoAziendale.includes('image/webp')) formato = 'WEBP';
+        const doc = new jsPDF('portrait', 'mm', 'a4');
 
-        // Leggiamo le proprietà originali dell'immagine per non deformarla
-        const imgProps = doc.getImageProperties(logoAziendale);
+        // Usiamo la costante "risultato" al posto di "this.risultatoOttimizzazione"
+        const pannelli = risultato.pannelli;
 
-        // Fissiamo l'altezza desiderata in millimetri
-        const altezzaFissa = 20;
+        const areaUsata = risultato.areaUsata / 1000000;
+        const areaScarto = risultato.areaScarto / 1000000;
+        const areaTot = areaUsata + areaScarto;
+        const percUsata = ((areaUsata / areaTot) * 100).toFixed(1);
+        const percScarto = ((areaScarto / areaTot) * 100).toFixed(1);
 
-        // Calcoliamo la larghezza in base al rapporto (aspect ratio) originale
-        const larghezzaProporzionata = (imgProps.width / imgProps.height) * altezzaFissa;
+        const oggi = new Date().toLocaleDateString('it-IT');
+        let paginaNum = 1;
 
-        // Disegniamo il logo sul PDF mantenendo le proporzioni perfette
-        doc.addImage(logoAziendale, formato, 14, 25, larghezzaProporzionata, altezzaFissa);
-      } catch (err) {
-        console.error("Errore durante l'inserimento del logo nel PDF", err);
-        doc.setDrawColor(200, 200, 200);
-        doc.rect(14, 25, 50, 25);
-        doc.setFontSize(8);
-        doc.text("ERRORE LOGO", 39, 40, {align: 'center'});
-      }
-    } else {
-      // Se l'utente non ha caricato nessun logo
-      doc.setDrawColor(200, 200, 200);
-      doc.rect(14, 25, 50, 25);
-      doc.setFontSize(8);
-      doc.text("LOGO FALEGNAMERIA", 39, 40, {align: 'center'});
-    }
+        // Funzione per Header e Footer
+        const drawHeaderFooter = (pageNum: number) => {
+          doc.setFontSize(10);
+          doc.setTextColor(150, 150, 150);
+          doc.setFont("helvetica", "normal");
+          doc.text(`${oggi}`, 14, 15);
+          doc.setFont("helvetica", "bold");
+          doc.text('Ligno Suite - Ottimizzazione Taglio', 196, 15, {align: 'right'});
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.text(`Pagina ${pageNum}`, 105, 290, {align: 'center'});
+          doc.setTextColor(0, 0, 0);
+        };
 
-    let startY = 65;
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    // Impostiamo X a 105 (centro dell'A4) e diciamo di allineare al centro
-    doc.text('RIEPILOGO GLOBALE PROGETTO', 105, startY, {align: 'center'});
+        // ==========================================
+        // PAGINA 1: RIEPILOGO E LOGO
+        // ==========================================
+        drawHeaderFooter(paginaNum);
 
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    startY += 12;
-    doc.text(`Pannelli utilizzati: ${pannelli.length}`, 14, startY);
-    doc.text(`Dimensione pannello: ${this.pannelloAltezza} x ${this.pannelloLarghezza} mm`, 80, startY);
-
-    startY += 8;
-    doc.text(`Totale pezzi prodotti: ${this.quantitaTotale}`, 14, startY);
-    doc.text(`Spessore lama/taglio: ${this.spessoreLama} mm`, 80, startY);
-
-    startY += 12;
-    doc.setFont("helvetica", "bold");
-    doc.text(`Efficienza totale: ${percUsata}%`, 14, startY);
-
-    doc.setFont("helvetica", "normal");
-    startY += 8;
-    doc.text(`Area totale utilizzata: ${areaUsata.toFixed(3)} m²`, 14, startY);
-    doc.text(`Area totale scarto: ${areaScarto.toFixed(3)} m² (${percScarto}%)`, 80, startY);
-
-    // --- SEZIONE NOTE ---
-    startY = 200;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("Note:", 14, startY);
-
-    doc.setDrawColor(180, 180, 180);
-    for (let n = 0; n < 6; n++) {
-      const lineY = startY + 10 + (n * 10);
-      doc.line(14, lineY, 196, lineY);
-    }
-
-    // ==========================================
-    // PAGINE SUCCESSIVE: PANNELLI
-    // ==========================================
-    pannelli.forEach((pannello, i) => {
-      doc.addPage();
-      paginaNum++;
-      drawHeaderFooter(paginaNum);
-
-      let pY = 25;
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text(`PANNELLO ${i + 1}`, 14, pY);
-
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      pY += 8;
-
-      const areaP = (pannello.pannelloLarghezza * pannello.pannelloAltezza);
-      let pAreaUsata = 0;
-      pannello.pezzi.forEach((p: any) => pAreaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0));
-      const pAreaScarto = areaP - pAreaUsata;
-
-      doc.text(`Area usata: ${(pAreaUsata / 1000000).toFixed(3)} m² (${((pAreaUsata / areaP) * 100).toFixed(1)}%)`, 14, pY);
-      doc.text(`Scarto: ${(pAreaScarto / 1000000).toFixed(3)} m² (${((pAreaScarto / areaP) * 100).toFixed(1)}%)`, 80, pY);
-      doc.text(`Pezzi ricavati: ${pannello.pezzi.length}`, 145, pY);
-
-      pY += 8;
-
-      // Immagine
-      const imgData = this.generaImmaginePannello(pannello);
-      if (imgData) {
-        const SCALA_IMG = 2.0;
-        const PAD_IMG = 40 * SCALA_IMG;
-        const origW = pannello.pannelloLarghezza * SCALA_IMG + PAD_IMG * 2;
-        const origH = pannello.pannelloAltezza * SCALA_IMG + PAD_IMG * 2;
-        const ratio = Math.min(182 / origW, 110 / origH);
-        const finalW = origW * ratio;
-        const finalH = origH * ratio;
-
-        doc.addImage(imgData, 'PNG', 14, pY, finalW, finalH);
-        doc.setDrawColor(200, 200, 200);
-        doc.rect(14, pY, finalW, finalH);
-
-        // Questo è il punto in cui facciamo continuare la tabella subito sotto l'immagine!
-        pY += finalH + 12;
-      }
-
-      // Tabella Pezzi - Intestazione
-      doc.setFont("helvetica", "bold");
-      doc.text("Qtà", 14, pY);
-      doc.text("Dimensioni (H x L)", 28, pY);
-      doc.text("Descrizione", 80, pY);
-      doc.line(14, pY + 2, 196, pY + 2);
-      doc.setFont("helvetica", "normal");
-      pY += 8;
-
-      // 1. Raggruppiamo i pezzi identici di questo pannello
-      const pezziRaggruppati: { qta: number; p: any }[] = [];
-
-      pannello.pezzi.forEach((p: any) => {
-        // Un pezzo fa gruppo se ha stesso nome, stesse misure e stessa rotazione
-        const esistente = pezziRaggruppati.find(
-          (rp) => rp.p.nome === p.nome &&
-            rp.p.altezzaTaglio === p.altezzaTaglio &&
-            rp.p.larghezzaTaglio === p.larghezzaTaglio &&
-            rp.p.ruotato === p.ruotato
-        );
-
-        if (esistente) {
-          esistente.qta++; // Incrementa quantità
-        } else {
-          pezziRaggruppati.push({qta: 1, p: p}); // Aggiungi nuovo gruppo
+        // --- LOGO FALEGNAMERIA (Dal servizio Auth) ---
+        let logoAziendale = null;
+        try {
+          const utente = this.authService.getUtenteLoggato();
+          if (utente && utente.logoBase64) {
+            logoAziendale = utente.logoBase64 as string;
+          }
+        } catch (e) {
+          console.error("Errore nella lettura del logo dal servizio Auth", e);
         }
-      });
 
-      // 2. Ordiniamo i gruppi per area decrescente
-      pezziRaggruppati.sort((a, b) =>
-        (b.p.larghezzaTaglio * b.p.altezzaTaglio) - (a.p.larghezzaTaglio * a.p.altezzaTaglio)
-      );
+        if (logoAziendale) {
+          try {
+            let formato = 'JPEG';
+            if (logoAziendale.includes('image/png')) formato = 'PNG';
+            else if (logoAziendale.includes('image/webp')) formato = 'WEBP';
 
+            const imgProps = doc.getImageProperties(logoAziendale);
+            const altezzaFissa = 20;
+            const larghezzaProporzionata = (imgProps.width / imgProps.height) * altezzaFissa;
 
-      // 3. Stampiamo le righe raggruppate dei PEZZI
-      pezziRaggruppati.forEach((gruppo) => {
-        if (pY > 275) {
+            doc.addImage(logoAziendale, formato, 14, 25, larghezzaProporzionata, altezzaFissa);
+          } catch (err) {
+            console.error("Errore durante l'inserimento del logo nel PDF", err);
+            doc.setDrawColor(200, 200, 200);
+            doc.rect(14, 25, 50, 25);
+            doc.setFontSize(8);
+            doc.text("ERRORE LOGO", 39, 40, {align: 'center'});
+          }
+        } else {
+          doc.setDrawColor(200, 200, 200);
+          doc.rect(14, 25, 50, 25);
+          doc.setFontSize(8);
+          doc.text("LOGO FALEGNAMERIA", 39, 40, {align: 'center'});
+        }
+
+        let startY = 65;
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.text('RIEPILOGO GLOBALE PROGETTO', 105, startY, {align: 'center'});
+
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        startY += 12;
+        doc.text(`Pannelli utilizzati: ${pannelli.length}`, 14, startY);
+        doc.text(`Dimensione pannello: ${this.pannelloAltezza} x ${this.pannelloLarghezza} mm`, 80, startY);
+
+        startY += 8;
+        doc.text(`Totale pezzi prodotti: ${this.quantitaTotale}`, 14, startY);
+        doc.text(`Spessore lama/taglio: ${this.spessoreLama} mm`, 80, startY);
+
+        startY += 12;
+        doc.setFont("helvetica", "bold");
+        doc.text(`Efficienza totale: ${percUsata}%`, 14, startY);
+
+        doc.setFont("helvetica", "normal");
+        startY += 8;
+        doc.text(`Area totale utilizzata: ${areaUsata.toFixed(3)} m²`, 14, startY);
+        doc.text(`Area totale scarto: ${areaScarto.toFixed(3)} m² (${percScarto}%)`, 80, startY);
+
+        // --- SEZIONE NOTE ---
+        startY = 200;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("Note:", 14, startY);
+
+        doc.setDrawColor(180, 180, 180);
+        for (let n = 0; n < 6; n++) {
+          const lineY = startY + 10 + (n * 10);
+          doc.line(14, lineY, 196, lineY);
+        }
+
+        // ==========================================
+        // PAGINE SUCCESSIVE: PANNELLI
+        // ==========================================
+        pannelli.forEach((pannello, i) => {
           doc.addPage();
           paginaNum++;
           drawHeaderFooter(paginaNum);
-          pY = 25;
+
+          let pY = 25;
+          doc.setFontSize(14);
+          doc.setFont("helvetica", "bold");
+          doc.text(`PANNELLO ${i + 1}`, 14, pY);
+
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          pY += 8;
+
+          const areaP = (pannello.pannelloLarghezza * pannello.pannelloAltezza);
+          let pAreaUsata = 0;
+          pannello.pezzi.forEach((p: any) => pAreaUsata += (p.larghezzaTaglio || 0) * (p.altezzaTaglio || 0));
+          const pAreaScarto = areaP - pAreaUsata;
+
+          doc.text(`Area usata: ${(pAreaUsata / 1000000).toFixed(3)} m² (${((pAreaUsata / areaP) * 100).toFixed(1)}%)`, 14, pY);
+          doc.text(`Scarto: ${(pAreaScarto / 1000000).toFixed(3)} m² (${((pAreaScarto / areaP) * 100).toFixed(1)}%)`, 80, pY);
+          doc.text(`Pezzi ricavati: ${pannello.pezzi.length}`, 145, pY);
+
+          pY += 8;
+
+          // Immagine
+          const imgData = this.generaImmaginePannello(pannello);
+          if (imgData) {
+            const SCALA_IMG = 2.0;
+            const PAD_IMG = 40 * SCALA_IMG;
+            const origW = pannello.pannelloLarghezza * SCALA_IMG + PAD_IMG * 2;
+            const origH = pannello.pannelloAltezza * SCALA_IMG + PAD_IMG * 2;
+            const ratio = Math.min(182 / origW, 110 / origH);
+            const finalW = origW * ratio;
+            const finalH = origH * ratio;
+
+            doc.addImage(imgData, 'PNG', 14, pY, finalW, finalH);
+            doc.setDrawColor(200, 200, 200);
+            doc.rect(14, pY, finalW, finalH);
+
+            pY += finalH + 12;
+          }
+
+          // Tabella Pezzi - Intestazione
           doc.setFont("helvetica", "bold");
           doc.text("Qtà", 14, pY);
           doc.text("Dimensioni (H x L)", 28, pY);
@@ -401,85 +365,118 @@ export class TaglioPannelli {
           doc.line(14, pY + 2, 196, pY + 2);
           doc.setFont("helvetica", "normal");
           pY += 8;
-        }
 
-        const rot = gruppo.p.ruotato ? " [Ruotato]" : "";
-        doc.text(`${gruppo.qta}x`, 14, pY);
-        doc.text(`${gruppo.p.altezzaTaglio} x ${gruppo.p.larghezzaTaglio} mm`, 28, pY);
-        doc.text(`${gruppo.p.nome}${rot}`, 80, pY);
-        pY += 6;
-      });
+          // Raggruppiamo i pezzi identici
+          const pezziRaggruppati: { qta: number; p: any }[] = [];
 
-      // ==========================================
-      // 4. AGGIUNTA DEGLI SFRIDI (SCARTI) IN CODA
-      // ==========================================
-      if (pannello.scarti && pannello.scarti.length > 0) {
-        pY += 4; // Rigo vuoto di separazione
+          pannello.pezzi.forEach((p: any) => {
+            const esistente = pezziRaggruppati.find(
+              (rp) => rp.p.nome === p.nome &&
+                rp.p.altezzaTaglio === p.altezzaTaglio &&
+                rp.p.larghezzaTaglio === p.larghezzaTaglio &&
+                rp.p.ruotato === p.ruotato
+            );
 
-        // Raggruppiamo gli sfridi
-        const scartiRaggruppati: { qta: number; s: any }[] = [];
-        pannello.scarti.forEach((scarto: any) => {
-          // Arrotondiamo per evitare problemi di decimali Javascript
-          const w = Math.round(scarto.w * 10) / 10;
-          const h = Math.round(scarto.h * 10) / 10;
+            if (esistente) {
+              esistente.qta++;
+            } else {
+              pezziRaggruppati.push({qta: 1, p: p});
+            }
+          });
 
-          // Per uno sfrido, l'orientamento non conta. Raggruppiamo lato lungo x lato corto.
-          const maxDim = Math.max(w, h);
-          const minDim = Math.min(w, h);
+          pezziRaggruppati.sort((a, b) =>
+            (b.p.larghezzaTaglio * b.p.altezzaTaglio) - (a.p.larghezzaTaglio * a.p.altezzaTaglio)
+          );
 
-          const esistente = scartiRaggruppati.find((rs) => rs.s.w === maxDim && rs.s.h === minDim);
+          pezziRaggruppati.forEach((gruppo) => {
+            if (pY > 275) {
+              doc.addPage();
+              paginaNum++;
+              drawHeaderFooter(paginaNum);
+              pY = 25;
+              doc.setFont("helvetica", "bold");
+              doc.text("Qtà", 14, pY);
+              doc.text("Dimensioni (H x L)", 28, pY);
+              doc.text("Descrizione", 80, pY);
+              doc.line(14, pY + 2, 196, pY + 2);
+              doc.setFont("helvetica", "normal");
+              pY += 8;
+            }
 
-          if (esistente) {
-            esistente.qta++;
-          } else {
-            scartiRaggruppati.push({qta: 1, s: {w: maxDim, h: minDim}});
-          }
-        });
+            const rot = gruppo.p.ruotato ? " [Ruotato]" : "";
+            doc.text(`${gruppo.qta}x`, 14, pY);
+            doc.text(`${gruppo.p.altezzaTaglio} x ${gruppo.p.larghezzaTaglio} mm`, 28, pY);
+            doc.text(`${gruppo.p.nome}${rot}`, 80, pY);
+            pY += 6;
+          });
 
-        // Ordinamento sfridi per area decrescente
-        scartiRaggruppati.sort((a, b) => (b.s.w * b.s.h) - (a.s.w * a.s.h));
+          if (pannello.scarti && pannello.scarti.length > 0) {
+            pY += 4;
 
-        // Stile per gli sfridi: Corsivo e Grigio Scuro
-        doc.setFont("helvetica", "italic");
-        doc.setTextColor(100, 100, 100);
+            const scartiRaggruppati: { qta: number; s: any }[] = [];
+            pannello.scarti.forEach((scarto: any) => {
+              const w = Math.round(scarto.w * 10) / 10;
+              const h = Math.round(scarto.h * 10) / 10;
 
-        scartiRaggruppati.forEach((gruppo) => {
-          // Paginazione per gli sfridi
-          if (pY > 275) {
-            doc.addPage();
-            paginaNum++;
-            drawHeaderFooter(paginaNum);
-            pY = 25;
-            // Intestazione Tabella Ripetuta (Nero, Grassetto)
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(0, 0, 0);
-            doc.text("Qtà", 14, pY);
-            doc.text("Dimensioni (H x L)", 28, pY);
-            doc.text("Descrizione", 80, pY);
-            doc.line(14, pY + 2, 196, pY + 2);
-            pY += 8;
-            // Ripristino Stile Sfridi (Corsivo, Grigio)
+              const maxDim = Math.max(w, h);
+              const minDim = Math.min(w, h);
+
+              const esistente = scartiRaggruppati.find((rs) => rs.s.w === maxDim && rs.s.h === minDim);
+
+              if (esistente) {
+                esistente.qta++;
+              } else {
+                scartiRaggruppati.push({qta: 1, s: {w: maxDim, h: minDim}});
+              }
+            });
+
+            scartiRaggruppati.sort((a, b) => (b.s.w * b.s.h) - (a.s.w * a.s.h));
+
             doc.setFont("helvetica", "italic");
             doc.setTextColor(100, 100, 100);
+
+            scartiRaggruppati.forEach((gruppo) => {
+              if (pY > 275) {
+                doc.addPage();
+                paginaNum++;
+                drawHeaderFooter(paginaNum);
+                pY = 25;
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 0, 0);
+                doc.text("Qtà", 14, pY);
+                doc.text("Dimensioni (H x L)", 28, pY);
+                doc.text("Descrizione", 80, pY);
+                doc.line(14, pY + 2, 196, pY + 2);
+                pY += 8;
+                doc.setFont("helvetica", "italic");
+                doc.setTextColor(100, 100, 100);
+              }
+
+              const dimW = Number.isInteger(gruppo.s.w) ? gruppo.s.w : gruppo.s.w.toFixed(1);
+              const dimH = Number.isInteger(gruppo.s.h) ? gruppo.s.h : gruppo.s.h.toFixed(1);
+
+              doc.text(`${gruppo.qta}x`, 14, pY);
+              doc.text(`${dimH} x ${dimW} mm`, 28, pY);
+              doc.text(`Rimanenza`, 80, pY);
+              pY += 6;
+            });
+
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(0, 0, 0);
           }
-
-          // Rimuove eventuali ".0" per misure intere pulite
-          const dimW = Number.isInteger(gruppo.s.w) ? gruppo.s.w : gruppo.s.w.toFixed(1);
-          const dimH = Number.isInteger(gruppo.s.h) ? gruppo.s.h : gruppo.s.h.toFixed(1);
-
-          doc.text(`${gruppo.qta}x`, 14, pY);
-          doc.text(`${dimH} x ${dimW} mm`, 28, pY);
-          doc.text(`Rimanenza`, 80, pY);
-          pY += 6;
         });
 
-        // Reset dei colori e font per il pannello successivo
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(0, 0, 0);
-      }
-    });
+        doc.save(`Schemi_Taglio_${oggi.replace(/\//g, '-')}.pdf`);
 
-    doc.save(`Schemi_Taglio_${oggi.replace(/\//g, '-')}.pdf`);
+      } catch (error) {
+        console.error("Errore durante la generazione del PDF:", error);
+        Swal.fire('Errore', 'Si è verificato un errore durante la creazione del PDF.', 'error');
+      } finally {
+        // 4. A operazione terminata o fallita, spegniamo lo spinner
+        this.isGenerazionePdfInCorso = false;
+        this.cdr.detectChanges(); // Diciamo ad Angular di aggiornare l'interfaccia istantaneamente
+      }
+    }, 50);
   }
 
   // Esporta in CSV
