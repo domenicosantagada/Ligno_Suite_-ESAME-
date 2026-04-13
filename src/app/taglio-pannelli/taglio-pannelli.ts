@@ -33,7 +33,6 @@ export class TaglioPannelli {
   indicePannelloAttivo: number = 0;
   zoomImmagine: number = 30;
 
-  // ---> NUOVA VARIABILE PER IL CARICAMENTO <---
   isCalcoloInCorso: boolean = false;
   isGenerazionePdfInCorso: boolean = false;
 
