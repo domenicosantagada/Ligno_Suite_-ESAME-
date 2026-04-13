@@ -50,8 +50,15 @@ export class PreventiviService {
     });
   }
 
+
+  /**
+   * CALCOLO PROGRESSIVO: Fa una chiamata GET al backend per ottenere il prossimo numero disponibile.
+   * Il backend calcola il numero progressivo in modo sicuro, evitando conflitti tra più utenti.
+   * Una volta ottenuto, aggiorna il campo "invoiceNumber" del preventivo.
+   */
   ottieniProssimoNumero() {
-    // RIMOSSO l'estrazione dell'utente
+
+    // Chiamata GET al backend per ottenere il prossimo numero progressivo disponibile
     this.http.get<number>(`${this.apiUrl}/next-number`).subscribe({
       next: (nextNum) => {
         this.invoice.update(current => ({...current, invoiceNumber: nextNum}));
@@ -147,28 +154,56 @@ export class PreventiviService {
     const preventivoDaSalvare = JSON.parse(JSON.stringify(data));
 
 
-    // CAPIRE L'INTENZIONE DELL'UTENTE
+    /**
+     * Determina il tipo di operazione richiesta dall'utente.
+     *
+     * - UPDATE: esiste un preventivo già persistito e il numero non è stato modificato
+     * - CLONE ("Salva con nome"): esiste un preventivo originale ma il numero è stato cambiato
+     * - CREATE: nuovo preventivo senza riferimento a uno esistente
+     */
     const isUpdate = this.originalInvoiceNumber && (this.originalInvoiceNumber === preventivoDaSalvare.invoiceNumber);
 
-    // --- PULIZIA DEGLI ID PER HIBERNATE (RISOLVE L'ERRORE "Detached entity") ---
+    /**
+     * NORMALIZZAZIONE DEGLI IDENTIFICATORI PER JPA/HIBERNATE
+     *
+     * Obiettivo: evitare inconsistenze nello stato delle entità (es. "detached entity")
+     * e guidare correttamente il comportamento di persistenza (INSERT vs UPDATE).
+     */
     if (this.originalInvoiceNumber && this.originalInvoiceNumber !== preventivoDaSalvare.invoiceNumber) {
-      // 1. L'utente sta "clonando" un preventivo cambiandogli il numero.
-      // Dobbiamo dire a Hibernate che l'intero preventivo e TUTTI i suoi item sono NUOVI.
+      /**
+       * CASO: CLONE DEL PREVENTIVO ("Salva con nome")
+       *
+       * Il cambio del numero identifica semanticamente una nuova entità.
+       * È quindi necessario azzerare tutti gli identificatori per forzare Hibernate
+       * a trattare sia il parent che le relazioni come nuove entità (INSERT).
+       */
       preventivoDaSalvare.id = null;
+
       preventivoDaSalvare.items.forEach((item: any) => {
-        item.id = null; // JPA capirà che deve fare delle nuove INSERT
+        item.id = null; // forza INSERT anche per le entità figlie
       });
+
     } else {
-      // 2. Normale salvataggio o update.
-      // Dobbiamo settare a null solo gli ID "temporanei" (le stringhe create da Angular)
-      // in modo che JPA li inserisca come nuove righe, aggiornando invece quelli esistenti (numerici).
+      /**
+       * CASO: CREATE o UPDATE STANDARD
+       *
+       * - Gli item con ID numerico sono considerati persistiti → UPDATE
+       * - Gli item con ID temporaneo (stringhe generate lato client) devono essere
+       *   convertiti in null per essere riconosciuti come nuove entità → INSERT
+       */
       preventivoDaSalvare.items.forEach((item: any) => {
         if (typeof item.id === 'string') {
-          item.id = null;
+          item.id = null; // segnala a JPA che l'entità è nuova
         }
       });
     }
 
+    /**
+     * ESECUZIONE DELLA CHIAMATA HTTP CORRETTA IN BASE AL CONTESTO:
+     *
+     * - UPDATE: PUT all'endpoint /api/preventivi/{id} con il DTO completo
+     * - CREATE: POST all'endpoint /api/preventivi con il DTO completo
+     */
     if (isUpdate && preventivoDaSalvare.id !== undefined) {
       // CHIAMATA PUT (Aggiornamento)
       // Passiamo utenteId come parametro URL (?utenteId=...)
@@ -218,18 +253,32 @@ export class PreventiviService {
     }
   }
 
+  /**
+   * ARCHIVIO PREVENTIVI: Recupera la lista dei preventivi associati all'utente loggato.
+   * Il backend filtra i preventivi in base all'utente, quindi riceviamo solo quelli pertinenti.
+   */
   getTuttiIPreventivi() {
     return this.http.get<InvoiceData[]>(this.apiUrl);
   }
 
+  /**
+   * ARCHIVIO PREVENTIVI PER CLIENTE: Recupera la lista dei preventivi associati a un cliente specifico (filtro per email).
+   * Il backend gestisce il filtro, restituendo solo i preventivi che corrispondono all'email del cliente.
+   */
   getPreventiviPerCliente(email: string) {
     return this.http.get<InvoiceData[]>(`${this.apiUrl}/cliente?email=${email}`);
   }
 
+  /**
+   * ELIMINAZIONE: Elimina un preventivo specifico. Il backend verifica che il preventivo appartenga all'utente loggato prima di eliminarlo.
+   */
   eliminaPreventivoDalDb(id: number) {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
+  /**
+   * RESET DEL PREVENTIVO: Pulisce il form per creare un nuovo preventivo, azzerando i dati e resettando lo stato.
+   */
   resetInvoice() {
     this.originalInvoiceNumber = null;
     // Ora usiamo il metodo sicuro che pesca i dati freschi dell'utente
@@ -342,6 +391,12 @@ export class PreventiviService {
     return {subtotal, taxAmount, total};
   }
 
+  /**
+   * Esegue un salvataggio silenzioso del preventivo in background, senza mostrare notifiche all'utente.
+   * Viene attivato automaticamente ogni minuto se ci sono modifiche non salvate.
+   * Il salvataggio avviene solo se il preventivo ha un numero valido e un nome cliente, per evitare di creare bozze inutili.
+   * Se è un nuovo preventivo (senza originalInvoiceNumber), viene creato un nuovo record. Se è una modifica, viene aggiornato quello esistente.
+   */
   private eseguiAutoSalvataggioSilenzioso() {
     const data = this.invoice();
 
@@ -357,6 +412,10 @@ export class PreventiviService {
       });
     }
 
+    /**
+     * Logica di salvataggio identica a quella del metodo salvaPreventivoNelDb(), ma senza notifiche.
+     * La sicurezza è gestita dall'Interceptor che aggiunge l'utenteId a tutte le chiamate, quindi non serve passarlo esplicitamente.
+     */
     if (isUpdate && preventivoDaSalvare.id) {
       // PUT senza parametri URL (sicurezza gestita dall'Interceptor)
       this.http.put<InvoiceData>(`${this.apiUrl}/${preventivoDaSalvare.id}`, preventivoDaSalvare).subscribe({
