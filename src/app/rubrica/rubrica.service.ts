@@ -1,49 +1,92 @@
 import {inject, Injectable} from '@angular/core';
-// HttpClient serve per fare richieste di rete (GET, POST, PUT, DELETE) verso il server
 import {HttpClient} from '@angular/common/http';
-import {Cliente} from './rubrica'; // Importa l'interfaccia (la "forma" dei dati) da rubrica.ts
+import {Cliente} from './rubrica';
 
 /**
- * SERVIZIO RUBRICA
- * providedIn: 'root' significa che Angular crea una sola istanza globale di questo servizio
- * e la rende disponibile a tutta l'applicazione.
+ * SERVIZIO RUBRICA (Data Access Layer - Clienti)
+ *
+ * Servizio responsabile della comunicazione con il backend per tutte le operazioni
+ * CRUD relative all'entità Cliente.
+ *
+ * providedIn: 'root' → singleton a livello applicativo (un'unica istanza condivisa).
  */
 @Injectable({
   providedIn: 'root'
 })
 export class RubricaService {
 
-  // Strumenti iniettati
+  /**
+   * HttpClient utilizzato per effettuare richieste HTTP verso il backend REST.
+   */
   private http = inject(HttpClient);
 
-  // L'indirizzo base del backend Spring Boot per la gestione dei clienti
+  /**
+   * Endpoint base dell'API REST esposta dal backend (Spring Boot).
+   * Tutte le operazioni sui clienti vengono costruite a partire da questo URL.
+   */
   private apiUrl = 'http://localhost:8080/api/clienti';
 
   /**
-   * RECUPERA I CLIENTI (READ - Metodo HTTP GET)
+   * RECUPERO LISTA CLIENTI
+   *
+   * Effettua una richiesta HTTP GET verso l'endpoint /api/clienti
+   * e restituisce un Observable tipizzato contenente un array di Cliente.
+   *
+   * La responsabilità del filtraggio (es. per utente) è delegata al backend.
    */
   getClientiDalDb() {
     return this.http.get<Cliente[]>(this.apiUrl);
   }
 
   /**
-   * SALVA O AGGIORNA UN CLIENTE (CREATE / UPDATE)
+   * CREAZIONE O AGGIORNAMENTO CLIENTE
+   *
+   * Determina automaticamente il tipo di operazione:
+   *
+   * - UPDATE (PUT): se cliente.id è valorizzato → entità già persistita
+   * - CREATE (POST): se cliente.id è assente → nuova entità
+   *
+   * REST semantics:
+   * - PUT   /api/clienti/{id} → aggiornamento risorsa esistente
+   * - POST  /api/clienti      → creazione nuova risorsa
    */
   salvaClienteNelDb(cliente: Cliente) {
+
     if (cliente.id) {
-      // PUT senza query param utenteId
-      return this.http.put<Cliente>(`${this.apiUrl}/${cliente.id}`, cliente);
+      /**
+       * UPDATE
+       *
+       * Invia una richiesta PUT all'endpoint specifico della risorsa.
+       * Il backend si aspetta un'entità già esistente da aggiornare.
+       */
+      return this.http.put<Cliente>(
+        `${this.apiUrl}/${cliente.id}`,
+        cliente
+      );
+
     } else {
-      // POST senza query param utenteId
-      return this.http.post<Cliente>(this.apiUrl, cliente);
+      /**
+       * CREATE
+       *
+       * Invia una richiesta POST all'endpoint base.
+       * Il backend creerà una nuova risorsa e tipicamente restituirà
+       * l'entità completa con ID generato.
+       */
+      return this.http.post<Cliente>(
+        this.apiUrl,
+        cliente
+      );
     }
   }
 
   /**
-   * ELIMINA UN CLIENTE (DELETE - Metodo HTTP DELETE)
+   * ELIMINAZIONE CLIENTE
+   *
+   * Effettua una richiesta DELETE sull'endpoint della specifica risorsa.
+   *
+   * @param id Identificatore univoco del cliente (numerico o stringa)
    */
   eliminaClienteDalDb(id: number | string) {
-    // DELETE senza query param utenteId
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
