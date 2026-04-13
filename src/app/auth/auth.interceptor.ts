@@ -1,27 +1,43 @@
 import {HttpInterceptorFn} from '@angular/common/http';
 
 /**
- * HTTP INTERCEPTOR
- * Questa funzione intercetta TUTTE le chiamate HTTP in uscita dall'applicazione.
- * Se trova un token salvato nel LocalStorage, lo aggiunge all'header della richiesta
- * sotto forma di "Authorization: Bearer <token>".
+ * HTTP AUTH INTERCEPTOR
+ *
+ * Intercetta tutte le richieste HTTP in uscita dall'applicazione Angular.
+ * Se è presente un token di autenticazione nel LocalStorage, lo aggiunge
+ * automaticamente all'header "Authorization" utilizzando lo schema Bearer.
+ *
+ * Questo approccio consente di centralizzare la gestione dell'autenticazione
+ * evitando di dover impostare manualmente l'header in ogni chiamata HTTP.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // Recupera il token salvato durante il login
+
+  /**
+   * Recupera il token JWT dal LocalStorage che è stato precedentemente salvato in fase di login.
+   */
   const token = localStorage.getItem('token');
 
+  /**
+   * Se il token è presente, viene creata una copia immutabile della richiesta originale
+   * con l'aggiunta dell'header Authorization.
+   */
   if (token) {
-    // Le richieste HTTP in Angular sono immutabili, quindi dobbiamo "clonare"
-    // la richiesta originale per poterne modificare gli header.
     const clonedReq = req.clone({
       setHeaders: {
+        // Inserisce il token nello standard "Bearer <token>"
         Authorization: `Bearer ${token}`
       }
     });
-    // Inoltra la richiesta modificata
+
+    /**
+     * Inoltra la richiesta modificata al prossimo handler della pipeline HTTP.
+     */
     return next(clonedReq);
   }
 
-  // Se non c'è token (es. utente non loggato), inoltra la richiesta originale senza modifiche
+  /**
+   * Se il token non è disponibile (utente non autenticato o sessione non inizializzata),
+   * la richiesta originale viene inoltrata senza alcuna modifica.
+   */
   return next(req);
 };
