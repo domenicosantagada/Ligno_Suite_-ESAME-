@@ -69,7 +69,8 @@ export class Auth {
 
   /**
    * Recupera i dati dell'utente loggato dal LocalStorage.
-   * Se i dati esistono, li restituisce come oggetto JSON. Altrimenti, restituisce null.
+   * Controlla se esiste la chiave 'utente' e in caso positivo
+   * la converte la stringa JSON in oggetto JavaScript.
    */
   getUtenteLoggato() {
     const utenteString = localStorage.getItem('utente');
@@ -77,7 +78,8 @@ export class Auth {
   }
 
   /**
-   * Effettua il logout dell'utente. Rimuove il token e i dati dell'utente dal LocalStorage,
+   * Effettua il logout dell'utente.
+   * Rimuove il token e i dati dell'utente dal LocalStorage,
    * aggiorna la signal utenteLoggato a false e reindirizza l'utente alla pagina di login.
    */
   logout() {

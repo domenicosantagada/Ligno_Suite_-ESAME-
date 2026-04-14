@@ -49,7 +49,8 @@ export class Login {
         // Se il server accetta le credenziali (tutto ok)
         // ora dovremmo avere un obserbable che contiene l'utente loggato
         next: (response: any) => {
-          // Salva sia il token che i dati dell'utente nel LocalStorage
+
+          // Salviamo il token e i dati dell'utente nella sessione (localStorage)
           this.authService.setSessione(response.token, response.utente);
 
           // Estraiamo l'utente per il controllo del ruolo
