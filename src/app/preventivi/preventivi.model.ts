@@ -36,6 +36,7 @@ export interface InvoiceData {
   fromName: string;
   fromEmail: string;
   fromPiva?: string;
+  fromLogo?: string;
 
   // --- DATI CLIENTE (A chi mandi il preventivo) ---
   toName: string;
