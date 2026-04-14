@@ -120,13 +120,12 @@ export class Preventivi implements OnInit {
     // 3. RECUPERO LOGO AZIENDALE
     if (this.isCliente()) {
 
-      // Se è un cliente, carichiamo il logo della falegnameria a cui è associato (che è salvato nel preventivo).
-      const falegname = (this.invoice() as any).utente;
-
-      // Se il preventivo è stato creato correttamente all'interno del Service, dovrebbe già avere i dati del falegname (compreso il logo) associati.
-      if (falegname && falegname.logoBase64) {
-        this.logoAzienda.set(falegname.logoBase64);
+      // Il logo arriva ora direttamente dal backend tramite il campo "fromLogo" del DTO
+      if (this.invoice().fromLogo) {
+        // Usiamo "as string" per sicurezza TypeScript
+        this.logoAzienda.set(this.invoice().fromLogo as string);
       }
+
     } else {
       // Se è un falegname, carichiamo il logo della propria azienda (se presente) dai dati dell'utente loggato.
       if (utenteLoggato && utenteLoggato.logoBase64) {

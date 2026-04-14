@@ -168,6 +168,7 @@ export class PdfGeneratorService {
             doc.text("Qtà", 14, pY);
             doc.text("Dimensioni (H x L)", 28, pY);
             doc.text("Descrizione", 80, pY);
+            doc.text("Note", 135, pY); // Nuova intestazione
             doc.line(14, pY + 2, 196, pY + 2);
             doc.setFont("helvetica", "normal");
             pY += 8;
@@ -191,18 +192,28 @@ export class PdfGeneratorService {
                 drawHeaderFooter(paginaNum);
                 pY = 25;
                 doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 0, 0); // Forza nero per l'header
                 doc.text("Qtà", 14, pY);
                 doc.text("Dimensioni (H x L)", 28, pY);
                 doc.text("Descrizione", 80, pY);
+                doc.text("Note", 135, pY); // Coordinata corretta
                 doc.line(14, pY + 2, 196, pY + 2);
                 doc.setFont("helvetica", "normal");
                 pY += 8;
               }
 
               const rot = gruppo.p.ruotato ? " [Ruotato]" : "";
+
+              // DATI PEZZO
+              doc.setTextColor(0, 0, 0);
               doc.text(`${gruppo.qta}x`, 14, pY);
               doc.text(`${gruppo.p.altezzaTaglio} x ${gruppo.p.larghezzaTaglio} mm`, 28, pY);
               doc.text(`${gruppo.p.nome}${rot}`, 80, pY);
+
+              // RIGA NOTE
+              doc.setTextColor(100, 100, 100);
+              doc.text('_______________________________', 135, pY);
+
               pY += 6;
             });
 
@@ -231,25 +242,29 @@ export class PdfGeneratorService {
                   drawHeaderFooter(paginaNum);
                   pY = 25;
                   doc.setFont("helvetica", "bold");
-                  doc.setTextColor(0, 0, 0);
+                  doc.setTextColor(0, 0, 0); // Header sempre nero e bold
                   doc.text("Qtà", 14, pY);
                   doc.text("Dimensioni (H x L)", 28, pY);
                   doc.text("Descrizione", 80, pY);
+                  doc.text("Note", 135, pY); // MANCAVA QUI
                   doc.line(14, pY + 2, 196, pY + 2);
                   pY += 8;
-                  doc.setFont("helvetica", "italic");
-                  doc.setTextColor(100, 100, 100);
                 }
 
                 const dimW = Number.isInteger(gruppo.s.w) ? gruppo.s.w : gruppo.s.w.toFixed(1);
                 const dimH = Number.isInteger(gruppo.s.h) ? gruppo.s.h : gruppo.s.h.toFixed(1);
 
+                // DATI E LINEA NOTE: Tutto in grigio scuro
+                doc.setFont("helvetica", "italic");
+                doc.setTextColor(100, 100, 100);
                 doc.text(`${gruppo.qta}x`, 14, pY);
                 doc.text(`${dimH} x ${dimW} mm`, 28, pY);
                 doc.text(`Rimanenza`, 80, pY);
+                doc.text('_______________________________', 135, pY);
+
                 pY += 6;
               });
-
+              
               doc.setFont("helvetica", "normal");
               doc.setTextColor(0, 0, 0);
             }
