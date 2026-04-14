@@ -262,11 +262,19 @@ export class PreventiviService {
   }
 
   /**
-   * ARCHIVIO PREVENTIVI PER CLIENTE: Recupera la lista dei preventivi associati a un cliente specifico (filtro per email).
-   * Il backend gestisce il filtro, restituendo solo i preventivi che corrispondono all'email del cliente.
+   * ARCHIVIO PREVENTIVI PER CLIENTE: Recupera la lista dei preventivi associati al cliente loggato.
+   * Il backend estrae l'email direttamente dal Token JWT in modo sicuro, quindi non serve passare parametri.
    */
-  getPreventiviPerCliente(email: string) {
-    return this.http.get<InvoiceData[]>(`${this.apiUrl}/cliente?email=${email}`);
+  getPreventiviPerCliente() {
+    return this.http.get<InvoiceData[]>(`${this.apiUrl}/cliente`);
+  }
+
+  /**
+   * DETTAGLIO PREVENTIVO PER CLIENTE: Scarica il preventivo completo (con gli items)
+   * per la visualizzazione dell'anteprima lato cliente.
+   */
+  getPreventivoDettaglioCliente(id: number) {
+    return this.http.get<InvoiceData>(`${this.apiUrl}/cliente/${id}`);
   }
 
   /**
@@ -303,6 +311,17 @@ export class PreventiviService {
         console.error('Errore nel caricamento dei dettagli del preventivo:', err);
       }
     });
+  }
+
+  /**
+   * Imposta direttamente i dati del preventivo in memoria.
+   * Utilizzato quando i dati completi sono già stati scaricati (es. dalla Dashboard Cliente)
+   * per evitare chiamate HTTP doppie o su endpoint errati.
+   */
+  impostaPreventivoInMemoria(prevCompleto: InvoiceData) {
+    this.originalInvoiceNumber = prevCompleto.invoiceNumber;
+    this.invoice.set(prevCompleto);
+    this.hasUnsavedChanges.set(false);
   }
 
   /**
