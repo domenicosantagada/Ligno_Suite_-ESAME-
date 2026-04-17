@@ -244,11 +244,25 @@
               <span class="fw-semibold text-dark">{{ risultatoOttimizzazione.areaUsata / 1000000 | number:'1.0-3' }}
                 m²</span>
             </div>
-            <div class="d-flex justify-content-between align-items-center small">
+            <div class="d-flex justify-content-between align-items-center mb-2 small">
               <span class="text-secondary">Scarto Sfrido:</span>
               <span class="fw-semibold text-danger">{{ risultatoOttimizzazione.areaScarto / 1000000 | number:'1.0-3' }}
                 m²</span>
             </div>
+
+            <hr class="text-black-50 opacity-25 my-3">
+
+            <div class="d-flex justify-content-between align-items-center mb-2 small">
+              <span class="text-secondary">Pannelli Utilizzati:</span>
+              <span class="fw-semibold text-dark">{{ risultatoOttimizzazione.pannelli.length }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2 small">
+              <span class="text-secondary">Pezzi Posizionati:</span>
+              <span class="fw-semibold text-dark">{{ getTotalePezziPosizionati() }}</span>
+            </div>
+
+
           </div>
         </div>
 

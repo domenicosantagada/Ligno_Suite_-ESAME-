@@ -135,6 +135,14 @@ export class TaglioPannelli {
     }
   }
 
+  getTotalePezziPosizionati(): number {
+    if (!this.risultatoOttimizzazione || !this.risultatoOttimizzazione.pannelli) return 0;
+
+    return this.risultatoOttimizzazione.pannelli.reduce((totale, pannello) => {
+      return totale + (pannello.pezzi ? pannello.pezzi.length : 0);
+    }, 0);
+  }
+
   calcolaTaglio() {
     // Filtriamo i pezzi per assicurarci che abbiano misure e quantità valide
     const pezziValidi = this.pezzi.filter(p => p.larghezza > 0 && p.altezza > 0 && p.quantita > 0);
