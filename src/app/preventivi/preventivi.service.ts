@@ -299,7 +299,16 @@ export class PreventiviService {
    * Fa una chiamata GET per scaricare il DTO COMPLETO (con la lista degli items).
    */
   caricaPreventivoPerModifica(prev: any) {
-    // 1. Usiamo l'ID del preventivo riassuntivo per scaricare quello completo
+    // Impostiamo immediatamente e in modo SINCRONO il numero del preventivo
+    // in memoria prima che parta la richiesta HTTP.
+    this.originalInvoiceNumber = prev.invoiceNumber;
+    this.invoice.update(current => ({
+      ...current,
+      id: prev.id,
+      invoiceNumber: prev.invoiceNumber
+    }));
+
+    // 1. Usiamo l'ID del preventivo riassuntivo per scaricare quello completo (Asincrono)
     this.http.get<InvoiceData>(`${this.apiUrl}/${prev.id}`).subscribe({
       next: (prevCompleto) => {
         // 2. Impostiamo i dati completi nel form
