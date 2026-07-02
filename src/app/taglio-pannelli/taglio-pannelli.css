@@ -1,0 +1,67 @@
+/* ==========================================================================
+   STILI TABELLA E RIGHE HOVER
+   ========================================================================== */
+.hover-row:hover {
+  background-color: #fcfcfc;
+}
+
+.table td, .table th {
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==========================================================================
+   STILI PER I PULSANTI CON ICONA (Cestino)
+   ========================================================================== */
+.action-icon {
+  background: none;
+  border: none;
+  padding: 5px;
+  color: #adb5bd;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.action-icon:hover {
+  color: #212529;
+  transform: translateY(-1px);
+}
+
+.text-danger-hover:hover {
+  color: #dc3545 !important;
+}
+
+/* ==========================================================================
+   EXTRA: Stile per gli input trasparenti dentro la tabella
+   ========================================================================== */
+.table-input {
+  border: 1px solid transparent;
+  background-color: transparent;
+  transition: all 0.2s;
+  font-size: 0.9rem; /* <-- Allineato alla grandezza font dei preventivi */
+}
+
+.table-input:focus {
+  border-color: #dee2e6;
+  background-color: #fff;
+  box-shadow: none;
+}
+
+.table-input:hover:not(:focus) {
+  border-color: #e9ecef;
+}
+
+/* Switch personalizzato in stile scuro */
+.focus-ring-dark:focus {
+  border-color: #212529;
+  box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: #212529;
+  border-color: #212529;
+}

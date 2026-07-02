@@ -36,6 +36,7 @@ export interface InvoiceData {
   fromName: string;
   fromEmail: string;
   fromPiva?: string;
+  fromLogo?: string;
 
   // --- DATI CLIENTE (A chi mandi il preventivo) ---
   toName: string;
@@ -53,6 +54,7 @@ export interface InvoiceData {
   discount: number; // Sconto applicato in Euro
   total: number; // Totale finale (Imponibile + IVA - Sconto)
 
+  // Campo opzionale per memorizzare informazioni sull'utente (falegnameria) che ha creato il preventivo.
   utente?: { id: number; logoBase64?: string; nomeAzienda?: string };
 
   // --- RELAZIONI DEL DATABASE ---

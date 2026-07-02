@@ -119,19 +119,20 @@ export class Preventivi implements OnInit {
 
     // 3. RECUPERO LOGO AZIENDALE
     if (this.isCliente()) {
-      // Magia del Backend: l'oggetto 'utente' (con il logo) viaggia già attaccato al preventivo!
-      const falegname = (this.invoice() as any).utente;
 
-      if (falegname && falegname.logoBase64) {
-        this.logoAzienda.set(falegname.logoBase64);
+      // Il logo arriva ora direttamente dal backend tramite il campo "fromLogo" del DTO
+      if (this.invoice().fromLogo) {
+        // Usiamo "as string" per sicurezza TypeScript
+        this.logoAzienda.set(this.invoice().fromLogo as string);
       }
+
     } else {
-      // 3. Caricamento del Logo aziendale del falegname (loggato)
+      // Se è un falegname, carichiamo il logo della propria azienda (se presente) dai dati dell'utente loggato.
       if (utenteLoggato && utenteLoggato.logoBase64) {
         this.logoAzienda.set(utenteLoggato.logoBase64);
       }
 
-      // 4. Caricamento rubrica in background per far funzionare l'autocompletamento
+      // Se è un falegname, carichiamo la lista dei clienti dalla rubrica per l'autocompletamento.
       this.rubricaService.getClientiDalDb().subscribe({
         next: (dati) => this.clienti.set(dati),
         error: (err: any) => console.error('Errore caricamento clienti:', err) // Aggiunto ": any" per risolvere l'errore TS7006

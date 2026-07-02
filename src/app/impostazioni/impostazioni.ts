@@ -114,8 +114,10 @@ export class Impostazioni implements OnInit {
 
     this.authService.updateProfilo(datiDaInviare).subscribe({
       next: (utenteAggiornatoDalDb: any) => {
-        // 2. Usiamo il nuovo metodo
+
+        // aggiorna utente locale con dati restituiti dal backend
         this.authService.aggiornaUtenteLocale(utenteAggiornatoDalDb);
+
         // aggiorna backup
         this.datiOriginali = JSON.parse(JSON.stringify(this.profilo()));
 
