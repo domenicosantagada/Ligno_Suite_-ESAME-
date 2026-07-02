@@ -51,7 +51,7 @@ Per eseguire il progetto sul proprio ambiente locale è necessario aver installa
 
 ## Configurazione e Avvio
 
-**ATTENZIONE:** Prima di avviare il client Angular, assicurarsi che il **Backend (Spring Boot)** sia in esecuzione e in ascolto sulla porta `8080`. Il frontend è configurato per puntare di default a `https://lignosuite-backend.onrender.com/api/`.
+**ATTENZIONE:** Prima di avviare il client Angular, assicurarsi che il **Backend (Spring Boot)** sia in esecuzione e in ascolto sulla porta `8080`. Il frontend è configurato per puntare di default a `http://localhost:8080/api/`.
 
 1. Clonare il repository o estrarre i file in una directory locale.
 2. Aprire il terminale nella root del progetto (dove si trova il file `package.json`).

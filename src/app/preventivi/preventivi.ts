@@ -226,64 +226,6 @@ export class Preventivi implements OnInit {
     }
   }
 
-  /*
-  inviaPDFPerEmail() {
-    const invoice = this.invoice();
-
-    if (!invoice.toEmail || invoice.toEmail.trim() === '') {
-      Swal.fire('Attenzione', 'Inserisci l\'email del cliente prima di inviare!', 'warning');
-      return;
-    }
-
-    const element = document.getElementById('invoice-preview-container');
-    if (element) {
-      const numero = invoice.invoiceNumber ?? 'ND';
-      const nomePulito = (invoice.toName || 'SenzaNome').trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
-      const fileName = `PREV_${numero}_${nomePulito}.pdf`;
-
-      const opt: any = {
-        margin: [2, 2],
-        filename: fileName,
-        image: {type: 'jpeg', quality: 1},
-        html2canvas: {scale: 3, useCORS: true}, // Usa scale 3 per non far impazzire la memoria nell'invio file
-        jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}
-      };
-
-      // Mostra uno spinner di caricamento con Swal
-      Swal.fire({
-        title: 'Generazione e invio in corso...',
-        text: 'Attendi un istante',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-
-      // Anziché .save(), usiamo .output('blob') per ottenere il file senza scaricarlo
-      html2pdf().set(opt).from(element).output('blob').then((pdfBlob: Blob) => {
-
-        const formData = new FormData();
-        formData.append('file', pdfBlob, fileName);
-        formData.append('destinatario', invoice.toEmail!);
-        formData.append('nomeCliente', invoice.toName || 'Cliente');
-
-        // Chiamata al backend
-        this.preventiviService.inviaPdfPerEmail(formData).subscribe({
-          next: (res) => {
-            Swal.fire('Inviato!', 'Il preventivo è stato inviato via email con successo.', 'success');
-          },
-          error: (err) => {
-            console.error(err);
-            Swal.fire('Errore', 'Si è verificato un problema durante l\'invio dell\'email.', 'error');
-          }
-        });
-      });
-    } else {
-      Swal.fire('Errore', 'Impossibile generare il PDF. Passa alla visualizzazione anteprima.', 'error');
-    }
-  }
-   */
-
   /**
    * Prende il contenitore HTML che fa da "Anteprima" e lo "stampa" in PDF
    */
